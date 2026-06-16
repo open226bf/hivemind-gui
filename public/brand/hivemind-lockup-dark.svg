@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="120" viewBox="0 0 380 120" role="img" aria-label="Hivemind">
+  <title>Hivemind</title>
+  <desc>Logo Hivemind pour fonds sombres : marque en essaim d'alvéoles suivie du mot Hivemind en blanc.</desc>
+  <polygon transform="translate(60,34)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#FBB040"/>
+  <polygon transform="translate(37.5,47)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#FBB040"/>
+  <polygon transform="translate(82.5,47)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#FBB040"/>
+  <polygon transform="translate(37.5,73)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#FBB040"/>
+  <polygon transform="translate(82.5,73)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#FBB040"/>
+  <polygon transform="translate(60,86)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#FBB040"/>
+  <polygon transform="translate(60,60)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#E8920C"/>
+  <text x="122" y="78" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="52" font-weight="600" letter-spacing="-1.5"><tspan fill="#FBB040">Hive</tspan><tspan fill="#FFFFFF">mind</tspan></text>
+</svg>

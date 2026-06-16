@@ -1,0 +1,38 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 13px;
+    color: var(--hm-text-muted);
+    margin-top: 8px;
+  }
+
+  input,
+  ::ng-deep .p-inputnumber,
+  ::ng-deep .p-multiselect,
+  ::ng-deep .p-select {
+    width: 100%;
+  }
+
+  .req { color: #b54747; }
+  .muted { color: var(--hm-text-muted); font-size: 12px; }
+  em { font-style: normal; color: var(--hm-text-muted); font-size: 11px; }
+
+  h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--hm-text-muted);
+    margin: 16px 0 0;
+  }
+
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+
+    label { margin-top: 8px; }
+  }
+}

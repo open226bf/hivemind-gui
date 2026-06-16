@@ -1,0 +1,107 @@
+<div class="card section">
+  <div class="section-head">
+    <div>
+      <h2>Snapshots</h2>
+      <div class="muted">Points de restauration complets — chaque snapshot fige le service et tous ses éléments (variables, secrets, configs, réseaux, montages) à leur valeur du moment.</div>
+    </div>
+    @if (canManage()) {
+      <p-button label="Capturer un snapshot" icon="pi pi-camera" (onClick)="openCapture()" />
+    }
+  </div>
+
+  <p-table [paginator]="true" [rows]="6" [value]="snapshots()" [loading]="loading()" dataKey="id">
+    <ng-template #header>
+      <tr>
+        <th>Libellé</th>
+        <th>Image</th>
+        <th style="width: 90px">Replicas</th>
+        <th>Contenu</th>
+        <th>Capturé le</th>
+        <th style="width: 220px"></th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-s>
+      <tr>
+        <td>{{ s.label || '—' }}</td>
+        <td><code>{{ s.summary.full_image }}</code></td>
+        <td>{{ s.summary.replicas }}</td>
+        <td class="chips">
+          <span class="chip">{{ s.summary.env_count }} var</span>
+          <span class="chip">{{ s.summary.secret_count }} secret</span>
+          <span class="chip">{{ s.summary.config_count }} config</span>
+          <span class="chip">{{ s.summary.network_count }} réseau</span>
+          <span class="chip">{{ s.summary.mount_count }} montage</span>
+        </td>
+        <td class="muted">{{ s.created_at | date: 'short' }}</td>
+        <td class="row-actions">
+          @if (canManage()) {
+            <p-button
+              label="Restaurer"
+              icon="pi pi-history"
+              severity="warn"
+              size="small"
+              (onClick)="rollback(s)"
+              [loading]="rollingBack() === s.id"
+              [disabled]="store.deploying() || rollingBack() === s.id"
+            />
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              [text]="true"
+              size="small"
+              pTooltip="Supprimer"
+              (onClick)="remove(s)"
+            />
+          } @else {
+            <span class="muted">Lecture seule</span>
+          }
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <i class="pi pi-camera"></i>
+            Aucun snapshot. Capturez l'état actuel pour pouvoir y revenir plus tard.
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Capture dialog -->
+<p-dialog
+  header="Capturer un snapshot"
+  [(visible)]="captureVisible"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: '440px' }"
+>
+  <p class="muted">Un libellé facultatif aide à retrouver ce point de restauration (ex. « avant migration v2 »).</p>
+  <input pInputText [(ngModel)]="captureLabel" placeholder="Libellé (facultatif)" class="full" />
+  <ng-template pTemplate="footer">
+    <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="captureVisible.set(false)" />
+    <p-button label="Capturer" icon="pi pi-camera" (onClick)="capture()" [loading]="capturing()" />
+  </ng-template>
+</p-dialog>
+
+<!-- Rollback warnings dialog -->
+<p-dialog
+  header="Restauration lancée avec avertissements"
+  [(visible)]="warningsVisible"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: '520px' }"
+>
+  <p class="muted">La restauration a été appliquée et le redéploiement est en cours. Points d'attention :</p>
+  <ul class="warn-list">
+    @for (w of warnings(); track w) {
+      <li><i class="pi pi-exclamation-triangle"></i> {{ w }}</li>
+    }
+  </ul>
+  <ng-template pTemplate="footer">
+    <p-button label="Compris" (onClick)="warningsVisible.set(false)" />
+  </ng-template>
+</p-dialog>

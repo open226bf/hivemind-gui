@@ -1,0 +1,49 @@
+<p-dialog
+  [header]="mode() === 'create' ? 'Créer un utilisateur' : 'Modifier l\'utilisateur'"
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '440px' }"
+>
+  <div class="form">
+    <label>Email <span class="req">*</span></label>
+    <input pInputText [(ngModel)]="form.email" [disabled]="mode() === 'edit'" placeholder="dev@exemple.com" />
+
+    <label>
+      Mot de passe @if (mode() === 'create') { <span class="req">*</span> }
+    </label>
+    <p-password [(ngModel)]="form.password" [feedback]="false" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full" />
+    @if (mode() === 'edit') {
+      <small class="muted">Laissez vide pour conserver le mot de passe actuel.</small>
+    } @else {
+      <small class="muted">8 caractères minimum.</small>
+    }
+
+    <label>Rôle</label>
+    <p-select
+      appendTo="body"
+      [(ngModel)]="form.role"
+      [options]="roles"
+      optionLabel="label"
+      optionValue="value"
+      styleClass="w-full"
+    />
+
+    @if (mode() === 'edit') {
+      <div class="active-row">
+        <label class="inline">Compte actif</label>
+        <p-toggleswitch [(ngModel)]="form.active" />
+      </div>
+      <small class="muted">Un compte inactif ne peut plus se connecter.</small>
+    }
+  </div>
+
+  <ng-template #footer>
+    <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="close()" />
+    <p-button
+      [label]="mode() === 'create' ? 'Créer' : 'Enregistrer'"
+      icon="pi pi-check"
+      (onClick)="save()"
+      [loading]="saving()"
+    />
+  </ng-template>
+</p-dialog>

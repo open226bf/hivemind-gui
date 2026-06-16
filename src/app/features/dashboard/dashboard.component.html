@@ -1,0 +1,162 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Tableau de bord</h1>
+      <div class="subtitle">Santé et capacité du cluster Hivemind</div>
+    </div>
+    <div class="livectl">
+      <span class="live-dot" [class.on]="autoRefresh()"></span>
+      <span class="live-label">@if (autoRefresh()) { Temps réel } @else { En pause }</span>
+      <p-toggleswitch [(ngModel)]="autoRefreshModel" (ngModelChange)="setAutoRefresh($event)" />
+      @if (lastUpdated(); as ts) {
+        <span class="updated">
+          @if (refreshing()) {
+            <i class="pi pi-spin pi-spinner"></i> actualisation…
+          } @else {
+            <i class="pi pi-check-circle"></i> {{ ts | date: 'mediumTime' }}
+          }
+        </span>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">
+      <p-progressSpinner strokeWidth="4" />
+      Chargement du tableau de bord…
+    </div>
+  } @else if (overview(); as ov) {
+
+    @if (!ov.cluster.reachable) {
+      <div class="banner warn">
+        <i class="pi pi-exclamation-triangle"></i>
+        <div>
+          <strong>Orchestrateur injoignable</strong>
+          <div>Les informations du cluster sont indisponibles. Les compteurs ci-dessous proviennent de la base.</div>
+        </div>
+      </div>
+    }
+
+    <!-- ─── Capacité & santé cluster ─── -->
+    <div class="grid kpis">
+      <div class="card kpi">
+        <span class="kpi-icon"><i class="pi pi-server"></i></span>
+        <div>
+          <div class="kpi-value">{{ ov.cluster.node_total }}</div>
+          <div class="kpi-label">Nœuds</div>
+          <div class="kpi-sub">{{ ov.cluster.managers }} manager(s) · {{ ov.cluster.workers }} worker(s)</div>
+        </div>
+      </div>
+      <div class="card kpi">
+        <span class="kpi-icon ok"><i class="pi pi-check-circle"></i></span>
+        <div>
+          <div class="kpi-value">{{ ov.cluster.ready_nodes }}/{{ ov.cluster.node_total }}</div>
+          <div class="kpi-label">Nœuds prêts</div>
+          <div class="health-bar">
+            <div class="bar-fill ok" [style.width.%]="readyRatio()"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card kpi">
+        <span class="kpi-icon"><i class="pi pi-microchip"></i></span>
+        <div>
+          <div class="kpi-value">{{ ov.cluster.total_cpus }}</div>
+          <div class="kpi-label">vCPU cumulés</div>
+        </div>
+      </div>
+      <div class="card kpi">
+        <span class="kpi-icon"><i class="pi pi-database"></i></span>
+        <div>
+          <div class="kpi-value">{{ gib(ov.cluster.total_memory_bytes) }} <small>GiB</small></div>
+          <div class="kpi-label">Mémoire cumulée</div>
+        </div>
+      </div>
+    </div>
+
+    @if (ov.cluster.reachable && ov.cluster.leader_host) {
+      <div class="leader-strip">
+        <i class="pi pi-star-fill"></i>
+        Leader : <strong>{{ ov.cluster.leader_host }}</strong>
+        @if (ov.cluster.engine_version) {
+          <span class="sep">·</span> Docker Engine {{ ov.cluster.engine_version }}
+        }
+      </div>
+    }
+
+    <!-- ─── Compteurs métier ─── -->
+    <div class="grid summaries">
+      <div class="card summary">
+        <h2>Services</h2>
+        <div class="big">{{ ov.services.total }}</div>
+        <div class="breakdown">
+          <span><b class="dot ok"></b>{{ ov.services.deployed }} déployé(s)</span>
+          <span><b class="dot neutral"></b>{{ ov.services.draft }} brouillon(s)</span>
+          <span><b class="dot muted"></b>{{ ov.services.removed }} retiré(s)</span>
+        </div>
+      </div>
+
+      <div class="card summary">
+        <h2>Déploiements</h2>
+        <div class="big">{{ ov.activity.total_deployments }}</div>
+        <div class="breakdown">
+          <span><b class="dot ok"></b>{{ ov.activity.succeeded }} réussi(s)</span>
+          <span><b class="dot err"></b>{{ ov.activity.failed }} échoué(s)</span>
+          <span><b class="dot warn"></b>{{ ov.activity.in_progress }} en cours</span>
+        </div>
+      </div>
+
+      <div class="card summary">
+        <h2>Catalogue</h2>
+        <div class="catalog">
+          <div><i class="pi pi-sitemap"></i><span>{{ ov.catalog.networks }}</span><small>Réseaux</small></div>
+          <div><i class="pi pi-lock"></i><span>{{ ov.catalog.secrets }}</span><small>Secrets</small></div>
+          <div><i class="pi pi-file"></i><span>{{ ov.catalog.configs }}</span><small>Configs</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Nœuds ─── -->
+    <div class="card nodes">
+      <div class="section-head"><h2>Nœuds du cluster</h2></div>
+      <p-table [value]="ov.nodes">
+        <ng-template #header>
+          <tr>
+            <th>Hôte</th>
+            <th>Rôle</th>
+            <th>État</th>
+            <th>Disponibilité</th>
+            <th>Adresse</th>
+            <th>vCPU</th>
+            <th>Mémoire</th>
+            <th>Engine</th>
+            <th>Plateforme</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-n>
+          <tr>
+            <td>
+              <span class="host">{{ n.hostname || '—' }}</span>
+              @if (n.leader) { <i class="pi pi-star-fill leader" title="Leader"></i> }
+            </td>
+            <td><p-tag [value]="n.role" [severity]="roleSeverity(n.role)" /></td>
+            <td><p-tag [value]="n.state" [severity]="stateSeverity(n.state)" /></td>
+            <td><p-tag [value]="n.availability" [severity]="availabilitySeverity(n.availability)" /></td>
+            <td class="mono">{{ n.addr || '—' }}</td>
+            <td>{{ n.cpus }}</td>
+            <td>{{ gib(n.memory_bytes) }} GiB</td>
+            <td class="muted">{{ n.engine_version || '—' }}</td>
+            <td class="muted">{{ n.platform || '—' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="9">
+              <div class="empty-state"><i class="pi pi-server"></i>Aucun nœud signalé par l'orchestrateur.</div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+  }
+</div>

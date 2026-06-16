@@ -1,0 +1,89 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Volumes</h1>
+      <div class="subtitle">{{ volumes().length }} volume(s) nommé(s)</div>
+    </div>
+    <div class="actions">
+      <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="load(); loadSwarm()" [loading]="loading()" />
+      @if (canManage()) {
+        <p-button label="Créer un volume" icon="pi pi-plus" (onClick)="openCreate()" />
+      }
+    </div>
+  </div>
+
+  <p-tabs [(value)]="activeTab">
+    <p-tablist>
+      <p-tab value="registered">Catalogue ({{ volumes().length }})</p-tab>
+      <p-tab value="swarm">Cluster Swarm ({{ swarmVolumes().length }})</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <p-tabpanel value="registered">
+        <div class="card">
+          <p-table [value]="volumes()" [loading]="loading()" dataKey="id">
+            <ng-template #header>
+              <tr>
+                <th>Nom</th>
+                <th style="width: 120px">Driver</th>
+                <th>Créé le</th>
+                <th style="width: 80px"></th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-v>
+              <tr>
+                <td class="name-cell"><code>{{ v.name }}</code></td>
+                <td><p-tag [value]="v.driver" severity="secondary" /></td>
+                <td class="muted">{{ v.created_at | date: 'short' }}</td>
+                <td class="row-actions">
+                  @if (canManage()) {
+                    <p-button icon="pi pi-trash" severity="danger" [text]="true" size="small" pTooltip="Supprimer" (onClick)="remove(v)" />
+                  }
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+              <tr>
+                <td colspan="4">
+                  <div class="empty-state"><i class="pi pi-database"></i>Aucun volume nommé.</div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-tabpanel>
+
+      <p-tabpanel value="swarm">
+        <div class="card">
+          <p-table [value]="swarmVolumes()" [loading]="swarmLoading()" dataKey="name">
+            <ng-template #header>
+              <tr>
+                <th>Nom</th>
+                <th>Driver</th>
+                <th>Scope</th>
+                <th>Point de montage</th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-v>
+              <tr>
+                <td class="name-cell"><code>{{ v.name }}</code></td>
+                <td class="muted">{{ v.driver }}</td>
+                <td class="muted">{{ v.scope }}</td>
+                <td class="muted mono">{{ v.mountpoint || '—' }}</td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+              <tr>
+                <td colspan="4">
+                  <div class="empty-state"><i class="pi pi-database"></i>Aucun volume sur le cluster.</div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</div>
+
+<hm-volume-form (saved)="onSaved()" />

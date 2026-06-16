@@ -1,0 +1,144 @@
+.login {
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ─── Brand panel ───────────────────────────────────────────────────────────── */
+.brand-side {
+  flex: 1.05;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 56px 60px;
+  color: #fff;
+  background: #000000;
+}
+
+.watermark {
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  right: -130px;
+  bottom: -150px;
+  fill: #fbb040;
+  opacity: 0.06;
+  transform: rotate(8deg);
+  pointer-events: none;
+}
+
+.brand-inner {
+  position: relative;
+  max-width: 440px;
+}
+
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.logo-row .mark { width: 40px; height: 40px; display: block; }
+
+.wordmark {
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.4px;
+
+  b { color: #fbb040; font-weight: 700; }
+}
+
+.brand-side h2 {
+  font-size: 30px;
+  line-height: 1.2;
+  margin: 0 0 14px;
+  font-weight: 600;
+}
+
+.lede {
+  margin: 0 0 28px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .pi {
+    color: #1c1305;
+    background: #fbb040;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex: 0 0 auto;
+  }
+}
+
+/* ─── Form panel ────────────────────────────────────────────────────────────── */
+.form-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hm-bg);
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-card h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.login-card .sub {
+  margin: 4px 0 18px;
+  color: var(--hm-text-muted);
+  font-size: 13px;
+}
+
+label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hm-text-muted);
+  margin-top: 12px;
+}
+
+input { width: 100%; }
+
+.submit { margin-top: 22px; }
+
+::ng-deep .w-full { width: 100%; }
+
+/* ─── Responsive: hide the brand panel on narrow screens ────────────────────── */
+@media (max-width: 860px) {
+  .brand-side { display: none; }
+  .form-side { flex: 1; }
+}

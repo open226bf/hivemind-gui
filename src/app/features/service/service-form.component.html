@@ -1,0 +1,155 @@
+<p-drawer
+  [header]="mode() === 'create' ? 'Créer un service' : 'Modifier le service'"
+  [(visible)]="visible"
+  position="right"
+  [style]="{ width: '760px' }"
+>
+  <div class="form">
+    @if (mode() === 'create') {
+      <label>Nom <span class="req">*</span></label>
+      <input pInputText [(ngModel)]="form.name" placeholder="mon-service" />
+      <small class="muted">Minuscules, chiffres et tirets (DNS). Immuable après création.</small>
+    }
+
+    <label>Image <span class="req">*</span></label>
+    <input pInputText [(ngModel)]="form.image" placeholder="nginx" />
+
+    <label>Tag</label>
+    <input pInputText [(ngModel)]="form.tag" placeholder="latest" />
+
+    <label>Replicas</label>
+    <p-inputnumber [(ngModel)]="form.replicas" [min]="0" [showButtons]="true" />
+
+    <label>Description</label>
+    <input pInputText [(ngModel)]="form.description" />
+
+    <label>Réseaux</label>
+    <p-multiselect
+      appendTo="body"
+      [(ngModel)]="form.networkIds"
+      [options]="networkOptions()"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Aucun réseau sélectionné"
+      [filter]="true"
+      display="chip"
+      styleClass="w-full"
+    />
+    <small class="muted">Réseaux overlay à rattacher au service.</small>
+
+    <label>Secrets</label>
+    <p-multiselect
+      appendTo="body"
+      [(ngModel)]="form.secretIds"
+      [options]="secretOptions()"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Aucun secret sélectionné"
+      [filter]="true"
+      display="chip"
+      styleClass="w-full"
+      emptyMessage="Aucun secret disponible"
+    />
+    <small class="muted">Secrets montés dans le conteneur au chemin configuré.</small>
+
+    <label>Configs</label>
+    <p-multiselect
+      appendTo="body"
+      [(ngModel)]="form.configIds"
+      [options]="configOptions()"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Aucune config sélectionnée"
+      [filter]="true"
+      display="chip"
+      styleClass="w-full"
+      emptyMessage="Aucune config disponible"
+    />
+    <small class="muted">Fichiers de config montés dans le conteneur au chemin configuré.</small>
+
+    <button type="button" class="strategy-toggle" (click)="showStrategy.set(!showStrategy())">
+      <i class="pi" [class.pi-chevron-right]="!showStrategy()" [class.pi-chevron-down]="showStrategy()"></i>
+      Stratégie de mise à jour (rolling update)
+    </button>
+
+    @if (showStrategy()) {
+      <div class="strategy">
+        <div class="grid2">
+          <div>
+            <label>Parallélisme</label>
+            <p-inputnumber [(ngModel)]="form.updateConfig.parallelism" [min]="0" [showButtons]="true" />
+            <small class="muted">Tâches mises à jour simultanément (0 = toutes).</small>
+          </div>
+          <div>
+            <label>Délai (s)</label>
+            <p-inputnumber [(ngModel)]="form.updateConfig.delay_seconds" [min]="0" suffix=" s" />
+            <small class="muted">Attente entre deux lots.</small>
+          </div>
+        </div>
+
+        <label>Action en cas d'échec</label>
+        <p-select
+          appendTo="body"
+          [(ngModel)]="form.updateConfig.failure_action"
+          [options]="failureActions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+        />
+
+        <div class="grid2">
+          <div>
+            <label>Fenêtre de surveillance (s)</label>
+            <p-inputnumber [(ngModel)]="form.updateConfig.monitor_seconds" [min]="0" suffix=" s" />
+            <small class="muted">Durée d'observation d'une tâche avant succès.</small>
+          </div>
+          <div>
+            <label>Taux d'échec max</label>
+            <p-inputnumber [(ngModel)]="form.updateConfig.max_failure_ratio" [min]="0" [max]="1" [maxFractionDigits]="2" [step]="0.05" />
+            <small class="muted">0 à 1 (0 = aucune tolérance).</small>
+          </div>
+        </div>
+
+        <label>Ordre</label>
+        <p-select
+          appendTo="body"
+          [(ngModel)]="form.updateConfig.order"
+          [options]="orders"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+        />
+
+        <button type="button" class="reset-link" (click)="resetStrategy()">
+          <i class="pi pi-replay"></i> Réinitialiser aux valeurs par défaut
+        </button>
+      </div>
+    }
+
+    @if (mode() === 'edit') {
+      <small class="muted hint">
+        <i class="pi pi-info-circle"></i>
+        Les changements prennent effet au prochain déploiement.
+      </small>
+    }
+  </div>
+
+  <ng-template #footer>
+    <div style="display: flex; gap: 10px;">
+      <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="close()" />
+      <p-button
+        [label]="mode() === 'create' ? 'Créer' : 'Enregistrer'"
+        icon="pi pi-check"
+        severity="secondary"
+        (onClick)="save()"
+        [loading]="saving()"
+      />
+      <p-button
+        [label]="mode() === 'create' ? 'Créer & Déployer' : 'Enregistrer & Déployer'"
+        icon="pi pi-cloud-upload"
+        (onClick)="saveAndDeploy()"
+        [loading]="saving()"
+      />
+    </div>
+  </ng-template>
+</p-drawer>

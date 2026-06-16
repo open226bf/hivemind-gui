@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="Hivemind">
+  <title>Hivemind</title>
+  <desc>Essaim d'alvéoles : un cœur orange entouré de six cellules.</desc>
+  <polygon transform="translate(60,34)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#FBB040"/>
+  <polygon transform="translate(37.5,47)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#FBB040"/>
+  <polygon transform="translate(82.5,47)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#FBB040"/>
+  <polygon transform="translate(37.5,73)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#FBB040"/>
+  <polygon transform="translate(82.5,73)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#FBB040"/>
+  <polygon transform="translate(60,86)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#FBB040"/>
+  <polygon transform="translate(60,60)" points="-6.25,-10.825 6.25,-10.825 12.5,0 6.25,10.825 -6.25,10.825 -12.5,0" fill="#E8920C"/>
+</svg>

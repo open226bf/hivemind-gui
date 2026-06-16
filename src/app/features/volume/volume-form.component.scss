@@ -1,0 +1,23 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label { font-size: 12px; font-weight: 600; color: var(--hm-text-muted); margin-top: 10px; }
+  input { width: 100%; }
+}
+
+.req { color: #d9534f; }
+.muted { color: var(--hm-text-muted); font-size: 12px; }
+
+.toggles { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  span { font-weight: 600; font-size: 13px; }
+  small { flex-basis: 100%; margin-left: 44px; }
+}

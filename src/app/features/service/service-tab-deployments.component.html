@@ -1,0 +1,38 @@
+<div class="card section">
+  <div class="section-head">
+    <h2>Historique des déploiements</h2>
+  </div>
+  <p-table [value]="store.deployments()">
+    <ng-template #header>
+      <tr>
+        <th style="width: 130px">Statut</th>
+        <th>Image</th>
+        <th>Déclencheur</th>
+        <th>Démarré le</th>
+        <th style="width: 80px">Durée</th>
+        <th>Erreur</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-d>
+      <tr>
+        <td><p-tag [value]="d.status" [severity]="severity(d.status)" /></td>
+        <td><code>{{ d.image_tag }}</code></td>
+        <td class="muted">{{ d.trigger }}</td>
+        <td class="muted">{{ d.started_at | date: 'short' }}</td>
+        <td class="muted">
+          {{ d.duration_ms ? (d.duration_ms / 1000 | number: '1.0-1') + ' s' : '—' }}
+        </td>
+        <td class="err-msg">{{ d.error_message || '—' }}</td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <i class="pi pi-history"></i>Aucun déploiement pour ce service.
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

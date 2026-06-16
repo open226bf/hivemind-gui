@@ -1,0 +1,60 @@
+<div class="page" [style.--hive-color]="color()">
+  <a class="back" routerLink="/hives"><i class="pi pi-arrow-left"></i> Ruches</a>
+
+  <div class="detail-header">
+    <span class="dot" [style.background]="color()"></span>
+    <div class="titles">
+      <h1>{{ isUnassigned() ? 'Sans ruche' : (hive()?.name ?? '…') }}</h1>
+      <div class="subtitle">
+        @if (isUnassigned()) {
+          Services non rattachés à un projet · {{ services().length }} service(s)
+        } @else {
+          {{ hive()?.description || 'Aucune description' }} · {{ services().length }} service(s)
+        }
+      </div>
+    </div>
+    <div class="header-actions">
+      @if (canManage() && !isUnassigned()) {
+        <p-button label="Gérer les services" icon="pi pi-sitemap" severity="secondary" (onClick)="openManage()" />
+        <p-button icon="pi pi-pencil" severity="secondary" [text]="true" (onClick)="openEdit()" pTooltip="Modifier" />
+        <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="remove()" pTooltip="Supprimer" />
+        <p-button label="Ajouter un service a la ruche" icon="pi pi-plus" (onClick)="openCreate()" />
+      }
+    </div>
+  </div>
+
+  @if (isUnassigned()) {
+    <hm-services [unassigned]="true" [embedded]="true" />
+  } @else {
+    <hm-services [hiveId]="id()" [embedded]="true" />
+  }
+</div>
+
+<p-dialog [header]="'Gérer les services — ' + (hive()?.name ?? '')" [(visible)]="manageVisible" [modal]="true" [style]="{ width: '520px' }">
+  <p class="dialog-hint">Sélectionnez les services rattachés à cette ruche. Retirer un service le replace « sans ruche » ; ajouter un service appartenant à une autre ruche le déplace ici.</p>
+  <p-multiSelect
+    [options]="serviceOptions()"
+    [(ngModel)]="selectedIds"
+    optionLabel="label"
+    optionValue="value"
+    [filter]="true"
+    display="chip"
+    appendTo="body"
+    placeholder="Choisir des services"
+    styleClass="full"
+  />
+  <ng-template #footer>
+    <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="manageVisible = false" />
+    <p-button label="Enregistrer" icon="pi pi-check" (onClick)="saveManage()" [loading]="managing()" />
+  </ng-template>
+</p-dialog>
+
+<hm-hive-form (saved)="load()" />
+
+
+<hm-service-form
+  [(visible)]="formVisible"
+  [mode]="'create'"
+  [hive]="hive()"
+  (saved)="load()"
+/>

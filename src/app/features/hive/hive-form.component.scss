@@ -1,0 +1,34 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 13px;
+    color: var(--hm-text-muted);
+    margin-top: 8px;
+  }
+
+  input { width: 100%; }
+  .req { color: #b54747; }
+}
+
+.palette {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s;
+}
+
+.swatch:hover { transform: scale(1.1); }
+.swatch.active { border-color: var(--hm-text, #222); box-shadow: 0 0 0 2px #fff inset; }

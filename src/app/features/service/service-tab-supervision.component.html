@@ -1,0 +1,204 @@
+@let status = store.liveStatus();
+
+<div class="livectl">
+  <span class="live-dot" [class.on]="autoRefresh()"></span>
+  <span class="live-label">
+    @if (autoRefresh()) { Temps réel } @else { En pause }
+  </span>
+  <p-toggleswitch [(ngModel)]="autoRefreshModel" (ngModelChange)="setAutoRefresh($event)" />
+  @if (lastUpdated(); as ts) {
+    <span class="updated">
+      @if (refreshing()) {
+        <i class="pi pi-spin pi-spinner"></i> actualisation…
+      } @else {
+        <i class="pi pi-check-circle"></i> mis à jour {{ ts | date: 'mediumTime' }}
+      }
+    </span>
+  }
+</div>
+
+<div class="card pad section-first">
+  <h2>État des réplicas</h2>
+  @if (!status && store.service()?.status !== 'deployed') {
+    <div class="muted">Service non déployé — aucune tâche active.</div>
+  } @else {
+    <div class="stats">
+      <div class="stat ok">
+        <span class="n">{{ status?.running ?? 0 }}</span>
+        <span class="l">En cours</span>
+      </div>
+      <div class="stat neutral">
+        <span class="n">{{ status?.desired ?? 0 }}</span>
+        <span class="l">Souhaités</span>
+      </div>
+      <div class="stat warn">
+        <span class="n">{{ status?.pending ?? 0 }}</span>
+        <span class="l">En attente</span>
+      </div>
+      <div class="stat err">
+        <span class="n">{{ status?.failed ?? 0 }}</span>
+        <span class="l">Échoués</span>
+      </div>
+      @if (status?.updating) {
+        <div class="stat info">
+          <span class="n"><i class="pi pi-sync pi-spin"></i></span>
+          <span class="l">Mise à jour</span>
+        </div>
+      }
+    </div>
+
+    @if (status?.updating) {
+      <div class="rolling-update">
+        <div class="ru-head">
+          <i class="pi pi-sync pi-spin"></i>
+          <strong>Rolling update en cours</strong>
+          <span class="ru-count">{{ status?.running ?? 0 }} / {{ status?.desired ?? 0 }} tâches à jour</span>
+        </div>
+        <div class="ru-bar">
+          <div class="ru-fill" [style.width.%]="status && status.desired > 0 ? (status.running / status.desired) * 100 : 0"></div>
+        </div>
+      </div>
+    }
+
+    @if (status && status.desired > 0) {
+      <div class="health-bar-wrap">
+        <div class="health-bar">
+          <div class="bar-fill ok" [style.width.%]="(status.running / status.desired) * 100"></div>
+          <div class="bar-fill warn" [style.width.%]="(status.pending / status.desired) * 100"></div>
+          <div class="bar-fill err" [style.width.%]="(status.failed / status.desired) * 100"></div>
+        </div>
+        <span class="bar-label">{{ status.running }}/{{ status.desired }} running</span>
+      </div>
+    }
+  }
+</div>
+
+<div class="card section">
+  <div class="section-head"><h2>Conteneurs (tâches)</h2></div>
+  <p-table [value]="store.tasks()">
+    <ng-template #header>
+      <tr>
+        <th style="width: 50px">Slot</th>
+        <th>ID</th>
+        <th>Image</th>
+        <th>Nœud</th>
+        <th>IP</th>
+        <th>État courant</th>
+        <th>Erreur</th>
+        <th>Mis à jour</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-t>
+      <tr class="task-row" (click)="openTask(t)">
+        <td class="muted">{{ t.slot }}</td>
+        <td><code>{{ t.id.slice(0, 12) }}</code></td>
+        <td class="muted img-col">{{ shortImage(t.image) }}</td>
+        <td class="muted">{{ t.node ? t.node.slice(0, 12) : '—' }}</td>
+        <td class="mono ip-col">{{ primaryIp(t) }}</td>
+        <td><p-tag [value]="t.current_state" [severity]="taskSeverity(t.current_state)" /></td>
+        <td class="err-msg">{{ t.error_message || '—' }}</td>
+        <td class="muted">
+          {{ t.updated_at | date: 'short' }}
+          <i class="pi pi-angle-right chev"></i>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="8">
+          <div class="empty-state"><i class="pi pi-box"></i>Aucune tâche active.</div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-drawer [(visible)]="drawerVisible" position="right" [style]="{ width: '480px' }" header="Détail du conteneur">
+  @if (selectedTask(); as t) {
+    <div class="drawer-body">
+      <div class="dr-head">
+        <p-tag [value]="t.current_state" [severity]="taskSeverity(t.current_state)" />
+        <span class="dr-arrow">→</span>
+        <span class="muted">souhaité : {{ t.desired_state }}</span>
+        @if (t.message) {
+          <span class="dr-msg muted">{{ t.message }}</span>
+        }
+      </div>
+
+      <dl>
+        <dt>ID de tâche</dt>
+        <dd class="mono">{{ t.id }}</dd>
+        <dt>Conteneur</dt>
+        <dd class="mono">{{ t.container_id ? t.container_id.slice(0, 12) : '—' }}</dd>
+        <dt>Image</dt>
+        <dd class="mono img-val">{{ shortImage(t.image) }}</dd>
+        <dt>Slot</dt>
+        <dd>{{ t.slot }}</dd>
+        <dt>Nœud</dt>
+        <dd class="mono">{{ t.node || '—' }}</dd>
+        <dt>Adresses IP</dt>
+        <dd>
+          @if (t.networks?.length) {
+            @for (n of t.networks; track n.address) {
+              <div class="ip-entry">
+                <code>{{ stripCidr(n.address) }}</code>
+                <span class="muted">{{ n.name }}</span>
+              </div>
+            }
+          } @else {
+            —
+          }
+        </dd>
+        <dt>État courant</dt>
+        <dd>{{ t.current_state }}</dd>
+        <dt>État souhaité</dt>
+        <dd>{{ t.desired_state }}</dd>
+        @if (t.pid) {
+          <dt>PID</dt>
+          <dd class="mono">{{ t.pid }}</dd>
+        }
+        @if (t.exit_code !== undefined && t.exit_code !== null) {
+          <dt>Code de sortie</dt>
+          <dd [class.exit-err]="t.exit_code !== 0">{{ t.exit_code }}</dd>
+        }
+        <dt>Créé le</dt>
+        <dd>{{ t.created_at | date: 'medium' }}</dd>
+        <dt>Mis à jour</dt>
+        <dd>{{ t.updated_at | date: 'medium' }}</dd>
+      </dl>
+
+      @if (t.error_message) {
+        <div class="dr-error">
+          <strong><i class="pi pi-exclamation-triangle"></i> Erreur Swarm</strong>
+          <pre>{{ t.error_message }}</pre>
+        </div>
+      }
+
+      <div class="dr-actions">
+        <p-button label="Voir les logs du service" icon="pi pi-align-left" severity="secondary" [outlined]="true" (onClick)="goToLogs()" />
+        <p-button
+          label="Attacher un shell"
+          icon="pi pi-desktop"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="openTerminal(t)"
+          [disabled]="!t.container_id || t.current_state !== 'running'"
+        />
+      </div>
+      @if (!t.container_id || t.current_state !== 'running') {
+        <small class="muted dr-hint">
+          <i class="pi pi-info-circle"></i> Le shell n'est disponible que sur une tâche en cours.
+        </small>
+      }
+    </div>
+  }
+</p-drawer>
+
+@if (terminalContainerId(); as cid) {
+  <hm-container-terminal
+    [serviceId]="store.serviceId()"
+    [containerId]="cid"
+    [visible]="terminalVisible()"
+    (visibleChange)="onTerminalVisible($event)"
+  />
+}

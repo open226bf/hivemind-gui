@@ -1,0 +1,124 @@
+<div [class.page]="!embedded()">
+  @if (!embedded()) {
+    <div class="page-header">
+      <div>
+        <h1>Services</h1>
+        <div class="subtitle">{{ services().length }} service(s)</div>
+      </div>
+      <div class="actions">
+        <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="load()" [loading]="loading()" />
+      </div>
+    </div>
+  }
+
+  <div class="card">
+    <p-table [value]="services()" [loading]="loading()" dataKey="id">
+      <ng-template #header>
+        <tr>
+          <th>Nom</th>
+          <th>Image</th>
+          <th>Replicas</th>
+          <th>Statut</th>
+          <th>Mis à jour</th>
+          <th style="width: 280px"></th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-svc>
+        <tr>
+          <td>
+            <a [routerLink]="['/services', svc.id]" class="svc-name">{{ svc.name }}</a>
+            @if (svc.description) {
+              <div class="muted">{{ svc.description }}</div>
+            }
+          </td>
+          <td><code>{{ svc.full_image }}</code></td>
+          <td>
+            @if (live(svc.id); as ls) {
+              <span
+                class="replicas"
+                [class.healthy]="ls.desired > 0 && ls.running >= ls.desired"
+                [class.degraded]="ls.running < ls.desired || ls.failed > 0"
+              >
+                <span class="dot"></span>{{ ls.running }}/{{ ls.desired }}
+              </span>
+            } @else {
+              {{ svc.replicas }}
+            }
+          </td>
+          <td>
+            @if (isDeploying(svc.id)) {
+              <span class="deploying">
+                <p-progressSpinner styleClass="mini-spin" strokeWidth="6" />
+                En cours…
+              </span>
+            } @else {
+              <p-tag [value]="svc.status" [severity]="statusSeverity(svc.status)" />
+            }
+          </td>
+          <td class="muted">{{ svc.updated_at | date: 'short' }}</td>
+          <td class="row-actions">
+            @if (canManage()) {
+              <p-button
+                icon="pi pi-pencil"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                pTooltip="Modifier"
+                (onClick)="openEdit(svc)"
+                [disabled]="isDeploying(svc.id)"
+              />
+              <p-button
+                [label]="svc.status === 'deployed' ? 'Redéployer' : 'Déployer'"
+                [severity]="svc.status === 'deployed' ? 'contrast' : 'success'"
+                icon="pi pi-cloud-upload"
+                size="small"
+                (onClick)="deploy(svc)"
+                [disabled]="isDeploying(svc.id)"
+                [loading]="isDeploying(svc.id)"
+              />
+              <p-button
+                icon="pi pi-stop-circle"
+                severity="warn"
+                [text]="true"
+                size="small"
+                pTooltip="Retirer de Swarm"
+
+                (onClick)="undeploy(svc)"
+                [disabled]="isDeploying(svc.id) || svc.status === 'removed' || svc.status === 'draft'"
+              />
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [text]="true"
+                size="small"
+                pTooltip="Supprimer la définition"
+                (onClick)="remove(svc)"
+              />
+            } @else {
+              <span class="muted ro-hint">Lecture seule</span>
+            }
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="6">
+            <div class="empty-state">
+              <i class="pi pi-server"></i>
+              Aucun service. Crée ton premier service pour commencer.
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<hm-service-form
+  [(visible)]="formVisible"
+  [mode]="formMode()"
+  [service]="editingService()"
+  (saved)="load()"
+/>
+
+<hm-redeploy-confirm (confirmed)="onRedeployConfirmed($event)" />

@@ -1,0 +1,122 @@
+.actions { display: flex; gap: 8px; }
+.muted { color: var(--hm-text-muted); font-size: 12px; }
+.mono { font-family: monospace; font-size: 12px; }
+.name-cell { font-weight: 600; }
+
+code {
+  font-size: 12px;
+  background: var(--hm-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+
+.empty-state {
+  padding: 32px;
+  text-align: center;
+  color: var(--hm-text-muted);
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.version-card {
+  border: 1px solid var(--hm-border);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.v-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.v-comment { font-style: italic; font-size: 13px; color: var(--hm-text); }
+
+.v-content {
+  margin: 0;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  background: var(--hm-bg);
+  padding: 10px;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* ─── F-V2-08: diff, impacted services, restore ─────────────────────────── */
+.impacted {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #eef4fb;
+  border: 1px solid #cfe0f3;
+  color: #2c5a86;
+  padding: 12px 14px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  font-size: 13px;
+
+  .pi { margin-top: 2px; }
+}
+
+.svc-link { margin-right: 8px; font-family: monospace; }
+.small { font-size: 12px; }
+
+.diff-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.diff-label { font-size: 13px; color: var(--hm-text-muted); }
+
+.diff {
+  border: 1px solid var(--hm-border, #e2e2e2);
+  border-radius: 6px;
+  overflow: auto;
+  font-family: monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+
+.diff-line {
+  display: flex;
+  white-space: pre;
+
+  .gutter {
+    flex: 0 0 38px;
+    text-align: right;
+    padding: 0 6px;
+    color: var(--hm-text-muted);
+    user-select: none;
+    opacity: 0.7;
+  }
+  .sign { flex: 0 0 16px; text-align: center; }
+  .text { flex: 1; padding-right: 10px; }
+}
+
+.diff-line.add { background: #e6f4ea; }
+.diff-line.add .sign { color: #1f8a4c; }
+.diff-line.del { background: #fbe9e9; }
+.diff-line.del .sign { color: #b54747; }
+
+.hist-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--hm-text-muted);
+  margin: 4px 0 10px;
+}
+
+.v-head .restore-btn { margin-left: auto; }

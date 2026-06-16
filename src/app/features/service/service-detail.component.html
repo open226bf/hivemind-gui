@@ -1,0 +1,116 @@
+@let svc = store.service();
+
+<div class="page">
+  <a routerLink="/services" class="back"><i class="pi pi-arrow-left"></i> Services</a>
+
+  @if (svc) {
+    <div class="page-header">
+      <div>
+        <h1>
+          {{ svc.name }}
+          @if (store.deploying()) {
+            <span class="deploying">
+              <p-progressSpinner [style]="{ width: '16px', height: '16px' }" strokeWidth="6" />
+              déploiement en cours…
+            </span>
+          } @else {
+            <p-tag [value]="svc.status" [severity]="statusSeverity(svc.status)" />
+          }
+        </h1>
+        <div class="subtitle">{{ svc.full_image }}</div>
+      </div>
+      <div class="actions">
+        <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="reload()" />
+        @if (canManage()) {
+          <div class="scale-ctrl">
+            <span class="scale-label"><i class="pi pi-server"></i> Replicas</span>
+            <p-inputnumber
+              [(ngModel)]="scaleValue"
+              [min]="0"
+              [showButtons]="true"
+              [style]="{ width: '110px' }"
+            />
+            <p-button
+              label="Appliquer"
+              icon="pi pi-bolt"
+              size="small"
+              severity="secondary"
+              (onClick)="applyScale()"
+              [loading]="scaling()"
+              [disabled]="store.deploying() || scaling()"
+            />
+          </div>
+          <p-button
+            label="Modifier"
+            icon="pi pi-pencil"
+            severity="secondary"
+            (onClick)="openEdit()"
+            [disabled]="store.deploying()"
+          />
+          <p-button
+            [label]="svc.status === 'deployed' ? 'Redéployer' : 'Déployer'"
+            icon="pi pi-cloud-upload"
+            (onClick)="deploy()"
+            [disabled]="store.deploying()"
+            [loading]="store.deploying()"
+          />
+          @if (svc.status === 'deployed') {
+            <p-button
+              label="Retirer"
+              icon="pi pi-stop-circle"
+              severity="warn"
+              (onClick)="undeploy()"
+              [disabled]="store.deploying()"
+            />
+          }
+        }
+      </div>
+    </div>
+
+    @if (store.liveStatus()?.externally_removed) {
+      <div class="banner error">
+        <i class="pi pi-exclamation-triangle"></i>
+        <div>
+          <strong>Service retiré hors Hivemind</strong>
+          <div>Ce service a été supprimé directement sur Swarm. Son statut a été synchronisé à "removed". Tu peux le redéployer ou supprimer sa définition.</div>
+        </div>
+      </div>
+    }
+
+    @if (store.lastFailure(); as fail) {
+      <div class="banner error">
+        <i class="pi pi-exclamation-triangle"></i>
+        <div>
+          <strong>Dernier déploiement en échec</strong>
+          <div>{{ fail }}</div>
+        </div>
+      </div>
+    }
+
+    <nav class="tab-nav">
+      @for (tab of tabs; track tab.path) {
+        <a [routerLink]="tab.path" routerLinkActive="active" class="tab-link">
+          <i class="pi" [class]="tab.icon"></i>
+          {{ tab.label }}
+        </a>
+      }
+    </nav>
+
+    <router-outlet />
+
+  } @else {
+    <div class="loading">
+      <p-progressSpinner strokeWidth="4" />
+      Chargement du service…
+    </div>
+  }
+</div>
+
+<hm-service-form
+  [(visible)]="editVisible"
+  mode="edit"
+  [service]="editingService()"
+  (saved)="onFormSaved()"
+/>
+
+<hm-redeploy-confirm (confirmed)="onRedeployConfirmed($event)" />

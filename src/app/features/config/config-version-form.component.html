@@ -1,0 +1,18 @@
+<p-dialog
+  [header]="'Nouvelle version — ' + (config()?.name ?? '')"
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '560px' }"
+>
+  <div class="form">
+    <label>Contenu <span class="req">*</span></label>
+    <textarea pTextarea [(ngModel)]="form.content" [rows]="8" [autoResize]="true"></textarea>
+
+    <label>Commentaire <span class="req">*</span></label>
+    <input pInputText [(ngModel)]="form.comment" placeholder="Description du changement" />
+  </div>
+  <ng-template #footer>
+    <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="close()" />
+    <p-button label="Ajouter" icon="pi pi-check" (onClick)="save()" [loading]="saving()" />
+  </ng-template>
+</p-dialog>

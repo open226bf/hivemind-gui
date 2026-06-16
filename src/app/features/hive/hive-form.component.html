@@ -1,0 +1,20 @@
+<p-dialog [header]="editingId() ? 'Modifier la ruche' : 'Créer une ruche'" [(visible)]="visible" [modal]="true" [style]="{ width: '460px' }">
+  <div class="form">
+    <label>Nom <span class="req">*</span></label>
+    <input pInputText [(ngModel)]="form.name" placeholder="Plateforme paiement" />
+
+    <label>Description</label>
+    <input pInputText [(ngModel)]="form.description" placeholder="Optionnelle" />
+
+    <label>Couleur</label>
+    <div class="palette">
+      @for (c of palette; track c) {
+        <button type="button" class="swatch" [style.background]="c" [class.active]="form.color === c" (click)="form.color = c"></button>
+      }
+    </div>
+  </div>
+  <ng-template #footer>
+    <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="close()" />
+    <p-button [label]="editingId() ? 'Enregistrer' : 'Créer'" icon="pi pi-check" (onClick)="save()" [loading]="saving()" />
+  </ng-template>
+</p-dialog>

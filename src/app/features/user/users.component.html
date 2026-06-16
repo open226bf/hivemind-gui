@@ -1,0 +1,64 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Utilisateurs</h1>
+      <div class="subtitle">{{ users().length }} compte(s) · gestion des accès (RBAC)</div>
+    </div>
+    <div class="actions">
+      <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="load()" [loading]="loading()" />
+      <p-button label="Créer un utilisateur" icon="pi pi-plus" (onClick)="openCreate()" />
+    </div>
+  </div>
+
+  <div class="card">
+    <p-table [value]="users()" [loading]="loading()" dataKey="id">
+      <ng-template #header>
+        <tr>
+          <th>Email</th>
+          <th style="width: 130px">Rôle</th>
+          <th style="width: 100px">Statut</th>
+          <th>Créé le</th>
+          <th style="width: 110px"></th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-u>
+        <tr>
+          <td class="name-cell">
+            <i class="pi pi-user"></i> {{ u.email }}
+            @if (u.id === currentUserId()) { <span class="you">vous</span> }
+          </td>
+          <td><p-tag [value]="u.role" [severity]="roleSeverity(u.role)" /></td>
+          <td>
+            @if (u.active) {
+              <span class="status on"><i class="pi pi-check-circle"></i> Actif</span>
+            } @else {
+              <span class="status off"><i class="pi pi-ban"></i> Inactif</span>
+            }
+          </td>
+          <td class="muted">{{ u.created_at | date: 'short' }}</td>
+          <td class="row-actions">
+            <p-button icon="pi pi-pencil" severity="secondary" [text]="true" size="small" pTooltip="Modifier" (onClick)="openEdit(u)" />
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              [text]="true"
+              size="small"
+              pTooltip="Supprimer"
+              [disabled]="u.id === currentUserId()"
+              (onClick)="remove(u)"
+            />
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="5">
+            <div class="empty-state"><i class="pi pi-users"></i>Aucun utilisateur.</div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<hm-user-form (saved)="load()" />

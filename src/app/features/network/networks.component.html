@@ -1,0 +1,97 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Réseaux</h1>
+      <div class="subtitle">{{ networks().length }} réseau(x) enregistré(s)</div>
+    </div>
+    <div class="actions">
+      <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="load(); loadSwarm()" [loading]="loading()" />
+      @if (canManage()) {
+        <p-button label="Créer un réseau" icon="pi pi-plus" (onClick)="openCreate()" />
+      }
+    </div>
+  </div>
+
+  <p-tabs [(value)]="activeTab">
+    <p-tablist>
+      <p-tab value="registered">Enregistrés ({{ networks().length }})</p-tab>
+      <p-tab value="swarm">Cluster Swarm ({{ swarmNetworks().length }})</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <p-tabpanel value="registered">
+        <div class="card">
+          <p-table [value]="networks()" [loading]="loading()" dataKey="id">
+            <ng-template #header>
+              <tr>
+                <th>Nom</th>
+                <th>Subnet</th>
+                <th style="width: 100px">Attachable</th>
+                <th style="width: 80px">External</th>
+                <th>Swarm ID</th>
+                <th>Créé le</th>
+                <th style="width: 80px"></th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-n>
+              <tr>
+                <td class="name-cell"><code>{{ n.name }}</code></td>
+                <td class="muted mono">{{ n.subnet || 'auto' }}</td>
+                <td><p-tag [value]="n.attachable ? 'Oui' : 'Non'" [severity]="n.attachable ? 'success' : 'secondary'" /></td>
+                <td><p-tag [value]="n.external ? 'Oui' : 'Non'" [severity]="n.external ? 'warn' : 'secondary'" /></td>
+                <td class="muted mono">{{ n.swarm_id ? n.swarm_id.slice(0, 12) : '—' }}</td>
+                <td class="muted">{{ n.created_at | date: 'short' }}</td>
+                <td class="row-actions">
+                  @if (canManage()) {
+                    <p-button icon="pi pi-trash" severity="danger" [text]="true" size="small" pTooltip="Supprimer" (onClick)="remove(n)" />
+                  }
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state"><i class="pi pi-sitemap"></i>Aucun réseau enregistré.</div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-tabpanel>
+
+      <p-tabpanel value="swarm">
+        <div class="card">
+          <p-table [value]="swarmNetworks()" [loading]="swarmLoading()" dataKey="id">
+            <ng-template #header>
+              <tr>
+                <th>Nom</th>
+                <th>ID</th>
+                <th>Driver</th>
+                <th>Scope</th>
+                <th>Subnet</th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-n>
+              <tr>
+                <td class="name-cell"><code>{{ n.name }}</code></td>
+                <td class="muted mono">{{ n.id.slice(0, 12) }}</td>
+                <td class="muted">{{ n.driver }}</td>
+                <td class="muted">{{ n.scope }}</td>
+                <td class="muted mono">{{ n.subnet || '—' }}</td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+              <tr>
+                <td colspan="5">
+                  <div class="empty-state"><i class="pi pi-sitemap"></i>Aucun réseau overlay sur le cluster.</div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</div>
+
+<hm-network-form (saved)="onSaved()" />
