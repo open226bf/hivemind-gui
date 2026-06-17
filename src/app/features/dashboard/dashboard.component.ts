@@ -63,11 +63,12 @@ export class Dashboard implements OnInit {
       });
   }
 
-  /** Loads the overview for the selected cluster (or the aggregated view). */
+  /** Loads the overview scoped to the selected cluster. Never aggregates. */
   private fetch(): void {
-    this.refreshing.set(true);
     const id = this.ctx.selectedId();
-    const req: Observable<ClusterOverview> = id ? this.api.overviewFor(id) : this.api.overview();
+    if (!id) return; // no cluster selected yet (pre-load); wait for the resolution
+    this.refreshing.set(true);
+    const req: Observable<ClusterOverview> = this.api.overviewFor(id);
     req.pipe(catchError(() => EMPTY)).subscribe((ov) => {
       this.overview.set(ov);
       this.loading.set(false);
