@@ -38,28 +38,42 @@ export class ConfigVersionFormComponent {
   save(): void {
     const c = this.config();
     if (!c || !this.form.content) {
-      this.toast.add({ severity: 'warn', summary: 'Champ requis', detail: 'Le contenu est obligatoire' });
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Champ requis',
+        detail: 'Le contenu est obligatoire',
+      });
       return;
     }
     if (!this.form.comment.trim()) {
-      this.toast.add({ severity: 'warn', summary: 'Champ requis', detail: 'Un commentaire est obligatoire pour chaque version' });
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Champ requis',
+        detail: 'Un commentaire est obligatoire pour chaque version',
+      });
       return;
     }
     this.saving.set(true);
-    this.api.addVersion(c.id, {
-      content: this.form.content,
-      comment: this.form.comment.trim(),
-    }).subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.visible.set(false);
-        this.toast.add({ severity: 'success', summary: 'Version ajoutée', detail: c.name });
-        this.saved.emit();
-      },
-      error: (err) => {
-        this.saving.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Ajout impossible' });
-      },
-    });
+    this.api
+      .addVersion(c.id, {
+        content: this.form.content,
+        comment: this.form.comment.trim(),
+      })
+      .subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.visible.set(false);
+          this.toast.add({ severity: 'success', summary: 'Version ajoutée', detail: c.name });
+          this.saved.emit();
+        },
+        error: (err) => {
+          this.saving.set(false);
+          this.toast.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: err?.error?.message ?? 'Ajout impossible',
+          });
+        },
+      });
   }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, signal, viewChild } from '@angular/core';
+import { Component, effect, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -8,6 +8,7 @@ import { TabsModule } from 'primeng/tabs';
 import { MessageService } from 'primeng/api';
 
 import { VolumesApi } from '../../core/api';
+import { ClusterContextService } from '../../core/cluster-context.service';
 import { AuthService } from '../../core/auth.service';
 import { SwarmVolumeInfo, VolumeResponse } from '../../core/models';
 import { VolumeFormComponent } from './volume-form.component';
@@ -21,6 +22,7 @@ import { VolumeFormComponent } from './volume-form.component';
 export class Volumes {
   private readonly api = inject(VolumesApi);
   private readonly toast = inject(MessageService);
+  private readonly ctx = inject(ClusterContextService);
 
   /** Volume catalog management is Admin-only (F-V2-06). */
   readonly canManage = inject(AuthService).isAdmin;
@@ -34,13 +36,16 @@ export class Volumes {
   activeTab = 'registered';
 
   constructor() {
-    this.load();
-    this.loadSwarm();
+    effect(() => {
+      this.ctx.selectedId();
+      this.load();
+      this.loadSwarm();
+    });
   }
 
   load(): void {
     this.loading.set(true);
-    this.api.list().subscribe({
+    this.api.list(1, 50, this.ctx.selectedId() ?? undefined).subscribe({
       next: (res) => { this.volumes.set(res.items); this.loading.set(false); },
       error: () => { this.loading.set(false); this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des volumes impossible' }); },
     });
@@ -48,7 +53,7 @@ export class Volumes {
 
   loadSwarm(): void {
     this.swarmLoading.set(true);
-    this.api.swarm().subscribe({
+    this.api.swarm(this.ctx.selectedId() ?? undefined).subscribe({
       next: (vols) => { this.swarmVolumes.set(vols); this.swarmLoading.set(false); },
       error: () => { this.swarmLoading.set(false); },
     });

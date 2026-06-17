@@ -1,4 +1,4 @@
-import { Component, inject, signal, viewChild } from '@angular/core';
+import { Component, effect, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -7,6 +7,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
 
 import { SecretsApi } from '../../core/api';
+import { ClusterContextService } from '../../core/cluster-context.service';
 import { AuthService } from '../../core/auth.service';
 import { SecretResponse } from '../../core/models';
 import { SecretFormComponent } from './secret-form.component';
@@ -14,13 +15,22 @@ import { SecretRotateFormComponent } from './secret-rotate-form.component';
 
 @Component({
   selector: 'hm-secrets',
-  imports: [DatePipe, TableModule, ButtonModule, TagModule, TooltipModule, SecretFormComponent, SecretRotateFormComponent],
+  imports: [
+    DatePipe,
+    TableModule,
+    ButtonModule,
+    TagModule,
+    TooltipModule,
+    SecretFormComponent,
+    SecretRotateFormComponent,
+  ],
   templateUrl: './secrets.component.html',
   styleUrl: './secrets.component.scss',
 })
 export class Secrets {
   private readonly api = inject(SecretsApi);
   private readonly toast = inject(MessageService);
+  private readonly ctx = inject(ClusterContextService);
 
   /** Secrets are Admin-only (F-V1-01). */
   readonly canManage = inject(AuthService).isAdmin;
@@ -33,14 +43,27 @@ export class Secrets {
   readonly rotateTarget = signal<SecretResponse | null>(null);
 
   constructor() {
-    this.load();
+    effect(() => {
+      this.ctx.selectedId();
+      this.load();
+    });
   }
 
   load(): void {
     this.loading.set(true);
-    this.api.list().subscribe({
-      next: (res) => { this.secrets.set(res.items); this.loading.set(false); },
-      error: () => { this.loading.set(false); this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des secrets impossible' }); },
+    this.api.list(1, 50, this.ctx.selectedId() ?? undefined).subscribe({
+      next: (res) => {
+        this.secrets.set(res.items);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Chargement des secrets impossible',
+        });
+      },
     });
   }
 
@@ -56,8 +79,17 @@ export class Secrets {
   remove(s: SecretResponse): void {
     if (!confirm(`Supprimer le secret "${s.name}" ?`)) return;
     this.api.remove(s.id).subscribe({
-      next: () => { this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${s.name} supprimé` }); this.load(); },
-      error: (err) => { this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Suppression impossible' }); },
+      next: () => {
+        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${s.name} supprimé` });
+        this.load();
+      },
+      error: (err) => {
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Suppression impossible',
+        });
+      },
     });
   }
 }

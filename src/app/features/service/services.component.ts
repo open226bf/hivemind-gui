@@ -22,6 +22,7 @@ import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { ClusterApi, DeploymentsApi, ServicesApi } from '../../core/api';
+import { ClusterContextService } from '../../core/cluster-context.service';
 import { AuthService } from '../../core/auth.service';
 import {
   DeploymentStatus,
@@ -61,6 +62,7 @@ export class Services {
   private readonly api = inject(ServicesApi);
   private readonly deployApi = inject(DeploymentsApi);
   private readonly clusterApi = inject(ClusterApi);
+  private readonly ctx = inject(ClusterContextService);
   private readonly toast = inject(MessageService);
   private readonly confirmer = inject(ConfirmationService);
   private readonly destroyRef = inject(DestroyRef);
@@ -108,6 +110,7 @@ export class Services {
     effect(() => {
       this.hiveId();
       this.unassigned();
+      this.ctx.selectedId(); // reload when the active cluster changes
       this.load();
     });
     interval(LIVE_REFRESH_MS)
@@ -156,9 +159,11 @@ export class Services {
 
   load(): void {
     this.loading.set(true);
-    const opts: { hive_id?: string; unassigned?: boolean } = {};
+    const opts: { hive_id?: string; unassigned?: boolean; cluster_id?: string } = {};
     if (this.unassigned()) opts.unassigned = true;
     else if (this.hiveId()) opts.hive_id = this.hiveId();
+    const cid = this.ctx.selectedId();
+    if (cid) opts.cluster_id = cid;
     this.api.list(1, 50, opts).subscribe({
       next: (res) => {
         this.services.set(res.items);

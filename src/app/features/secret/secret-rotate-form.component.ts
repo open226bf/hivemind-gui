@@ -37,7 +37,11 @@ export class SecretRotateFormComponent {
   save(): void {
     const t = this.target();
     if (!t || !this.value) {
-      this.toast.add({ severity: 'warn', summary: 'Champ requis', detail: 'La nouvelle valeur est obligatoire' });
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Champ requis',
+        detail: 'La nouvelle valeur est obligatoire',
+      });
       return;
     }
     this.saving.set(true);
@@ -50,7 +54,11 @@ export class SecretRotateFormComponent {
       },
       error: (err) => {
         this.saving.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Rotation impossible' });
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Rotation impossible',
+        });
       },
     });
   }
