@@ -1,8 +1,12 @@
+.card {
+  max-width: 760px;
+  padding: 20px 22px;
+}
+
 .form {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-width: 720px;
 
   label {
     font-size: 12px;

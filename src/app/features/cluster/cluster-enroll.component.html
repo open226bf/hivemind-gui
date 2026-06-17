@@ -44,16 +44,20 @@
       @if (mode === 'agent') {
         <div class="mode-note">
           <i class="pi pi-bolt"></i>
-          L'agent se déploie sur le cluster et <strong>compose vers Hivemind</strong> : aucune
-          ouverture entrante requise, et tu obtiens les métriques par nœud. On crée le cluster puis
-          on génère un token d'enrôlement à usage unique.
+          <span>
+            L'agent se déploie sur le cluster et <strong>compose vers Hivemind</strong> : aucune
+            ouverture entrante requise, et tu obtiens les métriques par nœud. On crée le cluster
+            puis on génère un token d'enrôlement à usage unique.
+          </span>
         </div>
       } @else {
         <div class="mode-note">
           <i class="pi pi-server"></i>
-          Hivemind se connecte directement au démon Docker d'un <strong>manager</strong>. Laisse
-          l'endpoint vide pour l'environnement Docker local du serveur, ou renseigne une adresse TCP
-          + TLS mutuel.
+          <span>
+            Hivemind se connecte directement au démon Docker d'un <strong>manager</strong>. Laisse
+            l'endpoint vide pour l'environnement Docker local du serveur, ou renseigne une adresse
+            TCP + TLS mutuel.
+          </span>
         </div>
 
         <label>Endpoint</label>
