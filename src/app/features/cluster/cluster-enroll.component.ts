@@ -11,6 +11,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { MessageService } from 'primeng/api';
 
 import { ClusterApi } from '../../core/api';
+import { API_BASE } from '../../core/config';
 import { ConnectionMode, EnrollClusterResponse } from '../../core/models';
 
 const STATUS_POLL_MS = 4000;
@@ -52,6 +53,8 @@ export class ClusterEnroll {
 
   /** Collapsible mutual-TLS section (direct mode). */
   readonly showTls = signal(false);
+  /** Collapsible "manual method" section on the enrollment result. */
+  readonly showAdvanced = signal(false);
 
   // Enrollment result + live agent status.
   readonly enrollment = signal<EnrollClusterResponse | null>(null);
@@ -88,6 +91,10 @@ services:
 
   toggleTls(): void {
     this.showTls.update((v) => !v);
+  }
+
+  toggleAdvanced(): void {
+    this.showAdvanced.update((v) => !v);
   }
 
   constructor() {
@@ -179,6 +186,11 @@ services:
           next: (c) => this.agentStatus.set(c.agent_status ?? ''),
         });
       });
+  }
+
+  /** One-liner to run on a cluster manager: downloads + runs the install script. */
+  installCommand(token: string): string {
+    return `curl -fsSL "${location.origin}${API_BASE}/agent/install?token=${token}" | sh`;
   }
 
   copy(text?: string): void {

@@ -149,85 +149,114 @@
 
       <ol class="steps">
         <li>Connecte-toi à un <strong>manager</strong> du cluster cible.</li>
-        <li>Récupère le manifeste <code>hivemind-agent.yml</code>.</li>
-        <li>Lance la commande ci-dessous (token à <strong>usage unique</strong>).</li>
+        <li>Colle la commande ci-dessous : elle télécharge et lance l'installation de l'agent.</li>
       </ol>
 
-      <label>Commande de déploiement</label>
+      <label>Commande d'installation (à lancer sur un manager)</label>
       <div class="copybox">
-        <code>{{ enr.command }}</code>
-        <p-button icon="pi pi-copy" [text]="true" pTooltip="Copier" (onClick)="copy(enr.command)" />
+        <code>{{ installCommand(enr.token) }}</code>
+        <p-button
+          icon="pi pi-copy"
+          [text]="true"
+          pTooltip="Copier"
+          (onClick)="copy(installCommand(enr.token))"
+        />
       </div>
+      <small class="muted">
+        Récupère le script (secrets + compose) et exécute <code>docker stack deploy</code>. Le token
+        est à usage unique.
+      </small>
 
-      <label>Token d'enrôlement (affiché une seule fois)</label>
-      <div class="copybox">
-        <code class="token">{{ enr.token }}</code>
-        <p-button icon="pi pi-copy" [text]="true" pTooltip="Copier" (onClick)="copy(enr.token)" />
-      </div>
+      <button type="button" class="tls-toggle" (click)="toggleAdvanced()">
+        <i
+          class="pi"
+          [class.pi-chevron-right]="!showAdvanced()"
+          [class.pi-chevron-down]="showAdvanced()"
+        ></i>
+        Méthode manuelle (avancé)
+      </button>
+      @if (showAdvanced()) {
+        <label>Commande de déploiement</label>
+        <div class="copybox">
+          <code>{{ enr.command }}</code>
+          <p-button
+            icon="pi pi-copy"
+            [text]="true"
+            pTooltip="Copier"
+            (onClick)="copy(enr.command)"
+          />
+        </div>
 
-      @if (enr.client_cert) {
-        <div class="mtls">
-          <div class="mtls-title"><i class="pi pi-shield"></i> mTLS (recommandé)</div>
-          <small class="muted">
-            L'agent s'authentifie par certificat client. Fournis ces valeurs à l'agent
-            (<code>HIVEMIND_HUB_ADDR</code>, <code>HIVEMIND_CLIENT_CERT</code>,
-            <code>HIVEMIND_CLIENT_KEY</code>, <code>HIVEMIND_CA_CERT</code>) — idéalement via des
-            secrets Docker. Affiché une seule fois.
-          </small>
+        <label>Token d'enrôlement (affiché une seule fois)</label>
+        <div class="copybox">
+          <code class="token">{{ enr.token }}</code>
+          <p-button icon="pi pi-copy" [text]="true" pTooltip="Copier" (onClick)="copy(enr.token)" />
+        </div>
 
-          <label>Adresse du hub</label>
-          <div class="copybox">
-            <code>{{ enr.hub_addr || '(non configurée)' }}</code>
-            @if (enr.hub_addr) {
+        @if (enr.client_cert) {
+          <div class="mtls">
+            <div class="mtls-title"><i class="pi pi-shield"></i> mTLS (recommandé)</div>
+            <small class="muted">
+              L'agent s'authentifie par certificat client. Fournis ces valeurs à l'agent
+              (<code>HIVEMIND_HUB_ADDR</code>, <code>HIVEMIND_CLIENT_CERT</code>,
+              <code>HIVEMIND_CLIENT_KEY</code>, <code>HIVEMIND_CA_CERT</code>) — idéalement via des
+              secrets Docker. Affiché une seule fois.
+            </small>
+
+            <label>Adresse du hub</label>
+            <div class="copybox">
+              <code>{{ enr.hub_addr || '(non configurée)' }}</code>
+              @if (enr.hub_addr) {
+                <p-button
+                  icon="pi pi-copy"
+                  [text]="true"
+                  pTooltip="Copier"
+                  (onClick)="copy(enr.hub_addr)"
+                />
+              }
+            </div>
+
+            <label>Certificat client (PEM)</label>
+            <div class="copybox">
+              <pre>{{ enr.client_cert }}</pre>
               <p-button
                 icon="pi pi-copy"
                 [text]="true"
                 pTooltip="Copier"
-                (onClick)="copy(enr.hub_addr)"
+                (onClick)="copy(enr.client_cert)"
               />
-            }
-          </div>
+            </div>
 
-          <label>Certificat client (PEM)</label>
-          <div class="copybox">
-            <pre>{{ enr.client_cert }}</pre>
-            <p-button
-              icon="pi pi-copy"
-              [text]="true"
-              pTooltip="Copier"
-              (onClick)="copy(enr.client_cert)"
-            />
-          </div>
+            <label>Clé privée client (PEM)</label>
+            <div class="copybox">
+              <pre>{{ enr.client_key }}</pre>
+              <p-button
+                icon="pi pi-copy"
+                [text]="true"
+                pTooltip="Copier"
+                (onClick)="copy(enr.client_key)"
+              />
+            </div>
 
-          <label>Clé privée client (PEM)</label>
-          <div class="copybox">
-            <pre>{{ enr.client_key }}</pre>
-            <p-button
-              icon="pi pi-copy"
-              [text]="true"
-              pTooltip="Copier"
-              (onClick)="copy(enr.client_key)"
-            />
+            <label>CA (PEM)</label>
+            <div class="copybox">
+              <pre>{{ enr.ca_cert }}</pre>
+              <p-button
+                icon="pi pi-copy"
+                [text]="true"
+                pTooltip="Copier"
+                (onClick)="copy(enr.ca_cert)"
+              />
+            </div>
           </div>
+        }
 
-          <label>CA (PEM)</label>
-          <div class="copybox">
-            <pre>{{ enr.ca_cert }}</pre>
-            <p-button
-              icon="pi pi-copy"
-              [text]="true"
-              pTooltip="Copier"
-              (onClick)="copy(enr.ca_cert)"
-            />
-          </div>
+        <label>Manifeste <code>hivemind-agent.yml</code></label>
+        <div class="copybox manifest">
+          <pre>{{ manifest }}</pre>
+          <p-button icon="pi pi-copy" [text]="true" pTooltip="Copier" (onClick)="copy(manifest)" />
         </div>
       }
-
-      <label>Manifeste <code>hivemind-agent.yml</code></label>
-      <div class="copybox manifest">
-        <pre>{{ manifest }}</pre>
-        <p-button icon="pi pi-copy" [text]="true" pTooltip="Copier" (onClick)="copy(manifest)" />
-      </div>
 
       <div class="enroll-actions">
         @if (agentStatus() === 'online') {
