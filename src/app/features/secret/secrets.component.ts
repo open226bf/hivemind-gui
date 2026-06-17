@@ -51,7 +51,7 @@ export class Secrets {
 
   load(): void {
     this.loading.set(true);
-    this.api.list(1, 50, this.ctx.selectedId() ?? undefined).subscribe({
+    this.api.list(1, 50).subscribe({
       next: (res) => {
         this.secrets.set(res.items);
         this.loading.set(false);

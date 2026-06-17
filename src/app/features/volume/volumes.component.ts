@@ -45,7 +45,7 @@ export class Volumes {
 
   load(): void {
     this.loading.set(true);
-    this.api.list(1, 50, this.ctx.selectedId() ?? undefined).subscribe({
+    this.api.list(1, 50).subscribe({
       next: (res) => { this.volumes.set(res.items); this.loading.set(false); },
       error: () => { this.loading.set(false); this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des volumes impossible' }); },
     });
@@ -53,7 +53,7 @@ export class Volumes {
 
   loadSwarm(): void {
     this.swarmLoading.set(true);
-    this.api.swarm(this.ctx.selectedId() ?? undefined).subscribe({
+    this.api.swarm().subscribe({
       next: (vols) => { this.swarmVolumes.set(vols); this.swarmLoading.set(false); },
       error: () => { this.swarmLoading.set(false); },
     });

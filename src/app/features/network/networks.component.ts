@@ -45,7 +45,7 @@ export class Networks {
 
   load(): void {
     this.loading.set(true);
-    this.api.list(1, 50, this.ctx.selectedId() ?? undefined).subscribe({
+    this.api.list(1, 50).subscribe({
       next: (res) => { this.networks.set(res.items); this.loading.set(false); },
       error: () => { this.loading.set(false); this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des réseaux impossible' }); },
     });
@@ -53,7 +53,7 @@ export class Networks {
 
   loadSwarm(): void {
     this.swarmLoading.set(true);
-    this.api.swarm(this.ctx.selectedId() ?? undefined).subscribe({
+    this.api.swarm().subscribe({
       next: (nets) => { this.swarmNetworks.set(nets); this.swarmLoading.set(false); },
       error: () => { this.swarmLoading.set(false); },
     });

@@ -4,14 +4,13 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
-import { SelectModule } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 
 import { ConfigsApi } from '../../core/api';
 
 @Component({
   selector: 'hm-config-form',
-  imports: [FormsModule, ButtonModule, DialogModule, InputTextModule, TextareaModule, SelectModule],
+  imports: [FormsModule, ButtonModule, DialogModule, InputTextModule, TextareaModule],
   templateUrl: './config-form.component.html',
   styleUrl: './config-form.component.scss',
 })

@@ -1,13 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  computed,
-  effect,
-  inject,
-  input,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, DestroyRef, effect, inject, input, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -21,7 +12,7 @@ import { forkJoin, interval } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
-import { ClusterApi, DeploymentsApi, ServicesApi } from '../../core/api';
+import { DeploymentsApi, ServicesApi } from '../../core/api';
 import { ClusterContextService } from '../../core/cluster-context.service';
 import { AuthService } from '../../core/auth.service';
 import {
@@ -61,7 +52,6 @@ export class Services {
 
   private readonly api = inject(ServicesApi);
   private readonly deployApi = inject(DeploymentsApi);
-  private readonly clusterApi = inject(ClusterApi);
   private readonly ctx = inject(ClusterContextService);
   private readonly toast = inject(MessageService);
   private readonly confirmer = inject(ConfirmationService);
@@ -73,10 +63,6 @@ export class Services {
 
   readonly services = signal<ServiceResponse[]>([]);
   readonly loading = signal(false);
-
-  /** id → name map; the Cluster column shows only once more than one exists. */
-  private readonly clusterNames = signal<Record<string, string>>({});
-  readonly multiCluster = computed(() => Object.keys(this.clusterNames()).length > 1);
 
   readonly deployStatus = signal<Record<string, DeploymentStatus | undefined>>({});
   private readonly polling = new Set<string>();
@@ -90,20 +76,7 @@ export class Services {
   private readonly redeployDialog = viewChild.required(RedeployConfirm);
   private pendingRedeploy: ServiceResponse | undefined;
 
-  /** Display name for a service's cluster (falls back to "défaut"). */
-  clusterName(id?: string): string {
-    if (!id) return 'défaut';
-    return this.clusterNames()[id] ?? id.slice(0, 8);
-  }
-
   constructor() {
-    this.clusterApi.list(1, 200).subscribe({
-      next: (res) => {
-        const map: Record<string, string> = {};
-        for (const c of res.items) map[c.id] = c.is_default ? `${c.name} (défaut)` : c.name;
-        this.clusterNames.set(map);
-      },
-    });
     this.destroyRef.onDestroy(() => (this.alive = false));
     // Reload whenever the filter inputs change (covers both initial mount and
     // navigation between hives without recreating the component).
@@ -159,11 +132,9 @@ export class Services {
 
   load(): void {
     this.loading.set(true);
-    const opts: { hive_id?: string; unassigned?: boolean; cluster_id?: string } = {};
+    const opts: { hive_id?: string; unassigned?: boolean } = {};
     if (this.unassigned()) opts.unassigned = true;
     else if (this.hiveId()) opts.hive_id = this.hiveId();
-    const cid = this.ctx.selectedId();
-    if (cid) opts.cluster_id = cid;
     this.api.list(1, 50, opts).subscribe({
       next: (res) => {
         this.services.set(res.items);

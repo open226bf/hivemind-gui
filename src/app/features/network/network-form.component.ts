@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { MessageService } from 'primeng/api';
 
@@ -11,14 +10,7 @@ import { NetworksApi } from '../../core/api';
 
 @Component({
   selector: 'hm-network-form',
-  imports: [
-    FormsModule,
-    ButtonModule,
-    DialogModule,
-    InputTextModule,
-    SelectModule,
-    ToggleSwitchModule,
-  ],
+  imports: [FormsModule, ButtonModule, DialogModule, InputTextModule, ToggleSwitchModule],
   templateUrl: './network-form.component.html',
   styleUrl: './network-form.component.scss',
 })

@@ -70,12 +70,11 @@ export class ServicesApi {
   list(
     page = 1,
     size = 50,
-    opts: { hive_id?: string; unassigned?: boolean; cluster_id?: string } = {},
+    opts: { hive_id?: string; unassigned?: boolean } = {},
   ): Observable<ServiceListResponse> {
     let params = new HttpParams().set('page', page).set('size', size);
     if (opts.unassigned) params = params.set('unassigned', 'true');
     else if (opts.hive_id) params = params.set('hive_id', opts.hive_id);
-    if (opts.cluster_id) params = params.set('cluster_id', opts.cluster_id);
     return this.http.get<ServiceListResponse>(`${API_BASE}/services`, { params });
   }
 
@@ -235,9 +234,8 @@ export class HivesApi {
 export class NetworksApi {
   private readonly http = inject(HttpClient);
 
-  list(page = 1, size = 50, clusterId?: string): Observable<NetworkListResponse> {
-    let params = new HttpParams().set("page", page).set("size", size);
-    if (clusterId) params = params.set("cluster_id", clusterId);
+  list(page = 1, size = 50): Observable<NetworkListResponse> {
+    const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<NetworkListResponse>(`${API_BASE}/networks`, { params });
   }
 
@@ -253,9 +251,8 @@ export class NetworksApi {
     return this.http.delete<void>(`${API_BASE}/networks/${id}`);
   }
 
-  swarm(clusterId?: string): Observable<SwarmNetworkInfo[]> {
-    const params = clusterId ? new HttpParams().set("cluster_id", clusterId) : undefined;
-    return this.http.get<SwarmNetworkInfo[]>(`${API_BASE}/networks/swarm`, { params });
+  swarm(): Observable<SwarmNetworkInfo[]> {
+    return this.http.get<SwarmNetworkInfo[]>(`${API_BASE}/networks/swarm`);
   }
 }
 
@@ -263,9 +260,8 @@ export class NetworksApi {
 export class VolumesApi {
   private readonly http = inject(HttpClient);
 
-  list(page = 1, size = 50, clusterId?: string): Observable<VolumeListResponse> {
-    let params = new HttpParams().set("page", page).set("size", size);
-    if (clusterId) params = params.set("cluster_id", clusterId);
+  list(page = 1, size = 50): Observable<VolumeListResponse> {
+    const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<VolumeListResponse>(`${API_BASE}/volumes`, { params });
   }
 
@@ -277,9 +273,8 @@ export class VolumesApi {
     return this.http.delete<void>(`${API_BASE}/volumes/${id}`);
   }
 
-  swarm(clusterId?: string): Observable<SwarmVolumeInfo[]> {
-    const params = clusterId ? new HttpParams().set("cluster_id", clusterId) : undefined;
-    return this.http.get<SwarmVolumeInfo[]>(`${API_BASE}/volumes/swarm`, { params });
+  swarm(): Observable<SwarmVolumeInfo[]> {
+    return this.http.get<SwarmVolumeInfo[]>(`${API_BASE}/volumes/swarm`);
   }
 }
 
@@ -287,9 +282,8 @@ export class VolumesApi {
 export class ConfigsApi {
   private readonly http = inject(HttpClient);
 
-  list(page = 1, size = 50, clusterId?: string): Observable<ConfigListResponse> {
-    let params = new HttpParams().set("page", page).set("size", size);
-    if (clusterId) params = params.set("cluster_id", clusterId);
+  list(page = 1, size = 50): Observable<ConfigListResponse> {
+    const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<ConfigListResponse>(`${API_BASE}/configs`, { params });
   }
 
@@ -333,9 +327,8 @@ export class ConfigsApi {
 export class SecretsApi {
   private readonly http = inject(HttpClient);
 
-  list(page = 1, size = 50, clusterId?: string): Observable<SecretListResponse> {
-    let params = new HttpParams().set("page", page).set("size", size);
-    if (clusterId) params = params.set("cluster_id", clusterId);
+  list(page = 1, size = 50): Observable<SecretListResponse> {
+    const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<SecretListResponse>(`${API_BASE}/secrets`, { params });
   }
 

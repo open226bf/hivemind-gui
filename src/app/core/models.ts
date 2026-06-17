@@ -99,8 +99,6 @@ export interface ServiceListResponse {
 export interface CreateServiceRequest {
   name: string;
   hive?: string;
-  /** Target cluster id; empty selects the default cluster. */
-  cluster?: string;
   description?: string;
   image: string;
   tag?: string;
@@ -320,7 +318,6 @@ export interface NetworkListResponse {
 
 export interface CreateNetworkRequest {
   name: string;
-  cluster?: string;
   subnet?: string;
   attachable?: boolean;
   external?: boolean;
@@ -357,7 +354,6 @@ export interface VolumeListResponse {
 
 export interface CreateVolumeRequest {
   name: string;
-  cluster?: string;
   driver?: string;
 }
 
@@ -637,7 +633,6 @@ export interface ConfigListResponse {
 
 export interface CreateConfigRequest {
   name: string;
-  cluster?: string;
   target_path?: string;
   content: string;
   comment?: string;
@@ -702,7 +697,6 @@ export interface SecretListResponse {
 
 export interface CreateSecretRequest {
   name: string;
-  cluster?: string;
   target_path?: string;
   value: string;
 }

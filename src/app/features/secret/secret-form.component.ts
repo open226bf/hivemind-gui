@@ -4,14 +4,13 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { SelectModule } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 
 import { SecretsApi } from '../../core/api';
 
 @Component({
   selector: 'hm-secret-form',
-  imports: [FormsModule, ButtonModule, DialogModule, InputTextModule, PasswordModule, SelectModule],
+  imports: [FormsModule, ButtonModule, DialogModule, InputTextModule, PasswordModule],
   templateUrl: './secret-form.component.html',
   styleUrl: './secret-form.component.scss',
 })

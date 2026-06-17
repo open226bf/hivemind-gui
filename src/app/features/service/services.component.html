@@ -23,9 +23,6 @@
         <tr>
           <th>Nom</th>
           <th>Image</th>
-          @if (multiCluster()) {
-            <th>Cluster</th>
-          }
           <th>Replicas</th>
           <th>Statut</th>
           <th>Mis à jour</th>
@@ -43,9 +40,6 @@
           <td>
             <code>{{ svc.full_image }}</code>
           </td>
-          @if (multiCluster()) {
-            <td class="muted">{{ clusterName(svc.cluster_id) }}</td>
-          }
           <td>
             @if (live(svc.id); as ls) {
               <span
