@@ -26,7 +26,7 @@ interface NavItem {
           <span class="env">dev</span>
         </div>
         <div class="spacer"></div>
-        @if (ctx.multiCluster()) {
+        @if (ctx.clusters().length > 0) {
           <div class="cluster-picker">
             <i class="pi pi-server"></i>
             <p-select
