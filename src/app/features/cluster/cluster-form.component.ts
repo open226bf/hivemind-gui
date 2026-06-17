@@ -40,6 +40,11 @@ export class ClusterFormComponent {
 
   form: ClusterForm = emptyForm();
 
+  /** Agent-mode clusters have no direct endpoint/TLS to edit. */
+  isAgent(): boolean {
+    return this.editing()?.connection_mode === 'agent';
+  }
+
   open(cluster?: ClusterResponse): void {
     this.editing.set(cluster ?? null);
     this.form = emptyForm();

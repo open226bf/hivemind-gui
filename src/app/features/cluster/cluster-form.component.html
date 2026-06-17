@@ -8,12 +8,14 @@
     <label>Nom <span class="req">*</span></label>
     <input pInputText [(ngModel)]="form.name" placeholder="prod-eu" />
 
-    <label>Endpoint</label>
-    <input pInputText [(ngModel)]="form.endpoint" placeholder="tcp://10.0.0.10:2376" />
-    <small class="muted"
-      >Adresse du démon Docker. Laisser vide pour utiliser l'environnement Docker local du
-      serveur.</small
-    >
+    @if (!isAgent()) {
+      <label>Endpoint</label>
+      <input pInputText [(ngModel)]="form.endpoint" placeholder="tcp://10.0.0.10:2376" />
+      <small class="muted"
+        >Adresse du démon Docker. Laisser vide pour utiliser l'environnement Docker local du
+        serveur.</small
+      >
+    }
 
     <label>Labels</label>
     <textarea
@@ -24,41 +26,53 @@
     ></textarea>
     <small class="muted">Une paire <code>clé=valeur</code> par ligne.</small>
 
-    <div class="tls">
-      <div class="tls-title">TLS mutuel (optionnel)</div>
-      <small class="muted">
-        Pour un démon distant en TCP. Les clés sont chiffrées au repos et jamais réaffichées —
-        {{
-          editing()
-            ? 'laisser vide pour conserver les valeurs existantes.'
-            : 'collez le contenu PEM.'
-        }}
-      </small>
+    @if (isAgent()) {
+      <div class="agent-note">
+        <i class="pi pi-bolt"></i>
+        <span
+          >Cluster en mode <strong>agent</strong> : la connexion passe par le tunnel. Pour
+          renouveler le certificat, utilise « Ré-enrôler » depuis la liste.</span
+        >
+      </div>
+    }
 
-      <label>CA certificate (PEM)</label>
-      <textarea
-        pTextarea
-        [(ngModel)]="form.caCert"
-        rows="3"
-        placeholder="-----BEGIN CERTIFICATE-----"
-      ></textarea>
+    @if (!isAgent()) {
+      <div class="tls">
+        <div class="tls-title">TLS mutuel (optionnel)</div>
+        <small class="muted">
+          Pour un démon distant en TCP. Les clés sont chiffrées au repos et jamais réaffichées —
+          {{
+            editing()
+              ? 'laisser vide pour conserver les valeurs existantes.'
+              : 'collez le contenu PEM.'
+          }}
+        </small>
 
-      <label>Client certificate (PEM)</label>
-      <textarea
-        pTextarea
-        [(ngModel)]="form.clientCert"
-        rows="3"
-        placeholder="-----BEGIN CERTIFICATE-----"
-      ></textarea>
+        <label>CA certificate (PEM)</label>
+        <textarea
+          pTextarea
+          [(ngModel)]="form.caCert"
+          rows="3"
+          placeholder="-----BEGIN CERTIFICATE-----"
+        ></textarea>
 
-      <label>Client key (PEM)</label>
-      <textarea
-        pTextarea
-        [(ngModel)]="form.clientKey"
-        rows="3"
-        placeholder="-----BEGIN PRIVATE KEY-----"
-      ></textarea>
-    </div>
+        <label>Client certificate (PEM)</label>
+        <textarea
+          pTextarea
+          [(ngModel)]="form.clientCert"
+          rows="3"
+          placeholder="-----BEGIN CERTIFICATE-----"
+        ></textarea>
+
+        <label>Client key (PEM)</label>
+        <textarea
+          pTextarea
+          [(ngModel)]="form.clientKey"
+          rows="3"
+          placeholder="-----BEGIN PRIVATE KEY-----"
+        ></textarea>
+      </div>
+    }
   </div>
   <ng-template #footer>
     <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="close()" />

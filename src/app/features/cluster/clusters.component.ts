@@ -1,4 +1,6 @@
-import { Component, inject, signal, viewChild } from '@angular/core';
+import { Component, DestroyRef, inject, signal, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { interval } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TableModule } from 'primeng/table';
@@ -39,12 +41,18 @@ export class Clusters {
   readonly loading = signal(false);
   readonly testingId = signal<string | null>(null);
 
+  private readonly destroyRef = inject(DestroyRef);
+
   constructor() {
     this.load();
+    // Auto-refresh so agent_status (online/offline) stays current without a manual reload.
+    interval(8000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.load(true));
   }
 
-  load(): void {
-    this.loading.set(true);
+  load(silent = false): void {
+    if (!silent) this.loading.set(true);
     this.api.list().subscribe({
       next: (res) => {
         this.clusters.set(res.items);
@@ -52,11 +60,13 @@ export class Clusters {
       },
       error: () => {
         this.loading.set(false);
-        this.toast.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: 'Chargement des clusters impossible',
-        });
+        if (!silent) {
+          this.toast.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Chargement des clusters impossible',
+          });
+        }
       },
     });
   }
