@@ -541,18 +541,31 @@ export interface ClusterOverview {
 
 export type ClusterType = 'swarm';
 export type ClusterStatus = 'unknown' | 'reachable' | 'unreachable';
+export type ConnectionMode = 'direct' | 'agent';
+export type AgentStatus = 'pending' | 'online' | 'offline';
 
 export interface ClusterResponse {
   id: string;
   name: string;
   type: ClusterType | string;
+  connection_mode: ConnectionMode | string;
   endpoint?: string;
   is_default: boolean;
   status: ClusterStatus | string;
   labels?: Record<string, string>;
   tls_enabled: boolean;
+  agent_status?: AgentStatus | string;
+  agent_last_seen?: string;
   created_at: string;
   updated_at: string;
+}
+
+/** Returned by POST /clusters/:id/enroll — token shown once + deploy command. */
+export interface EnrollClusterResponse {
+  cluster_id: string;
+  cluster_name: string;
+  token: string;
+  command: string;
 }
 
 export interface ClusterListResponse {

@@ -9,6 +9,7 @@ import {
   ClusterOverview,
   ClusterResponse,
   CreateClusterRequest,
+  EnrollClusterResponse,
   UpdateClusterRequest,
   ConfigDiffResponse,
   ConfigListResponse,
@@ -442,6 +443,11 @@ export class ClusterApi {
   /** Probe connectivity; returns the cluster with its refreshed status. */
   test(id: string): Observable<ClusterResponse> {
     return this.http.post<ClusterResponse>(`${API_BASE}/clusters/${id}/test`, {});
+  }
+
+  /** Switch the cluster to agent mode and issue a one-time enrollment token. */
+  enroll(id: string): Observable<EnrollClusterResponse> {
+    return this.http.post<EnrollClusterResponse>(`${API_BASE}/clusters/${id}/enroll`, {});
   }
 }
 

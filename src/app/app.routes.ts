@@ -128,6 +128,18 @@ export const routes: Routes = [
           import('./features/cluster/clusters.component').then((m) => m.Clusters),
       },
       {
+        path: 'clusters/new',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/cluster/cluster-enroll.component').then((m) => m.ClusterEnroll),
+      },
+      {
+        path: 'clusters/:id/enroll',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/cluster/cluster-enroll.component').then((m) => m.ClusterEnroll),
+      },
+      {
         path: 'users',
         canActivate: [adminGuard],
         loadComponent: () => import('./features/user/users.component').then((m) => m.Users),

@@ -1,5 +1,6 @@
 import { Component, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -13,7 +14,15 @@ import { ClusterFormComponent } from './cluster-form.component';
 
 @Component({
   selector: 'hm-clusters',
-  imports: [DatePipe, TableModule, ButtonModule, TagModule, TooltipModule, ClusterFormComponent],
+  imports: [
+    DatePipe,
+    RouterLink,
+    TableModule,
+    ButtonModule,
+    TagModule,
+    TooltipModule,
+    ClusterFormComponent,
+  ],
   templateUrl: './clusters.component.html',
   styleUrl: './clusters.component.scss',
 })
@@ -50,10 +59,6 @@ export class Clusters {
         });
       },
     });
-  }
-
-  openCreate(): void {
-    this.formRef().open();
   }
 
   openEdit(c: ClusterResponse): void {
@@ -132,6 +137,17 @@ export class Clusters {
         return 'success';
       case 'unreachable':
         return 'danger';
+      default:
+        return 'secondary';
+    }
+  }
+
+  agentSeverity(status?: string): 'success' | 'warn' | 'secondary' {
+    switch (status) {
+      case 'online':
+        return 'success';
+      case 'pending':
+        return 'warn';
       default:
         return 'secondary';
     }

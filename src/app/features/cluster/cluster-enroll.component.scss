@@ -1,0 +1,124 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 720px;
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--hm-text-muted);
+    margin-top: 12px;
+  }
+  input,
+  textarea {
+    width: 100%;
+  }
+  textarea {
+    font-family: monospace;
+    font-size: 12px;
+  }
+}
+
+.req {
+  color: #d9534f;
+}
+.muted {
+  color: var(--hm-text-muted);
+  font-size: 12px;
+}
+code {
+  font-family: monospace;
+}
+
+.mode-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: var(--hm-bg);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-top: 10px;
+
+  .pi {
+    margin-top: 2px;
+    color: var(--hm-primary);
+  }
+}
+
+.form-actions {
+  margin-top: 18px;
+}
+
+.enroll {
+  max-width: 760px;
+
+  .enroll-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+
+    h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+  }
+  .agent-state {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .steps {
+    margin: 8px 0 16px;
+    padding-left: 18px;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--hm-text-muted);
+    margin: 12px 0 4px;
+  }
+}
+
+.copybox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--hm-bg);
+  border-radius: 6px;
+  padding: 8px 10px;
+
+  code {
+    flex: 1;
+    font-size: 12px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  code.token {
+    word-break: break-all;
+    white-space: normal;
+  }
+}
+
+.enroll-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+.online-hint {
+  color: var(--hm-success, #2e7d32);
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
