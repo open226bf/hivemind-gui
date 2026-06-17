@@ -154,12 +154,12 @@
 
       <label>Commande d'installation (à lancer sur un manager)</label>
       <div class="copybox">
-        <code>{{ installCommand(enr.token) }}</code>
+        <code>{{ enr.install_command || installCommand(enr.token) }}</code>
         <p-button
           icon="pi pi-copy"
           [text]="true"
           pTooltip="Copier"
-          (onClick)="copy(installCommand(enr.token))"
+          (onClick)="copy(enr.install_command || installCommand(enr.token))"
         />
       </div>
       <small class="muted">

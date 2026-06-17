@@ -569,6 +569,7 @@ export interface EnrollClusterResponse {
   cluster_name: string;
   token: string;
   command: string;
+  install_command?: string;
   hub_addr?: string;
   client_cert?: string;
   client_key?: string;
