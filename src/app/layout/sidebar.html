@@ -1,0 +1,30 @@
+<nav>
+  <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+    <i class="pi pi-th-large"></i>
+    <span>Tableau de bord</span>
+  </a>
+</nav>
+
+<div class="nav-group-label">Ressources</div>
+<nav>
+  @for (item of nav; track item.path) {
+    <a [routerLink]="item.path" routerLinkActive="active" class="nav-item">
+      <i class="pi" [class]="item.icon"></i>
+      <span>{{ item.label }}</span>
+    </a>
+  }
+</nav>
+
+@if (isAdmin()) {
+  <div class="nav-group-label">Administration</div>
+  <nav>
+    @for (item of adminNav; track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="active" class="nav-item">
+        <i class="pi" [class]="item.icon"></i>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+}
+
+<hm-cluster-switcher class="foot" />

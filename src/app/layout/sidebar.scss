@@ -1,0 +1,46 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--hm-surface);
+  border-right: 1px solid var(--hm-border);
+  padding: 14px 10px;
+  overflow-y: auto;
+}
+
+.nav-group-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--hm-text-muted);
+  padding: 10px 10px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 4px;
+  color: var(--hm-text);
+  font-size: 14px;
+  margin-bottom: 2px;
+  border-left: 3px solid transparent;
+}
+.nav-item:hover {
+  background: var(--hm-bg);
+}
+.nav-item.active {
+  background: var(--hm-accent);
+  color: #2b1a06;
+  border-left-color: var(--hm-primary);
+  font-weight: 600;
+}
+.nav-item .pi {
+  font-size: 15px;
+}
+
+/* Pin the cluster switcher to the foot of the rail. */
+.foot {
+  margin-top: auto;
+}

@@ -1,70 +1,7 @@
 <p-toast position="bottom-right" />
 <div class="shell">
-  <header class="topbar">
-    <div class="brand">
-      <img src="/brand/hivemind-mark.svg" alt="" class="logo" width="22" height="22" />
-      <span class="name">Hivemind</span>
-      <span class="env">dev</span>
-    </div>
-    <div class="spacer"></div>
-    <div class="user">
-      <i class="pi pi-user"></i>
-      <span class="email">{{ email() }}</span>
-      <button class="logout" (click)="logout()" title="Se déconnecter">
-        <i class="pi pi-sign-out"></i>
-      </button>
-    </div>
-  </header>
-
-  <aside class="sidebar">
-    <nav>
-      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
-        <i class="pi pi-th-large"></i>
-        <span>Tableau de bord</span>
-      </a>
-    </nav>
-    <div class="nav-group-label">Ressources</div>
-    <nav>
-      @for (item of nav; track item.path) {
-        <a [routerLink]="item.path" routerLinkActive="active" class="nav-item">
-          <i class="pi" [class]="item.icon"></i>
-          <span>{{ item.label }}</span>
-        </a>
-      }
-    </nav>
-
-    @if (isAdmin()) {
-      <div class="nav-group-label">Administration</div>
-      <nav>
-        @for (item of adminNav; track item.path) {
-          <a [routerLink]="item.path" routerLinkActive="active" class="nav-item">
-            <i class="pi" [class]="item.icon"></i>
-            <span>{{ item.label }}</span>
-          </a>
-        }
-      </nav>
-    }
-
-    @if (ctx.clusters().length > 0) {
-      <div class="cluster-picker">
-        <div class="nav-group-label">Cluster actif</div>
-        <p-select
-          [options]="clusterPickerOptions()"
-          [ngModel]="ctx.selectedId()"
-          (ngModelChange)="ctx.select($event)"
-          optionLabel="label"
-          optionValue="value"
-          appendTo="body"
-          styleClass="cluster-select"
-        >
-          <ng-template #selectedItem let-opt>
-            <span class="cluster-trigger"><i class="pi pi-server"></i>{{ opt.label }}</span>
-          </ng-template>
-        </p-select>
-      </div>
-    }
-  </aside>
-
+  <hm-topbar />
+  <hm-sidebar />
   <main class="content">
     <router-outlet />
   </main>

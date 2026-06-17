@@ -1,0 +1,59 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  padding: 0 16px;
+  background: var(--hm-header-bg);
+  color: #fff;
+  border-bottom: 1px solid #000;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand .logo {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+.brand .name {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.brand .env {
+  font-size: 10px;
+  text-transform: uppercase;
+  background: var(--hm-accent);
+  color: #2b1a06;
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #cdd0da;
+}
+.user .logout {
+  background: transparent;
+  border: 0;
+  color: #cdd0da;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 2px;
+}
+.user .logout:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}

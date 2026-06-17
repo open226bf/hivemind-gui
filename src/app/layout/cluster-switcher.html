@@ -1,0 +1,18 @@
+@if (ctx.clusters().length > 0) {
+  <div class="cluster-picker">
+    <div class="nav-group-label">Cluster actif</div>
+    <p-select
+      [options]="options()"
+      [ngModel]="ctx.selectedId()"
+      (ngModelChange)="ctx.select($event)"
+      optionLabel="label"
+      optionValue="value"
+      appendTo="body"
+      styleClass="cluster-select"
+    >
+      <ng-template #selectedItem let-opt>
+        <span class="cluster-trigger"><i class="pi pi-server"></i>{{ opt.label }}</span>
+      </ng-template>
+    </p-select>
+  </div>
+}
