@@ -228,7 +228,6 @@ export class Shell {
 
   /** "All clusters" plus one entry per cluster, for the header picker. */
   readonly clusterPickerOptions = computed(() => [
-    { label: 'Tous les clusters', value: null },
     ...this.ctx.clusters().map((c) => ({ label: c.name, value: c.id })),
   ]);
 
