@@ -50,9 +50,45 @@ export class ClusterEnroll {
   // Identity (create only).
   form = { name: '', labels: '', endpoint: '', caCert: '', clientCert: '', clientKey: '' };
 
+  /** Collapsible mutual-TLS section (direct mode). */
+  readonly showTls = signal(false);
+
   // Enrollment result + live agent status.
   readonly enrollment = signal<EnrollClusterResponse | null>(null);
   readonly agentStatus = signal<string>('');
+
+  /** The agent stack manifest, shown alongside the deploy command. */
+  readonly manifest = `version: "3.8"
+services:
+  agent:
+    image: hivemind/agent:latest
+    deploy:
+      mode: global            # one task per node
+      restart_policy:
+        condition: any
+    environment:
+      HIVEMIND_SERVER: "\${HIVEMIND_SERVER}"
+      HIVEMIND_ENROLL_TOKEN: "\${HIVEMIND_ENROLL_TOKEN}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro`;
+
+  /** Cluster name must be a DNS-safe slug (create mode only). */
+  private static readonly nameRe = /^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$/;
+
+  /** True when the name is acceptable for submission (existing clusters skip this). */
+  nameOk(): boolean {
+    return !!this.clusterId() || ClusterEnroll.nameRe.test(this.form.name.trim());
+  }
+
+  /** True when a non-empty name is malformed — drives the inline hint. */
+  nameInvalid(): boolean {
+    const n = this.form.name.trim();
+    return n.length > 0 && !ClusterEnroll.nameRe.test(n);
+  }
+
+  toggleTls(): void {
+    this.showTls.update((v) => !v);
+  }
 
   constructor() {
     const id = this.route.snapshot.paramMap.get('id');

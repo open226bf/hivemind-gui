@@ -20,7 +20,17 @@
     <div class="card form">
       @if (!clusterId()) {
         <label>Nom <span class="req">*</span></label>
-        <input pInputText [(ngModel)]="form.name" placeholder="prod-eu" />
+        <input
+          pInputText
+          [(ngModel)]="form.name"
+          placeholder="prod-eu"
+          [class.invalid]="nameInvalid()"
+        />
+        @if (nameInvalid()) {
+          <small class="err"
+            >Minuscules, chiffres et tirets (slug DNS), p. ex. <code>prod-eu</code>.</small
+          >
+        }
 
         <label>Labels</label>
         <textarea
@@ -63,27 +73,40 @@
         <label>Endpoint</label>
         <input pInputText [(ngModel)]="form.endpoint" placeholder="tcp://10.0.0.10:2376" />
 
-        <label>CA certificate (PEM)</label>
-        <textarea
-          pTextarea
-          [(ngModel)]="form.caCert"
-          rows="3"
-          placeholder="-----BEGIN CERTIFICATE-----"
-        ></textarea>
-        <label>Client certificate (PEM)</label>
-        <textarea
-          pTextarea
-          [(ngModel)]="form.clientCert"
-          rows="3"
-          placeholder="-----BEGIN CERTIFICATE-----"
-        ></textarea>
-        <label>Client key (PEM)</label>
-        <textarea
-          pTextarea
-          [(ngModel)]="form.clientKey"
-          rows="3"
-          placeholder="-----BEGIN PRIVATE KEY-----"
-        ></textarea>
+        <button type="button" class="tls-toggle" (click)="toggleTls()">
+          <i
+            class="pi"
+            [class.pi-chevron-right]="!showTls()"
+            [class.pi-chevron-down]="showTls()"
+          ></i>
+          TLS mutuel (optionnel)
+        </button>
+        @if (showTls()) {
+          <div class="tls-body">
+            <small class="muted">Requis pour un démon distant en TCP. Collez le contenu PEM.</small>
+            <label>CA certificate (PEM)</label>
+            <textarea
+              pTextarea
+              [(ngModel)]="form.caCert"
+              rows="3"
+              placeholder="-----BEGIN CERTIFICATE-----"
+            ></textarea>
+            <label>Client certificate (PEM)</label>
+            <textarea
+              pTextarea
+              [(ngModel)]="form.clientCert"
+              rows="3"
+              placeholder="-----BEGIN CERTIFICATE-----"
+            ></textarea>
+            <label>Client key (PEM)</label>
+            <textarea
+              pTextarea
+              [(ngModel)]="form.clientKey"
+              rows="3"
+              placeholder="-----BEGIN PRIVATE KEY-----"
+            ></textarea>
+          </div>
+        }
       }
 
       <div class="form-actions">
@@ -93,6 +116,7 @@
             icon="pi pi-key"
             (onClick)="generateToken()"
             [loading]="saving()"
+            [disabled]="!nameOk()"
           />
         } @else {
           <p-button
@@ -100,6 +124,7 @@
             icon="pi pi-check"
             (onClick)="createDirect()"
             [loading]="saving()"
+            [disabled]="!nameOk()"
           />
         }
       </div>
@@ -138,6 +163,12 @@
       <div class="copybox">
         <code class="token">{{ enr.token }}</code>
         <p-button icon="pi pi-copy" [text]="true" pTooltip="Copier" (onClick)="copy(enr.token)" />
+      </div>
+
+      <label>Manifeste <code>hivemind-agent.yml</code></label>
+      <div class="copybox manifest">
+        <pre>{{ manifest }}</pre>
+        <p-button icon="pi pi-copy" [text]="true" pTooltip="Copier" (onClick)="copy(manifest)" />
       </div>
 
       <div class="enroll-actions">
