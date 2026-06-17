@@ -26,20 +26,6 @@ interface NavItem {
           <span class="env">dev</span>
         </div>
         <div class="spacer"></div>
-        @if (ctx.clusters().length > 0) {
-          <div class="cluster-picker">
-            <i class="pi pi-server"></i>
-            <p-select
-              [options]="clusterPickerOptions()"
-              [ngModel]="ctx.selectedId()"
-              (ngModelChange)="ctx.select($event)"
-              optionLabel="label"
-              optionValue="value"
-              appendTo="body"
-              styleClass="cluster-select"
-            />
-          </div>
-        }
         <div class="user">
           <i class="pi pi-user"></i>
           <span class="email">{{ email() }}</span>
@@ -76,6 +62,25 @@ interface NavItem {
               </a>
             }
           </nav>
+        }
+
+        @if (ctx.clusters().length > 0) {
+          <div class="cluster-picker">
+            <div class="nav-group-label">Cluster actif</div>
+            <p-select
+              [options]="clusterPickerOptions()"
+              [ngModel]="ctx.selectedId()"
+              (ngModelChange)="ctx.select($event)"
+              optionLabel="label"
+              optionValue="value"
+              appendTo="body"
+              styleClass="cluster-select"
+            >
+              <ng-template #selectedItem let-opt>
+                <span class="cluster-trigger"><i class="pi pi-server"></i>{{ opt.label }}</span>
+              </ng-template>
+            </p-select>
+          </div>
         }
       </aside>
 
@@ -131,18 +136,21 @@ interface NavItem {
         flex: 1;
       }
       .cluster-picker {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-right: 14px;
-        color: #fff;
-      }
-      .cluster-picker .pi {
-        font-size: 13px;
-        opacity: 0.85;
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px solid var(--hm-border);
       }
       .cluster-picker ::ng-deep .cluster-select {
-        min-width: 170px;
+        width: 100%;
+      }
+      .cluster-trigger {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .cluster-trigger .pi {
+        font-size: 13px;
+        color: var(--hm-text-muted);
       }
       .user {
         display: flex;
@@ -169,6 +177,8 @@ interface NavItem {
         border-right: 1px solid var(--hm-border);
         padding: 14px 10px;
         overflow-y: auto;
+        display: flex;
+        flex-direction: column;
       }
       .nav-group-label {
         font-size: 11px;
