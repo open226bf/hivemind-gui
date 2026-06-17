@@ -32,8 +32,10 @@ import {
   TemplateResponse,
   UpdateTemplateRequest,
   PlacementDTO,
+  PortsResponse,
   ResourcesDTO,
   SetMountsRequest,
+  SetPortsRequest,
   SwarmNetworkInfo,
   SwarmVolumeInfo,
   VolumeListResponse,
@@ -177,6 +179,14 @@ export class ServicesApi {
 
   setMounts(id: string, body: SetMountsRequest): Observable<MountsResponse> {
     return this.http.put<MountsResponse>(`${API_BASE}/services/${id}/mounts`, body);
+  }
+
+  ports(id: string): Observable<PortsResponse> {
+    return this.http.get<PortsResponse>(`${API_BASE}/services/${id}/ports`);
+  }
+
+  setPorts(id: string, body: SetPortsRequest): Observable<PortsResponse> {
+    return this.http.put<PortsResponse>(`${API_BASE}/services/${id}/ports`, body);
   }
 
   attachConfig(id: string, configId: string, targetPath: string): Observable<void> {

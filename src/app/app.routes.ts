@@ -86,6 +86,13 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'ports',
+            loadComponent: () =>
+              import('./features/service/service-tab-ports.component').then(
+                (m) => m.ServiceTabPorts,
+              ),
+          },
+          {
             path: 'snapshots',
             loadComponent: () =>
               import('./features/service/service-tab-snapshots.component').then(

@@ -382,6 +382,24 @@ export interface MountsResponse {
   warnings: string[];
 }
 
+export type PortProtocol = 'tcp' | 'udp' | 'sctp';
+export type PublishMode = 'ingress' | 'host';
+
+export interface PortDTO {
+  target_port: number;
+  published_port: number;
+  protocol: PortProtocol;
+  mode: PublishMode;
+}
+
+export interface SetPortsRequest {
+  ports: PortDTO[];
+}
+
+export interface PortsResponse {
+  ports: PortDTO[];
+}
+
 // ─── Hives (projets) ─────────────────────────────────────────────────────────
 
 export interface HiveResponse {
