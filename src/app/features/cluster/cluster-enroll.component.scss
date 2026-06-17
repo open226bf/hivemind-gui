@@ -146,6 +146,35 @@ code {
   }
 }
 
+.mtls {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hm-border);
+
+  .mtls-title {
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .mtls-title .pi {
+    color: var(--hm-primary);
+  }
+}
+
+.copybox pre {
+  flex: 1;
+  margin: 0;
+  font-family: monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
 .copybox.manifest {
   align-items: flex-start;
 

@@ -165,6 +165,64 @@
         <p-button icon="pi pi-copy" [text]="true" pTooltip="Copier" (onClick)="copy(enr.token)" />
       </div>
 
+      @if (enr.client_cert) {
+        <div class="mtls">
+          <div class="mtls-title"><i class="pi pi-shield"></i> mTLS (recommandé)</div>
+          <small class="muted">
+            L'agent s'authentifie par certificat client. Fournis ces valeurs à l'agent
+            (<code>HIVEMIND_HUB_ADDR</code>, <code>HIVEMIND_CLIENT_CERT</code>,
+            <code>HIVEMIND_CLIENT_KEY</code>, <code>HIVEMIND_CA_CERT</code>) — idéalement via des
+            secrets Docker. Affiché une seule fois.
+          </small>
+
+          <label>Adresse du hub</label>
+          <div class="copybox">
+            <code>{{ enr.hub_addr || '(non configurée)' }}</code>
+            @if (enr.hub_addr) {
+              <p-button
+                icon="pi pi-copy"
+                [text]="true"
+                pTooltip="Copier"
+                (onClick)="copy(enr.hub_addr)"
+              />
+            }
+          </div>
+
+          <label>Certificat client (PEM)</label>
+          <div class="copybox">
+            <pre>{{ enr.client_cert }}</pre>
+            <p-button
+              icon="pi pi-copy"
+              [text]="true"
+              pTooltip="Copier"
+              (onClick)="copy(enr.client_cert)"
+            />
+          </div>
+
+          <label>Clé privée client (PEM)</label>
+          <div class="copybox">
+            <pre>{{ enr.client_key }}</pre>
+            <p-button
+              icon="pi pi-copy"
+              [text]="true"
+              pTooltip="Copier"
+              (onClick)="copy(enr.client_key)"
+            />
+          </div>
+
+          <label>CA (PEM)</label>
+          <div class="copybox">
+            <pre>{{ enr.ca_cert }}</pre>
+            <p-button
+              icon="pi pi-copy"
+              [text]="true"
+              pTooltip="Copier"
+              (onClick)="copy(enr.ca_cert)"
+            />
+          </div>
+        </div>
+      }
+
       <label>Manifeste <code>hivemind-agent.yml</code></label>
       <div class="copybox manifest">
         <pre>{{ manifest }}</pre>

@@ -181,7 +181,8 @@ services:
       });
   }
 
-  copy(text: string): void {
+  copy(text?: string): void {
+    if (!text) return;
     navigator.clipboard?.writeText(text).then(
       () => this.toast.add({ severity: 'success', summary: 'Copié', detail: '' }),
       () => this.warn('Copie impossible'),

@@ -560,12 +560,17 @@ export interface ClusterResponse {
   updated_at: string;
 }
 
-/** Returned by POST /clusters/:id/enroll — token shown once + deploy command. */
+/** Returned by POST /clusters/:id/enroll — token shown once + deploy command.
+ *  When the CA is configured, also carries the agent's mTLS client certificate. */
 export interface EnrollClusterResponse {
   cluster_id: string;
   cluster_name: string;
   token: string;
   command: string;
+  hub_addr?: string;
+  client_cert?: string;
+  client_key?: string;
+  ca_cert?: string;
 }
 
 export interface ClusterListResponse {
