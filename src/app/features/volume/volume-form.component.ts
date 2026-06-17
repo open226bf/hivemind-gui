@@ -6,7 +6,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 
-import { ClusterApi, VolumesApi } from '../../core/api';
+import { VolumesApi } from '../../core/api';
 
 @Component({
   selector: 'hm-volume-form',
@@ -16,7 +16,6 @@ import { ClusterApi, VolumesApi } from '../../core/api';
 })
 export class VolumeFormComponent {
   private readonly api = inject(VolumesApi);
-  private readonly clusterApi = inject(ClusterApi);
   private readonly toast = inject(MessageService);
 
   readonly visible = model(false);
@@ -25,28 +24,12 @@ export class VolumeFormComponent {
 
   readonly drivers = [{ label: 'local', value: 'local' }];
 
-  readonly clusterOptions = signal<{ label: string; value: string }[]>([]);
-  private defaultClusterId = '';
-
-  form = { name: '', driver: 'local', cluster: '' };
-
-  constructor() {
-    this.clusterApi.list(1, 200).subscribe({
-      next: (res) => {
-        this.clusterOptions.set(
-          res.items.map((c) => ({
-            label: c.is_default ? `${c.name} (défaut)` : c.name,
-            value: c.id,
-          })),
-        );
-        this.defaultClusterId = res.items.find((c) => c.is_default)?.id ?? res.items[0]?.id ?? '';
-        if (!this.form.cluster) this.form.cluster = this.defaultClusterId;
-      },
-    });
-  }
+  // The target cluster comes from the active selection (X-Hivemind-Cluster
+  // header set by clusterInterceptor); no per-form picker needed.
+  form = { name: '', driver: 'local' };
 
   open(): void {
-    this.form = { name: '', driver: 'local', cluster: this.defaultClusterId };
+    this.form = { name: '', driver: 'local' };
     this.visible.set(true);
   }
 
@@ -68,7 +51,6 @@ export class VolumeFormComponent {
       .create({
         name: this.form.name,
         driver: this.form.driver || undefined,
-        cluster: this.form.cluster || undefined,
       })
       .subscribe({
         next: () => {

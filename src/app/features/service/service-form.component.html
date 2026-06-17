@@ -9,17 +9,6 @@
       <label>Nom <span class="req">*</span></label>
       <input pInputText [(ngModel)]="form.name" placeholder="mon-service" />
       <small class="muted">Minuscules, chiffres et tirets (DNS). Immuable après création.</small>
-
-      <label>Cluster</label>
-      <p-select
-        [options]="clusterOptions()"
-        [(ngModel)]="form.cluster"
-        optionLabel="label"
-        optionValue="value"
-        appendTo="body"
-        placeholder="Cluster par défaut"
-      />
-      <small class="muted">Cible d'orchestration. Immuable après création.</small>
     }
 
     <label>Image <span class="req">*</span></label>

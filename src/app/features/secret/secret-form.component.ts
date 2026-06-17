@@ -7,7 +7,7 @@ import { PasswordModule } from 'primeng/password';
 import { SelectModule } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 
-import { ClusterApi, SecretsApi } from '../../core/api';
+import { SecretsApi } from '../../core/api';
 
 @Component({
   selector: 'hm-secret-form',
@@ -17,35 +17,18 @@ import { ClusterApi, SecretsApi } from '../../core/api';
 })
 export class SecretFormComponent {
   private readonly api = inject(SecretsApi);
-  private readonly clusterApi = inject(ClusterApi);
   private readonly toast = inject(MessageService);
 
   readonly visible = model(false);
   readonly saved = output<void>();
   readonly saving = signal(false);
 
-  readonly clusterOptions = signal<{ label: string; value: string }[]>([]);
-  private defaultClusterId = '';
-
-  form = { name: '', target_path: '', value: '', cluster: '' };
-
-  constructor() {
-    this.clusterApi.list(1, 200).subscribe({
-      next: (res) => {
-        this.clusterOptions.set(
-          res.items.map((c) => ({
-            label: c.is_default ? `${c.name} (défaut)` : c.name,
-            value: c.id,
-          })),
-        );
-        this.defaultClusterId = res.items.find((c) => c.is_default)?.id ?? res.items[0]?.id ?? '';
-        if (!this.form.cluster) this.form.cluster = this.defaultClusterId;
-      },
-    });
-  }
+  // The target cluster comes from the active selection (X-Hivemind-Cluster
+  // header set by clusterInterceptor); no per-form picker needed.
+  form = { name: '', target_path: '', value: '' };
 
   open(): void {
-    this.form = { name: '', target_path: '', value: '', cluster: this.defaultClusterId };
+    this.form = { name: '', target_path: '', value: '' };
     this.visible.set(true);
   }
 
@@ -68,7 +51,6 @@ export class SecretFormComponent {
         name: this.form.name,
         target_path: this.form.target_path || undefined,
         value: this.form.value,
-        cluster: this.form.cluster || undefined,
       })
       .subscribe({
         next: () => {

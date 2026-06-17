@@ -7,7 +7,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 
-import { ClusterApi, ConfigsApi } from '../../core/api';
+import { ConfigsApi } from '../../core/api';
 
 @Component({
   selector: 'hm-config-form',
@@ -17,41 +17,18 @@ import { ClusterApi, ConfigsApi } from '../../core/api';
 })
 export class ConfigFormComponent {
   private readonly api = inject(ConfigsApi);
-  private readonly clusterApi = inject(ClusterApi);
   private readonly toast = inject(MessageService);
 
   readonly visible = model(false);
   readonly saved = output<void>();
   readonly saving = signal(false);
 
-  readonly clusterOptions = signal<{ label: string; value: string }[]>([]);
-  private defaultClusterId = '';
-
-  form = { name: '', target_path: '', content: '', comment: '', cluster: '' };
-
-  constructor() {
-    this.clusterApi.list(1, 200).subscribe({
-      next: (res) => {
-        this.clusterOptions.set(
-          res.items.map((c) => ({
-            label: c.is_default ? `${c.name} (défaut)` : c.name,
-            value: c.id,
-          })),
-        );
-        this.defaultClusterId = res.items.find((c) => c.is_default)?.id ?? res.items[0]?.id ?? '';
-        if (!this.form.cluster) this.form.cluster = this.defaultClusterId;
-      },
-    });
-  }
+  // The target cluster comes from the active selection (X-Hivemind-Cluster
+  // header set by clusterInterceptor); no per-form picker needed.
+  form = { name: '', target_path: '', content: '', comment: '' };
 
   open(): void {
-    this.form = {
-      name: '',
-      target_path: '',
-      content: '',
-      comment: '',
-      cluster: this.defaultClusterId,
-    };
+    this.form = { name: '', target_path: '', content: '', comment: '' };
     this.visible.set(true);
   }
 
@@ -83,7 +60,6 @@ export class ConfigFormComponent {
         target_path: this.form.target_path || undefined,
         content: this.form.content,
         comment: this.form.comment.trim(),
-        cluster: this.form.cluster || undefined,
       })
       .subscribe({
         next: () => {

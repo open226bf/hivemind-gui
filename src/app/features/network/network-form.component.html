@@ -9,16 +9,6 @@
     <input pInputText [(ngModel)]="form.name" placeholder="backend-net" />
     <small class="muted">Nom DNS overlay (minuscules, chiffres, tirets).</small>
 
-    <label>Cluster</label>
-    <p-select
-      [options]="clusterOptions()"
-      [(ngModel)]="form.cluster"
-      optionLabel="label"
-      optionValue="value"
-      appendTo="body"
-      placeholder="Cluster par défaut"
-    />
-
     <label>Subnet</label>
     <input pInputText [(ngModel)]="form.subnet" placeholder="10.0.9.0/24" />
     <small class="muted"

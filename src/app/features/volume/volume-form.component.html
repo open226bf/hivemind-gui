@@ -9,16 +9,6 @@
     <input pInputText [(ngModel)]="form.name" placeholder="app-data" />
     <small class="muted">Nom du volume nommé (lettres, chiffres, <code>_ . -</code>).</small>
 
-    <label>Cluster</label>
-    <p-select
-      [options]="clusterOptions()"
-      [(ngModel)]="form.cluster"
-      optionLabel="label"
-      optionValue="value"
-      appendTo="body"
-      placeholder="Cluster par défaut"
-    />
-
     <label>Driver</label>
     <p-select
       [options]="drivers"

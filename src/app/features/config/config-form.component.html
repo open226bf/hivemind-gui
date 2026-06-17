@@ -8,16 +8,6 @@
     <label>Nom <span class="req">*</span></label>
     <input pInputText [(ngModel)]="form.name" placeholder="nginx.conf" />
 
-    <label>Cluster</label>
-    <p-select
-      [options]="clusterOptions()"
-      [(ngModel)]="form.cluster"
-      optionLabel="label"
-      optionValue="value"
-      appendTo="body"
-      placeholder="Cluster par défaut"
-    />
-
     <label>Chemin cible</label>
     <input pInputText [(ngModel)]="form.target_path" placeholder="/etc/nginx/nginx.conf" />
 
