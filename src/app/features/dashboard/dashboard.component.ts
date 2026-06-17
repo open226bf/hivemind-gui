@@ -40,6 +40,12 @@ export class Dashboard implements OnInit {
   readonly autoRefresh = signal(true);
   autoRefreshModel = true;
 
+  /** True when the selected cluster uses the agent connection mode. */
+  readonly isAgentCluster = computed(() => {
+    const id = this.ctx.selectedId();
+    return !!id && this.ctx.clusters().some((c) => c.id === id && c.connection_mode === 'agent');
+  });
+
   /** Ratio of ready nodes, for the health bar (0 when no nodes). */
   readonly readyRatio = computed(() => {
     const c = this.overview()?.cluster;

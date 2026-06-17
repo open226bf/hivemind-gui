@@ -6,7 +6,13 @@
     </div>
     <div class="livectl">
       <span class="live-dot" [class.on]="autoRefresh()"></span>
-      <span class="live-label">@if (autoRefresh()) { Temps réel } @else { En pause }</span>
+      <span class="live-label">
+        @if (autoRefresh()) {
+          Temps réel
+        } @else {
+          En pause
+        }
+      </span>
       <p-toggleswitch [(ngModel)]="autoRefreshModel" (ngModelChange)="setAutoRefresh($event)" />
       @if (lastUpdated(); as ts) {
         <span class="updated">
@@ -26,13 +32,15 @@
       Chargement du tableau de bord…
     </div>
   } @else if (overview(); as ov) {
-
     @if (!ov.cluster.reachable) {
       <div class="banner warn">
         <i class="pi pi-exclamation-triangle"></i>
         <div>
           <strong>Orchestrateur injoignable</strong>
-          <div>Les informations du cluster sont indisponibles. Les compteurs ci-dessous proviennent de la base.</div>
+          <div>
+            Les informations du cluster sont indisponibles. Les compteurs ci-dessous proviennent de
+            la base.
+          </div>
         </div>
       </div>
     }
@@ -44,7 +52,9 @@
         <div>
           <div class="kpi-value">{{ ov.cluster.node_total }}</div>
           <div class="kpi-label">Nœuds</div>
-          <div class="kpi-sub">{{ ov.cluster.managers }} manager(s) · {{ ov.cluster.workers }} worker(s)</div>
+          <div class="kpi-sub">
+            {{ ov.cluster.managers }} manager(s) · {{ ov.cluster.workers }} worker(s)
+          </div>
         </div>
       </div>
       <div class="card kpi">
@@ -108,9 +118,18 @@
       <div class="card summary">
         <h2>Catalogue</h2>
         <div class="catalog">
-          <div><i class="pi pi-sitemap"></i><span>{{ ov.catalog.networks }}</span><small>Réseaux</small></div>
-          <div><i class="pi pi-lock"></i><span>{{ ov.catalog.secrets }}</span><small>Secrets</small></div>
-          <div><i class="pi pi-file"></i><span>{{ ov.catalog.configs }}</span><small>Configs</small></div>
+          <div>
+            <i class="pi pi-sitemap"></i><span>{{ ov.catalog.networks }}</span
+            ><small>Réseaux</small>
+          </div>
+          <div>
+            <i class="pi pi-lock"></i><span>{{ ov.catalog.secrets }}</span
+            ><small>Secrets</small>
+          </div>
+          <div>
+            <i class="pi pi-file"></i><span>{{ ov.catalog.configs }}</span
+            ><small>Configs</small>
+          </div>
         </div>
       </div>
     </div>
@@ -130,33 +149,49 @@
             <th>Mémoire</th>
             <th>Engine</th>
             <th>Plateforme</th>
+            @if (isAgentCluster()) {
+              <th>Tunnel</th>
+            }
           </tr>
         </ng-template>
         <ng-template #body let-n>
           <tr>
             <td>
               <span class="host">{{ n.hostname || '—' }}</span>
-              @if (n.leader) { <i class="pi pi-star-fill leader" title="Leader"></i> }
+              @if (n.leader) {
+                <i class="pi pi-star-fill leader" title="Leader"></i>
+              }
             </td>
             <td><p-tag [value]="n.role" [severity]="roleSeverity(n.role)" /></td>
             <td><p-tag [value]="n.state" [severity]="stateSeverity(n.state)" /></td>
-            <td><p-tag [value]="n.availability" [severity]="availabilitySeverity(n.availability)" /></td>
+            <td>
+              <p-tag [value]="n.availability" [severity]="availabilitySeverity(n.availability)" />
+            </td>
             <td class="mono">{{ n.addr || '—' }}</td>
             <td>{{ n.cpus }}</td>
             <td>{{ gib(n.memory_bytes) }} GiB</td>
             <td class="muted">{{ n.engine_version || '—' }}</td>
             <td class="muted">{{ n.platform || '—' }}</td>
+            @if (isAgentCluster()) {
+              <td>
+                <p-tag
+                  [value]="n.agent_connected ? 'connecté' : 'absent'"
+                  [severity]="n.agent_connected ? 'success' : 'secondary'"
+                />
+              </td>
+            }
           </tr>
         </ng-template>
         <ng-template #emptymessage>
           <tr>
             <td colspan="9">
-              <div class="empty-state"><i class="pi pi-server"></i>Aucun nœud signalé par l'orchestrateur.</div>
+              <div class="empty-state">
+                <i class="pi pi-server"></i>Aucun nœud signalé par l'orchestrateur.
+              </div>
             </td>
           </tr>
         </ng-template>
       </p-table>
     </div>
-
   }
 </div>

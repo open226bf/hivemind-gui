@@ -507,6 +507,8 @@ export interface NodeInfo {
   cpus: number;
   memory_bytes: number;
   platform: string;
+  /** Agent clusters only: true when this node has a live agent tunnel. */
+  agent_connected?: boolean;
 }
 
 export interface ServiceSummary {
