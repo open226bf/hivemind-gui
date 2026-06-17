@@ -1,4 +1,13 @@
-import { Component, DestroyRef, effect, inject, input, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -12,9 +21,14 @@ import { forkJoin, interval } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
-import { DeploymentsApi, ServicesApi } from '../../core/api';
+import { ClusterApi, DeploymentsApi, ServicesApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
-import { DeploymentStatus, ServiceLiveStatus, ServiceResponse, ServiceStatus } from '../../core/models';
+import {
+  DeploymentStatus,
+  ServiceLiveStatus,
+  ServiceResponse,
+  ServiceStatus,
+} from '../../core/models';
 import { ServiceFormComponent } from './service-form.component';
 import { RedeployConfirm } from './redeploy-confirm.component';
 
@@ -22,7 +36,17 @@ const LIVE_REFRESH_MS = 8000;
 
 @Component({
   selector: 'hm-services',
-  imports: [DatePipe, RouterLink, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, TooltipModule, ServiceFormComponent, RedeployConfirm],
+  imports: [
+    DatePipe,
+    RouterLink,
+    TableModule,
+    ButtonModule,
+    TagModule,
+    ProgressSpinnerModule,
+    TooltipModule,
+    ServiceFormComponent,
+    RedeployConfirm,
+  ],
   templateUrl: './services.component.html',
   styleUrl: './services.component.scss',
 })
@@ -36,6 +60,7 @@ export class Services {
 
   private readonly api = inject(ServicesApi);
   private readonly deployApi = inject(DeploymentsApi);
+  private readonly clusterApi = inject(ClusterApi);
   private readonly toast = inject(MessageService);
   private readonly confirmer = inject(ConfirmationService);
   private readonly destroyRef = inject(DestroyRef);
@@ -46,6 +71,10 @@ export class Services {
 
   readonly services = signal<ServiceResponse[]>([]);
   readonly loading = signal(false);
+
+  /** id → name map; the Cluster column shows only once more than one exists. */
+  private readonly clusterNames = signal<Record<string, string>>({});
+  readonly multiCluster = computed(() => Object.keys(this.clusterNames()).length > 1);
 
   readonly deployStatus = signal<Record<string, DeploymentStatus | undefined>>({});
   private readonly polling = new Set<string>();
@@ -59,7 +88,20 @@ export class Services {
   private readonly redeployDialog = viewChild.required(RedeployConfirm);
   private pendingRedeploy: ServiceResponse | undefined;
 
+  /** Display name for a service's cluster (falls back to "défaut"). */
+  clusterName(id?: string): string {
+    if (!id) return 'défaut';
+    return this.clusterNames()[id] ?? id.slice(0, 8);
+  }
+
   constructor() {
+    this.clusterApi.list(1, 200).subscribe({
+      next: (res) => {
+        const map: Record<string, string> = {};
+        for (const c of res.items) map[c.id] = c.is_default ? `${c.name} (défaut)` : c.name;
+        this.clusterNames.set(map);
+      },
+    });
     this.destroyRef.onDestroy(() => (this.alive = false));
     // Reload whenever the filter inputs change (covers both initial mount and
     // navigation between hives without recreating the component).
@@ -126,13 +168,20 @@ export class Services {
       },
       error: () => {
         this.loading.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des services impossible' });
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Chargement des services impossible',
+        });
       },
     });
   }
 
   private refreshDeployStatuses(services: ServiceResponse[]): void {
-    if (services.length === 0) { this.deployStatus.set({}); return; }
+    if (services.length === 0) {
+      this.deployStatus.set({});
+      return;
+    }
     forkJoin(
       services.map((s) =>
         this.api.deployments(s.id).pipe(
@@ -180,12 +229,20 @@ export class Services {
     this.setStatus(svc.id, 'pending');
     this.api.deploy(svc.id, opts).subscribe({
       next: (dep) => {
-        this.toast.add({ severity: 'info', summary: 'Déploiement lancé', detail: `${svc.name} en cours…` });
+        this.toast.add({
+          severity: 'info',
+          summary: 'Déploiement lancé',
+          detail: `${svc.name} en cours…`,
+        });
         this.poll(svc.id, dep.id);
       },
       error: (err) => {
         this.setStatus(svc.id, undefined);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Déploiement impossible' });
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Déploiement impossible',
+        });
       },
     });
   }
@@ -198,19 +255,30 @@ export class Services {
       this.deployApi.get(deploymentId).subscribe({
         next: (dep) => {
           this.setStatus(serviceId, dep.status);
-          if (dep.status === 'succeeded' || dep.status === 'failed' || dep.status === 'rolled_back') {
+          if (
+            dep.status === 'succeeded' ||
+            dep.status === 'failed' ||
+            dep.status === 'rolled_back'
+          ) {
             this.polling.delete(serviceId);
             this.refreshService(serviceId);
             this.toast.add(
               dep.status === 'succeeded'
                 ? { severity: 'success', summary: 'Déployé', detail: 'Déploiement terminé' }
-                : { severity: 'error', summary: 'Échec', detail: dep.error_message ?? 'Le déploiement a échoué' },
+                : {
+                    severity: 'error',
+                    summary: 'Échec',
+                    detail: dep.error_message ?? 'Le déploiement a échoué',
+                  },
             );
             return;
           }
           setTimeout(tick, 2000);
         },
-        error: () => { this.polling.delete(serviceId); this.setStatus(serviceId, undefined); },
+        error: () => {
+          this.polling.delete(serviceId);
+          this.setStatus(serviceId, undefined);
+        },
       });
     };
     setTimeout(tick, 1500);
@@ -251,11 +319,19 @@ export class Services {
       accept: () => {
         this.api.remove(svc.id).subscribe({
           next: () => {
-            this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${svc.name} supprimé` });
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimé',
+              detail: `${svc.name} supprimé`,
+            });
             this.load();
           },
           error: (err) => {
-            this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Suppression impossible' });
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible',
+            });
           },
         });
       },
@@ -274,7 +350,11 @@ export class Services {
       accept: () => {
         this.api.undeploy(svc.id).subscribe({
           next: (updated) => {
-            this.toast.add({ severity: 'success', summary: 'Retiré', detail: `${svc.name} retiré du cluster` });
+            this.toast.add({
+              severity: 'success',
+              summary: 'Retiré',
+              detail: `${svc.name} retiré du cluster`,
+            });
             this.services.update((list) => list.map((s) => (s.id === updated.id ? updated : s)));
             this.liveStatus.update((m) => {
               const next = { ...m };
@@ -283,7 +363,11 @@ export class Services {
             });
           },
           error: (err) => {
-            this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Retrait impossible' });
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Retrait impossible',
+            });
           },
         });
       },
@@ -296,10 +380,14 @@ export class Services {
 
   statusSeverity(status: ServiceStatus): 'success' | 'info' | 'secondary' | 'danger' {
     switch (status) {
-      case 'deployed': return 'success';
-      case 'draft': return 'info';
-      case 'removed': return 'danger';
-      default: return 'secondary';
+      case 'deployed':
+        return 'success';
+      case 'draft':
+        return 'info';
+      case 'removed':
+        return 'danger';
+      default:
+        return 'secondary';
     }
   }
 }

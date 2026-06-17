@@ -1,8 +1,11 @@
 import { Component, computed, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
+import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 
 import { AuthService } from '../core/auth.service';
+import { ClusterContextService } from '../core/cluster-context.service';
 
 interface NavItem {
   label: string;
@@ -12,7 +15,7 @@ interface NavItem {
 
 @Component({
   selector: 'hm-shell',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, ToastModule],
+  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, SelectModule, ToastModule],
   template: `
     <p-toast position="bottom-right" />
     <div class="shell">
@@ -23,6 +26,20 @@ interface NavItem {
           <span class="env">dev</span>
         </div>
         <div class="spacer"></div>
+        @if (ctx.multiCluster()) {
+          <div class="cluster-picker">
+            <i class="pi pi-server"></i>
+            <p-select
+              [options]="clusterPickerOptions()"
+              [ngModel]="ctx.selectedId()"
+              (ngModelChange)="ctx.select($event)"
+              optionLabel="label"
+              optionValue="value"
+              appendTo="body"
+              styleClass="cluster-select"
+            />
+          </div>
+        }
         <div class="user">
           <i class="pi pi-user"></i>
           <span class="email">{{ email() }}</span>
@@ -113,6 +130,20 @@ interface NavItem {
       .spacer {
         flex: 1;
       }
+      .cluster-picker {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-right: 14px;
+        color: #fff;
+      }
+      .cluster-picker .pi {
+        font-size: 13px;
+        opacity: 0.85;
+      }
+      .cluster-picker ::ng-deep .cluster-select {
+        min-width: 170px;
+      }
       .user {
         display: flex;
         align-items: center;
@@ -180,9 +211,20 @@ interface NavItem {
 export class Shell {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  readonly ctx = inject(ClusterContextService);
 
   readonly email = computed(() => this.auth.user()?.email ?? '');
   readonly isAdmin = this.auth.isAdmin;
+
+  /** "All clusters" plus one entry per cluster, for the header picker. */
+  readonly clusterPickerOptions = computed(() => [
+    { label: 'Tous les clusters', value: null },
+    ...this.ctx.clusters().map((c) => ({ label: c.name, value: c.id })),
+  ]);
+
+  constructor() {
+    this.ctx.load();
+  }
 
   readonly nav: NavItem[] = [
     { label: 'Ruches', icon: 'pi-box', path: '/hives' },
@@ -195,7 +237,10 @@ export class Shell {
     { label: 'Déploiements', icon: 'pi-cloud-upload', path: '/deployments' },
   ];
 
-  readonly adminNav: NavItem[] = [{ label: 'Utilisateurs', icon: 'pi-users', path: '/users' }];
+  readonly adminNav: NavItem[] = [
+    { label: 'Clusters', icon: 'pi-server', path: '/clusters' },
+    { label: 'Utilisateurs', icon: 'pi-users', path: '/users' },
+  ];
 
   logout(): void {
     this.auth.logout();

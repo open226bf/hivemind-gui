@@ -15,7 +15,8 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/dashboard/dashboard.component').then((m) => m.Dashboard),
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.component').then((m) => m.Dashboard),
       },
       {
         path: 'hives',
@@ -23,54 +24,80 @@ export const routes: Routes = [
       },
       {
         path: 'hives/:id',
-        loadComponent: () => import('./features/hive/hive-detail.component').then((m) => m.HiveDetail),
+        loadComponent: () =>
+          import('./features/hive/hive-detail.component').then((m) => m.HiveDetail),
       },
       {
         path: 'services',
-        loadComponent: () => import('./features/service/services.component').then((m) => m.Services),
+        loadComponent: () =>
+          import('./features/service/services.component').then((m) => m.Services),
       },
       {
         path: 'services/:id',
-        loadComponent: () => import('./features/service/service-detail.component').then((m) => m.ServiceDetail),
+        loadComponent: () =>
+          import('./features/service/service-detail.component').then((m) => m.ServiceDetail),
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'general' },
           {
             path: 'general',
-            loadComponent: () => import('./features/service/service-tab-general.component').then((m) => m.ServiceTabGeneral),
+            loadComponent: () =>
+              import('./features/service/service-tab-general.component').then(
+                (m) => m.ServiceTabGeneral,
+              ),
           },
           {
             path: 'supervision',
-            loadComponent: () => import('./features/service/service-tab-supervision.component').then((m) => m.ServiceTabSupervision),
+            loadComponent: () =>
+              import('./features/service/service-tab-supervision.component').then(
+                (m) => m.ServiceTabSupervision,
+              ),
           },
           {
             path: 'deployments',
-            loadComponent: () => import('./features/service/service-tab-deployments.component').then((m) => m.ServiceTabDeployments),
+            loadComponent: () =>
+              import('./features/service/service-tab-deployments.component').then(
+                (m) => m.ServiceTabDeployments,
+              ),
           },
           {
             path: 'logs',
-            loadComponent: () => import('./features/service/service-tab-logs.component').then((m) => m.ServiceTabLogs),
+            loadComponent: () =>
+              import('./features/service/service-tab-logs.component').then((m) => m.ServiceTabLogs),
           },
           {
             path: 'variables',
-            loadComponent: () => import('./features/service/service-tab-variables.component').then((m) => m.ServiceTabVariables),
+            loadComponent: () =>
+              import('./features/service/service-tab-variables.component').then(
+                (m) => m.ServiceTabVariables,
+              ),
           },
           {
             path: 'resources',
-            loadComponent: () => import('./features/service/service-tab-resources.component').then((m) => m.ServiceTabResources),
+            loadComponent: () =>
+              import('./features/service/service-tab-resources.component').then(
+                (m) => m.ServiceTabResources,
+              ),
           },
           {
             path: 'mounts',
-            loadComponent: () => import('./features/service/service-tab-mounts.component').then((m) => m.ServiceTabMounts),
+            loadComponent: () =>
+              import('./features/service/service-tab-mounts.component').then(
+                (m) => m.ServiceTabMounts,
+              ),
           },
           {
             path: 'snapshots',
-            loadComponent: () => import('./features/service/service-tab-snapshots.component').then((m) => m.ServiceTabSnapshots),
+            loadComponent: () =>
+              import('./features/service/service-tab-snapshots.component').then(
+                (m) => m.ServiceTabSnapshots,
+              ),
           },
         ],
       },
       {
         path: 'networks',
-        loadComponent: () => import('./features/network/networks.component').then((m) => m.Networks),
+        loadComponent: () =>
+          import('./features/network/networks.component').then((m) => m.Networks),
       },
       {
         path: 'volumes',
@@ -86,11 +113,19 @@ export const routes: Routes = [
       },
       {
         path: 'templates',
-        loadComponent: () => import('./features/template/templates.component').then((m) => m.Templates),
+        loadComponent: () =>
+          import('./features/template/templates.component').then((m) => m.Templates),
       },
       {
         path: 'deployments',
-        loadComponent: () => import('./features/deployment/deployments.component').then((m) => m.Deployments),
+        loadComponent: () =>
+          import('./features/deployment/deployments.component').then((m) => m.Deployments),
+      },
+      {
+        path: 'clusters',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/cluster/clusters.component').then((m) => m.Clusters),
       },
       {
         path: 'users',

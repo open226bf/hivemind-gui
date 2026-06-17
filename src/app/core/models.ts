@@ -70,6 +70,7 @@ export type ServiceStatus = 'draft' | 'deployed' | 'removed';
 
 export interface ServiceResponse {
   id: string;
+  cluster_id?: string;
   hive_id?: string;
   name: string;
   description: string;
@@ -98,6 +99,8 @@ export interface ServiceListResponse {
 export interface CreateServiceRequest {
   name: string;
   hive?: string;
+  /** Target cluster id; empty selects the default cluster. */
+  cluster?: string;
   description?: string;
   image: string;
   tag?: string;
@@ -178,12 +181,7 @@ export interface SetEnvVarsRequest {
   vars: EnvVar[];
 }
 
-export type DeploymentStatus =
-  | 'pending'
-  | 'in_progress'
-  | 'succeeded'
-  | 'failed'
-  | 'rolled_back';
+export type DeploymentStatus = 'pending' | 'in_progress' | 'succeeded' | 'failed' | 'rolled_back';
 
 export interface DeploymentResponse {
   id: string;
@@ -302,6 +300,7 @@ export interface RollbackResponse {
 
 export interface NetworkResponse {
   id: string;
+  cluster_id?: string;
   name: string;
   driver: string;
   scope: string;
@@ -321,6 +320,7 @@ export interface NetworkListResponse {
 
 export interface CreateNetworkRequest {
   name: string;
+  cluster?: string;
   subnet?: string;
   attachable?: boolean;
   external?: boolean;
@@ -342,6 +342,7 @@ export interface AttachNetworkRequest {
 
 export interface VolumeResponse {
   id: string;
+  cluster_id?: string;
   name: string;
   driver: string;
   created_at: string;
@@ -356,6 +357,7 @@ export interface VolumeListResponse {
 
 export interface CreateVolumeRequest {
   name: string;
+  cluster?: string;
   driver?: string;
 }
 
@@ -422,7 +424,13 @@ export interface AssignHiveRequest {
 // ─── Service templates (F-V2-07) ─────────────────────────────────────────────
 
 export type LockableField =
-  | 'image' | 'tag' | 'replicas' | 'resources' | 'update_config' | 'placement' | 'networks';
+  | 'image'
+  | 'tag'
+  | 'replicas'
+  | 'resources'
+  | 'update_config'
+  | 'placement'
+  | 'networks';
 
 export interface TemplateSpecDTO {
   image: string;
@@ -529,6 +537,50 @@ export interface ClusterOverview {
   catalog: CatalogSummary;
 }
 
+// ─── Cluster management (multi-cluster) ──────────────────────────────────────
+
+export type ClusterType = 'swarm';
+export type ClusterStatus = 'unknown' | 'reachable' | 'unreachable';
+
+export interface ClusterResponse {
+  id: string;
+  name: string;
+  type: ClusterType | string;
+  endpoint?: string;
+  is_default: boolean;
+  status: ClusterStatus | string;
+  labels?: Record<string, string>;
+  tls_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ClusterListResponse {
+  items: ClusterResponse[];
+  total: number;
+  page: number;
+  size: number;
+}
+
+export interface CreateClusterRequest {
+  name: string;
+  type?: ClusterType | string;
+  endpoint?: string;
+  labels?: Record<string, string>;
+  ca_cert?: string;
+  client_cert?: string;
+  client_key?: string;
+}
+
+export interface UpdateClusterRequest {
+  name?: string;
+  endpoint?: string;
+  labels?: Record<string, string>;
+  ca_cert?: string;
+  client_cert?: string;
+  client_key?: string;
+}
+
 // ─── Service attachments ─────────────────────────────────────────────────────
 
 export interface ServiceSecretResponse {
@@ -547,6 +599,7 @@ export interface ServiceConfigResponse {
 
 export interface ConfigResponse {
   id: string;
+  cluster_id?: string;
   name: string;
   target_path: string;
   current_version: number;
@@ -563,6 +616,7 @@ export interface ConfigListResponse {
 
 export interface CreateConfigRequest {
   name: string;
+  cluster?: string;
   target_path?: string;
   content: string;
   comment?: string;
@@ -608,6 +662,7 @@ export interface ImpactedService {
 
 export interface SecretResponse {
   id: string;
+  cluster_id?: string;
   name: string;
   target_path: string;
   current_version: number;
@@ -626,6 +681,7 @@ export interface SecretListResponse {
 
 export interface CreateSecretRequest {
   name: string;
+  cluster?: string;
   target_path?: string;
   value: string;
 }

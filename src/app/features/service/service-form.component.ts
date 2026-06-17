@@ -11,7 +11,7 @@ import { map, switchMap } from 'rxjs/operators';
 
 import { SelectModule } from 'primeng/select';
 
-import { ConfigsApi, NetworksApi, SecretsApi, ServicesApi } from '../../core/api';
+import { ClusterApi, ConfigsApi, NetworksApi, SecretsApi, ServicesApi } from '../../core/api';
 import {
   DEFAULT_UPDATE_CONFIG,
   SecretResponse,
@@ -42,12 +42,15 @@ export class ServiceFormComponent {
   readonly service = input<ServiceResponse | undefined>(undefined);
   readonly saved = output<void>();
 
-  private readonly svcApi     = inject(ServicesApi);
-  private readonly networkApi= inject(NetworksApi);
-  private readonly secretsApi  = inject(SecretsApi);
-  private readonly configsApi  = inject(ConfigsApi);
-  private readonly toast    = inject(MessageService);
+  private readonly svcApi = inject(ServicesApi);
+  private readonly networkApi = inject(NetworksApi);
+  private readonly secretsApi = inject(SecretsApi);
+  private readonly configsApi = inject(ConfigsApi);
+  private readonly clusterApi = inject(ClusterApi);
+  private readonly toast = inject(MessageService);
 
+  readonly clusterOptions = signal<{ label: string; value: string }[]>([]);
+  private defaultClusterId = '';
   readonly networkOptions = signal<{ label: string; value: string }[]>([]);
   readonly secretOptions = signal<{ label: string; value: string }[]>([]);
   readonly configOptions = signal<{ label: string; value: string }[]>([]);
@@ -73,6 +76,18 @@ export class ServiceFormComponent {
   private editingConfigIds: string[] = [];
 
   constructor() {
+    this.clusterApi.list(1, 200).subscribe({
+      next: (res) => {
+        this.clusterOptions.set(
+          res.items.map((c) => ({
+            label: c.is_default ? `${c.name} (défaut)` : c.name,
+            value: c.id,
+          })),
+        );
+        this.defaultClusterId = res.items.find((c) => c.is_default)?.id ?? res.items[0]?.id ?? '';
+        if (!this.form.cluster) this.form.cluster = this.defaultClusterId;
+      },
+    });
     this.networkApi.list(1, 200).subscribe({
       next: (res) =>
         this.networkOptions.set(res.items.map((n) => ({ label: n.name, value: n.id }))),
@@ -123,7 +138,8 @@ export class ServiceFormComponent {
         secretIds: [],
         configIds: [],
         updateConfig: { ...(svc.update_config ?? DEFAULT_UPDATE_CONFIG) },
-        hive: this.hive()?.id
+        hive: this.hive()?.id,
+        cluster: svc.cluster_id ?? this.defaultClusterId,
       };
 
       forkJoin({
@@ -191,6 +207,7 @@ export class ServiceFormComponent {
         description: this.form.description || undefined,
         update_config: { ...this.form.updateConfig },
         hive: this.form.hive,
+        cluster: this.form.cluster || undefined,
       });
     }
     return this.svcApi.update(this.service()!.id, {
@@ -283,6 +300,7 @@ export class ServiceFormComponent {
       configIds: [] as string[],
       updateConfig: { ...DEFAULT_UPDATE_CONFIG } as UpdateConfigDTO,
       hive: this.hive()?.id,
+      cluster: this.defaultClusterId,
     };
   }
 }

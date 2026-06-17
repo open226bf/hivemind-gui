@@ -9,6 +9,17 @@
       <label>Nom <span class="req">*</span></label>
       <input pInputText [(ngModel)]="form.name" placeholder="mon-service" />
       <small class="muted">Minuscules, chiffres et tirets (DNS). Immuable après création.</small>
+
+      <label>Cluster</label>
+      <p-select
+        [options]="clusterOptions()"
+        [(ngModel)]="form.cluster"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        placeholder="Cluster par défaut"
+      />
+      <small class="muted">Cible d'orchestration. Immuable après création.</small>
     }
 
     <label>Image <span class="req">*</span></label>
@@ -68,7 +79,11 @@
     <small class="muted">Fichiers de config montés dans le conteneur au chemin configuré.</small>
 
     <button type="button" class="strategy-toggle" (click)="showStrategy.set(!showStrategy())">
-      <i class="pi" [class.pi-chevron-right]="!showStrategy()" [class.pi-chevron-down]="showStrategy()"></i>
+      <i
+        class="pi"
+        [class.pi-chevron-right]="!showStrategy()"
+        [class.pi-chevron-down]="showStrategy()"
+      ></i>
       Stratégie de mise à jour (rolling update)
     </button>
 
@@ -77,7 +92,11 @@
         <div class="grid2">
           <div>
             <label>Parallélisme</label>
-            <p-inputnumber [(ngModel)]="form.updateConfig.parallelism" [min]="0" [showButtons]="true" />
+            <p-inputnumber
+              [(ngModel)]="form.updateConfig.parallelism"
+              [min]="0"
+              [showButtons]="true"
+            />
             <small class="muted">Tâches mises à jour simultanément (0 = toutes).</small>
           </div>
           <div>
@@ -105,7 +124,13 @@
           </div>
           <div>
             <label>Taux d'échec max</label>
-            <p-inputnumber [(ngModel)]="form.updateConfig.max_failure_ratio" [min]="0" [max]="1" [maxFractionDigits]="2" [step]="0.05" />
+            <p-inputnumber
+              [(ngModel)]="form.updateConfig.max_failure_ratio"
+              [min]="0"
+              [max]="1"
+              [maxFractionDigits]="2"
+              [step]="0.05"
+            />
             <small class="muted">0 à 1 (0 = aucune tolérance).</small>
           </div>
         </div>
@@ -135,7 +160,7 @@
   </div>
 
   <ng-template #footer>
-    <div style="display: flex; gap: 10px;">
+    <div style="display: flex; gap: 10px">
       <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="close()" />
       <p-button
         [label]="mode() === 'create' ? 'Créer' : 'Enregistrer'"

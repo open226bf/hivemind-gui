@@ -6,7 +6,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 
-import { VolumesApi } from '../../core/api';
+import { ClusterApi, VolumesApi } from '../../core/api';
 
 @Component({
   selector: 'hm-volume-form',
@@ -16,20 +16,37 @@ import { VolumesApi } from '../../core/api';
 })
 export class VolumeFormComponent {
   private readonly api = inject(VolumesApi);
+  private readonly clusterApi = inject(ClusterApi);
   private readonly toast = inject(MessageService);
 
   readonly visible = model(false);
   readonly saved = output<void>();
   readonly saving = signal(false);
 
-  readonly drivers = [
-    { label: 'local', value: 'local' },
-  ];
+  readonly drivers = [{ label: 'local', value: 'local' }];
 
-  form = { name: '', driver: 'local' };
+  readonly clusterOptions = signal<{ label: string; value: string }[]>([]);
+  private defaultClusterId = '';
+
+  form = { name: '', driver: 'local', cluster: '' };
+
+  constructor() {
+    this.clusterApi.list(1, 200).subscribe({
+      next: (res) => {
+        this.clusterOptions.set(
+          res.items.map((c) => ({
+            label: c.is_default ? `${c.name} (défaut)` : c.name,
+            value: c.id,
+          })),
+        );
+        this.defaultClusterId = res.items.find((c) => c.is_default)?.id ?? res.items[0]?.id ?? '';
+        if (!this.form.cluster) this.form.cluster = this.defaultClusterId;
+      },
+    });
+  }
 
   open(): void {
-    this.form = { name: '', driver: 'local' };
+    this.form = { name: '', driver: 'local', cluster: this.defaultClusterId };
     this.visible.set(true);
   }
 
@@ -39,21 +56,39 @@ export class VolumeFormComponent {
 
   save(): void {
     if (!this.form.name) {
-      this.toast.add({ severity: 'warn', summary: 'Champ requis', detail: 'Le nom est obligatoire' });
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Champ requis',
+        detail: 'Le nom est obligatoire',
+      });
       return;
     }
     this.saving.set(true);
-    this.api.create({ name: this.form.name, driver: this.form.driver || undefined }).subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.visible.set(false);
-        this.toast.add({ severity: 'success', summary: 'Créé', detail: `Volume ${this.form.name}` });
-        this.saved.emit();
-      },
-      error: (err) => {
-        this.saving.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Création impossible' });
-      },
-    });
+    this.api
+      .create({
+        name: this.form.name,
+        driver: this.form.driver || undefined,
+        cluster: this.form.cluster || undefined,
+      })
+      .subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.visible.set(false);
+          this.toast.add({
+            severity: 'success',
+            summary: 'Créé',
+            detail: `Volume ${this.form.name}`,
+          });
+          this.saved.emit();
+        },
+        error: (err) => {
+          this.saving.set(false);
+          this.toast.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: err?.error?.message ?? 'Création impossible',
+          });
+        },
+      });
   }
 }

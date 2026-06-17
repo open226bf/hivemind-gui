@@ -5,7 +5,11 @@ import { Observable } from 'rxjs';
 import { API_BASE } from './config';
 import {
   AddConfigVersionRequest,
+  ClusterListResponse,
   ClusterOverview,
+  ClusterResponse,
+  CreateClusterRequest,
+  UpdateClusterRequest,
   ConfigDiffResponse,
   ConfigListResponse,
   ConfigResponse,
@@ -62,7 +66,11 @@ import {
 export class ServicesApi {
   private readonly http = inject(HttpClient);
 
-  list(page = 1, size = 50, opts: { hive_id?: string; unassigned?: boolean } = {}): Observable<ServiceListResponse> {
+  list(
+    page = 1,
+    size = 50,
+    opts: { hive_id?: string; unassigned?: boolean } = {},
+  ): Observable<ServiceListResponse> {
     let params = new HttpParams().set('page', page).set('size', size);
     if (opts.unassigned) params = params.set('unassigned', 'true');
     else if (opts.hive_id) params = params.set('hive_id', opts.hive_id);
@@ -97,7 +105,10 @@ export class ServicesApi {
     return this.http.delete<void>(`${API_BASE}/services/${id}`);
   }
 
-  deploy(id: string, opts: { force?: boolean; repull?: boolean } = {}): Observable<DeploymentResponse> {
+  deploy(
+    id: string,
+    opts: { force?: boolean; repull?: boolean } = {},
+  ): Observable<DeploymentResponse> {
     return this.http.post<DeploymentResponse>(`${API_BASE}/services/${id}/deploy`, {
       force: opts.force ?? false,
       repull: opts.repull ?? false,
@@ -145,7 +156,10 @@ export class ServicesApi {
   }
 
   attachSecret(id: string, secretId: string, targetPath: string): Observable<void> {
-    return this.http.post<void>(`${API_BASE}/services/${id}/secrets`, { secret_id: secretId, target_path: targetPath });
+    return this.http.post<void>(`${API_BASE}/services/${id}/secrets`, {
+      secret_id: secretId,
+      target_path: targetPath,
+    });
   }
 
   detachSecret(id: string, secretId: string): Observable<void> {
@@ -165,7 +179,10 @@ export class ServicesApi {
   }
 
   attachConfig(id: string, configId: string, targetPath: string): Observable<void> {
-    return this.http.post<void>(`${API_BASE}/services/${id}/configs`, { config_id: configId, target_path: targetPath });
+    return this.http.post<void>(`${API_BASE}/services/${id}/configs`, {
+      config_id: configId,
+      target_path: targetPath,
+    });
   }
 
   detachConfig(id: string, configId: string): Observable<void> {
@@ -291,7 +308,9 @@ export class ConfigsApi {
   }
 
   restore(id: string, version: number, comment: string): Observable<ConfigResponse> {
-    return this.http.post<ConfigResponse>(`${API_BASE}/configs/${id}/versions/${version}/restore`, { comment });
+    return this.http.post<ConfigResponse>(`${API_BASE}/configs/${id}/versions/${version}/restore`, {
+      comment,
+    });
   }
 
   impactedServices(id: string): Observable<ImpactedService[]> {
@@ -385,8 +404,44 @@ export class UsersApi {
 export class ClusterApi {
   private readonly http = inject(HttpClient);
 
+  /** Aggregated dashboard overview (default cluster node health + global counts). */
   overview(): Observable<ClusterOverview> {
     return this.http.get<ClusterOverview>(`${API_BASE}/cluster/overview`);
+  }
+
+  /** Dashboard overview scoped to a specific cluster's node health. */
+  overviewFor(clusterId: string): Observable<ClusterOverview> {
+    return this.http.get<ClusterOverview>(`${API_BASE}/clusters/${clusterId}/overview`);
+  }
+
+  list(page = 1, size = 100): Observable<ClusterListResponse> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<ClusterListResponse>(`${API_BASE}/clusters`, { params });
+  }
+
+  get(id: string): Observable<ClusterResponse> {
+    return this.http.get<ClusterResponse>(`${API_BASE}/clusters/${id}`);
+  }
+
+  create(body: CreateClusterRequest): Observable<ClusterResponse> {
+    return this.http.post<ClusterResponse>(`${API_BASE}/clusters`, body);
+  }
+
+  update(id: string, body: UpdateClusterRequest): Observable<ClusterResponse> {
+    return this.http.patch<ClusterResponse>(`${API_BASE}/clusters/${id}`, body);
+  }
+
+  remove(id: string): Observable<void> {
+    return this.http.delete<void>(`${API_BASE}/clusters/${id}`);
+  }
+
+  setDefault(id: string): Observable<ClusterResponse> {
+    return this.http.put<ClusterResponse>(`${API_BASE}/clusters/${id}/default`, {});
+  }
+
+  /** Probe connectivity; returns the cluster with its refreshed status. */
+  test(id: string): Observable<ClusterResponse> {
+    return this.http.post<ClusterResponse>(`${API_BASE}/clusters/${id}/test`, {});
   }
 }
 
@@ -415,14 +470,16 @@ export class DeploymentsApi {
     return this.http.get<DeploymentResponse>(`${API_BASE}/deployments/${id}`);
   }
 
-  list(opts: {
-    service_id?: string;
-    status?: string;
-    from?: string;
-    to?: string;
-    page?: number;
-    size?: number;
-  } = {}): Observable<DeploymentListResponse> {
+  list(
+    opts: {
+      service_id?: string;
+      status?: string;
+      from?: string;
+      to?: string;
+      page?: number;
+      size?: number;
+    } = {},
+  ): Observable<DeploymentListResponse> {
     let params = new HttpParams();
     if (opts.service_id) params = params.set('service_id', opts.service_id);
     if (opts.status) params = params.set('status', opts.status);

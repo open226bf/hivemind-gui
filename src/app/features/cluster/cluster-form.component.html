@@ -1,0 +1,72 @@
+<p-dialog
+  [header]="editing() ? 'Modifier le cluster' : 'Ajouter un cluster'"
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '560px' }"
+>
+  <div class="form">
+    <label>Nom <span class="req">*</span></label>
+    <input pInputText [(ngModel)]="form.name" placeholder="prod-eu" />
+
+    <label>Endpoint</label>
+    <input pInputText [(ngModel)]="form.endpoint" placeholder="tcp://10.0.0.10:2376" />
+    <small class="muted"
+      >Adresse du démon Docker. Laisser vide pour utiliser l'environnement Docker local du
+      serveur.</small
+    >
+
+    <label>Labels</label>
+    <textarea
+      pTextarea
+      [(ngModel)]="form.labels"
+      rows="2"
+      placeholder="zone=eu-west&#10;tier=prod"
+    ></textarea>
+    <small class="muted">Une paire <code>clé=valeur</code> par ligne.</small>
+
+    <div class="tls">
+      <div class="tls-title">TLS mutuel (optionnel)</div>
+      <small class="muted">
+        Pour un démon distant en TCP. Les clés sont chiffrées au repos et jamais réaffichées —
+        {{
+          editing()
+            ? 'laisser vide pour conserver les valeurs existantes.'
+            : 'collez le contenu PEM.'
+        }}
+      </small>
+
+      <label>CA certificate (PEM)</label>
+      <textarea
+        pTextarea
+        [(ngModel)]="form.caCert"
+        rows="3"
+        placeholder="-----BEGIN CERTIFICATE-----"
+      ></textarea>
+
+      <label>Client certificate (PEM)</label>
+      <textarea
+        pTextarea
+        [(ngModel)]="form.clientCert"
+        rows="3"
+        placeholder="-----BEGIN CERTIFICATE-----"
+      ></textarea>
+
+      <label>Client key (PEM)</label>
+      <textarea
+        pTextarea
+        [(ngModel)]="form.clientKey"
+        rows="3"
+        placeholder="-----BEGIN PRIVATE KEY-----"
+      ></textarea>
+    </div>
+  </div>
+  <ng-template #footer>
+    <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="close()" />
+    <p-button
+      [label]="editing() ? 'Enregistrer' : 'Créer'"
+      icon="pi pi-check"
+      (onClick)="save()"
+      [loading]="saving()"
+    />
+  </ng-template>
+</p-dialog>
