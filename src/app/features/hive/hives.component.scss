@@ -4,25 +4,47 @@
   align-items: flex-start;
   margin-bottom: 18px;
 
-  h1 { margin: 0; font-size: 22px; }
-  .subtitle { color: var(--hm-text-muted); font-size: 13px; margin-top: 2px; }
+  h1 {
+    margin: 0;
+    font-size: 22px;
+  }
+  .subtitle {
+    color: var(--hm-text-muted);
+    font-size: 13px;
+    margin-top: 2px;
+  }
 }
 
-.header-right { display: flex; align-items: center; gap: 10px; }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
 /* ─── Onboarding (no hives) ─────────────────────────────────────────────────── */
 .onboard {
   text-align: center;
   padding: 36px 20px 30px;
   border: 1px dashed var(--hm-border, #d8dce3);
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(255, 200, 60, 0.06), transparent);
+  border-radius: 8px;
+  background: var(--hm-surface, #fff);
 
-  h2 { margin: 16px 0 6px; font-size: 17px; }
-  p { margin: 0 auto 18px; color: var(--hm-text-muted); max-width: 420px; font-size: 13.5px; }
+  h2 {
+    margin: 16px 0 6px;
+    font-size: 17px;
+  }
+  p {
+    margin: 0 auto 18px;
+    color: var(--hm-text-muted);
+    max-width: 420px;
+    font-size: 13.5px;
+  }
 }
 
-.onboard-hex { display: flex; justify-content: center; }
+.onboard-hex {
+  display: flex;
+  justify-content: center;
+}
 .onboard-hex .hex {
   width: 84px;
   height: 96px;
@@ -30,8 +52,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, #38b96c, #2e9e5b);
-  .hex-label { font-size: 30px; }
+  background: #2e9e5b;
+  .hex-label {
+    font-size: 30px;
+  }
 }
 
 /* ─── Hive cards ─────────────────────────────────────────────────────────────── */
@@ -49,16 +73,21 @@
   cursor: pointer;
   background: var(--hm-surface, #fff);
   border: 1px solid var(--hm-border, #e6e8ec);
-  border-top: 4px solid var(--hive-color, #E8920C);
-  border-radius: 12px;
+  border-top: 3px solid var(--hive-color, #e8920c);
+  border-radius: 8px;
   padding: 18px 18px 0;
   display: flex;
   flex-direction: column;
   min-height: 150px;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
 }
 
-.hive-card.unassigned { border-top-color: #b6bcc6; border-style: dashed; }
+.hive-card.unassigned {
+  border-top-color: #b6bcc6;
+  border-style: dashed;
+}
 
 .card-actions {
   position: absolute;
@@ -70,9 +99,13 @@
   transition: opacity 0.12s ease;
 }
 
-.hive-card:hover .card-actions { opacity: 1; }
+.hive-card:hover .card-actions {
+  opacity: 1;
+}
 
-.card-body { flex: 1; }
+.card-body {
+  flex: 1;
+}
 
 .dot {
   display: inline-block;
@@ -82,10 +115,17 @@
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
   margin-bottom: 10px;
 
-  &.grey { background: #b6bcc6; }
+  &.grey {
+    background: #b6bcc6;
+  }
 }
 
-.name { margin: 0 0 6px; font-size: 16px; font-weight: 600; padding-right: 60px; }
+.name {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+  padding-right: 60px;
+}
 
 .desc {
   margin: 0;
@@ -109,14 +149,19 @@
   color: var(--hm-text-muted);
 }
 
-.count-label .count { font-weight: 700; color: var(--hm-text, #1f2733); }
+.count-label .count {
+  font-weight: 700;
+  color: var(--hm-text, #1f2733);
+}
 
 .open {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--hive-color, #E8920C);
+  color: var(--hive-color, #e8920c);
   font-weight: 500;
 }
 
-.hive-card.unassigned .open { color: var(--hm-text-muted); }
+.hive-card.unassigned .open {
+  color: var(--hm-text-muted);
+}

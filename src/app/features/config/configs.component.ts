@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -11,20 +11,39 @@ import { SelectModule } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 
 import { ConfigsApi } from '../../core/api';
+import { ClusterContextService } from '../../core/cluster-context.service';
 import { AuthService } from '../../core/auth.service';
-import { ConfigResponse, ConfigVersionResponse, DiffLine, ImpactedService } from '../../core/models';
+import {
+  ConfigResponse,
+  ConfigVersionResponse,
+  DiffLine,
+  ImpactedService,
+} from '../../core/models';
 import { ConfigFormComponent } from './config-form.component';
 import { ConfigVersionFormComponent } from './config-version-form.component';
 
 @Component({
   selector: 'hm-configs',
-  imports: [DatePipe, FormsModule, RouterLink, TableModule, ButtonModule, DrawerModule, TagModule, TooltipModule, SelectModule, ConfigFormComponent, ConfigVersionFormComponent],
+  imports: [
+    DatePipe,
+    FormsModule,
+    RouterLink,
+    TableModule,
+    ButtonModule,
+    DrawerModule,
+    TagModule,
+    TooltipModule,
+    SelectModule,
+    ConfigFormComponent,
+    ConfigVersionFormComponent,
+  ],
   templateUrl: './configs.component.html',
   styleUrl: './configs.component.scss',
 })
 export class Configs {
   private readonly api = inject(ConfigsApi);
   private readonly toast = inject(MessageService);
+  private readonly ctx = inject(ClusterContextService);
 
   /** Operator or Admin may create configs, add versions and restore (F-V1-01). */
   readonly canManage = inject(AuthService).isOperator;
@@ -53,14 +72,27 @@ export class Configs {
   readonly impacted = signal<ImpactedService[]>([]);
 
   constructor() {
-    this.load();
+    effect(() => {
+      this.ctx.selectedId();
+      this.load();
+    });
   }
 
   load(): void {
     this.loading.set(true);
-    this.api.list().subscribe({
-      next: (res) => { this.configs.set(res.items); this.loading.set(false); },
-      error: () => { this.loading.set(false); this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des configs impossible' }); },
+    this.api.list(1, 50).subscribe({
+      next: (res) => {
+        this.configs.set(res.items);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Chargement des configs impossible',
+        });
+      },
     });
   }
 
@@ -80,7 +112,9 @@ export class Configs {
     this.diffFrom = null;
     this.diffTo = null;
     this.loadVersions(c.id);
-    this.api.impactedServices(c.id).subscribe({ next: (s) => this.impacted.set(s), error: () => this.impacted.set([]) });
+    this.api
+      .impactedServices(c.id)
+      .subscribe({ next: (s) => this.impacted.set(s), error: () => this.impacted.set([]) });
   }
 
   private loadVersions(id: string): void {
@@ -90,27 +124,55 @@ export class Configs {
         this.versions.set(v);
         this.versionsLoading.set(false);
         // Default the comparison to the two most recent versions.
-        if (v.length >= 2) { this.diffFrom = v[1].version; this.diffTo = v[0].version; }
+        if (v.length >= 2) {
+          this.diffFrom = v[1].version;
+          this.diffTo = v[0].version;
+        }
       },
-      error: () => { this.versionsLoading.set(false); this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des versions impossible' }); },
+      error: () => {
+        this.versionsLoading.set(false);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Chargement des versions impossible',
+        });
+      },
     });
   }
 
   runDiff(): void {
     const c = this.versionTarget();
     if (!c || this.diffFrom == null || this.diffTo == null) return;
-    if (this.diffFrom === this.diffTo) { this.diffLines.set([]); return; }
+    if (this.diffFrom === this.diffTo) {
+      this.diffLines.set([]);
+      return;
+    }
     this.diffLoading.set(true);
     this.api.diff(c.id, this.diffFrom, this.diffTo).subscribe({
-      next: (res) => { this.diffLines.set(res.lines); this.diffLoading.set(false); },
-      error: (err) => { this.diffLoading.set(false); this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Diff impossible' }); },
+      next: (res) => {
+        this.diffLines.set(res.lines);
+        this.diffLoading.set(false);
+      },
+      error: (err) => {
+        this.diffLoading.set(false);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Diff impossible',
+        });
+      },
     });
   }
 
   restore(v: ConfigVersionResponse): void {
     const c = this.versionTarget();
     if (!c) return;
-    if (!confirm(`Restaurer la version v${v.version} ? Une nouvelle version au contenu identique sera créée.`)) return;
+    if (
+      !confirm(
+        `Restaurer la version v${v.version} ? Une nouvelle version au contenu identique sera créée.`,
+      )
+    )
+      return;
     this.api.restore(c.id, v.version, '').subscribe({
       next: () => {
         this.loadVersions(c.id);
@@ -119,12 +181,18 @@ export class Configs {
         this.toast.add({
           severity: 'success',
           summary: 'Restaurée',
-          detail: n > 0
-            ? `v${v.version} restaurée. ${n} service(s) impacté(s) — pensez à les redéployer.`
-            : `v${v.version} restaurée.`,
+          detail:
+            n > 0
+              ? `v${v.version} restaurée. ${n} service(s) impacté(s) — pensez à les redéployer.`
+              : `v${v.version} restaurée.`,
         });
       },
-      error: (err) => this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Restauration impossible' }),
+      error: (err) =>
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Restauration impossible',
+        }),
     });
   }
 
@@ -137,8 +205,21 @@ export class Configs {
   remove(c: ConfigResponse): void {
     if (!confirm(`Supprimer la config "${c.name}" ?`)) return;
     this.api.remove(c.id).subscribe({
-      next: () => { this.toast.add({ severity: 'success', summary: 'Supprimée', detail: `${c.name} supprimée` }); this.load(); },
-      error: (err) => { this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Suppression impossible' }); },
+      next: () => {
+        this.toast.add({
+          severity: 'success',
+          summary: 'Supprimée',
+          detail: `${c.name} supprimée`,
+        });
+        this.load();
+      },
+      error: (err) => {
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Suppression impossible',
+        });
+      },
     });
   }
 }

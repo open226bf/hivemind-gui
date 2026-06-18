@@ -1,7 +1,7 @@
 /* Hivemind GUI — Rancher-inspired global styles */
 
 :root {
-  --hm-header-bg: #1b1c21;
+  --hm-header-bg: #16191f; /* squid-ink topbar (AWS-like), flat */
   --hm-header-h: 54px;
   --hm-sidebar-w: 232px;
   --hm-bg: #f4f5fa;
@@ -9,9 +9,14 @@
   --hm-border: #e2e4ea;
   --hm-text: #141419;
   --hm-text-muted: #6c7392;
-  --hm-primary: #C8790A;
-  --hm-primary-weak: #FBEAC6;
-  --hm-accent: #E8920C;
+  --hm-primary: #c8790a;
+  --hm-primary-weak: #fbeac6;
+  --hm-accent: #e8920c;
+
+  /* Radii — squared, console-grade (no rounded pills) */
+  --hm-radius: 6px; /* containers / cards */
+  --hm-radius-control: 4px; /* inputs / selects */
+  --hm-radius-btn: 5px; /* buttons — softened, still crisp */
 }
 
 * {
@@ -92,10 +97,77 @@ input {
 }
 
 .deploying .mini-spin {
-  width: 16px; height: 16px !important;
+  width: 16px;
+  height: 16px !important;
 }
 
+.section-first {
+  padding: 18px 20px;
+}
+.section {
+  margin-top: 16px;
+}
+.section-head {
+  padding: 14px 18px 0;
+}
 
-.section-first { padding: 18px 20px; }
-.section { margin-top: 16px; }
-.section-head { padding: 14px 18px 0; }
+/* ─── AWS-style controls (flat, squared, solid) ───────────────────────────────
+   Button shape/colour tiers live in the PrimeNG preset (theme.ts). Here we only
+   guarantee no gradients/shadows leak in and keep the squared radius. */
+.p-button {
+  background-image: none; /* belt-and-braces: never a gradient */
+  box-shadow: none;
+  letter-spacing: 0.01em;
+}
+
+/* Inputs / selects — subtle squared radius */
+.p-inputtext,
+.p-select,
+.p-password,
+.p-password input,
+.p-textarea {
+  border-radius: var(--hm-radius-control);
+}
+
+/* Containers/cards keep a tight, console-grade radius */
+.card {
+  border-radius: var(--hm-radius);
+}
+
+/* Tab panels that wrap a table carry no padding/background — the card inside
+   is the only surface, flush with the tab strip. */
+.p-tabpanels:has(.p-datatable),
+.p-tabpanel:has(.p-datatable) {
+  padding: 0;
+  background: transparent;
+}
+
+/* Tables sit flush inside their card — the card owns the border + rounded
+   corners, so the datatable drops its own (no "box-in-a-box" gap). */
+.card:has(.p-datatable) {
+  overflow: hidden; /* clip the table to the card's corners */
+}
+.card .p-datatable {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.card .p-datatable .p-datatable-thead > tr > th {
+  border-top: 0; /* header flush with the card's top edge */
+}
+.card .p-datatable .p-datatable-tbody > tr:last-child > td {
+  border-bottom: 0; /* last row flush with the card's bottom edge */
+}
+
+/* Tooltips — size to content (cap width) and wrap on words, not per character. */
+.p-tooltip {
+  max-width: 20rem;
+}
+.p-tooltip .p-tooltip-text {
+  width: max-content;
+  max-width: 20rem;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}

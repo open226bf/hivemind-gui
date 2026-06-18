@@ -42,11 +42,11 @@ export class ServiceFormComponent {
   readonly service = input<ServiceResponse | undefined>(undefined);
   readonly saved = output<void>();
 
-  private readonly svcApi     = inject(ServicesApi);
-  private readonly networkApi= inject(NetworksApi);
-  private readonly secretsApi  = inject(SecretsApi);
-  private readonly configsApi  = inject(ConfigsApi);
-  private readonly toast    = inject(MessageService);
+  private readonly svcApi = inject(ServicesApi);
+  private readonly networkApi = inject(NetworksApi);
+  private readonly secretsApi = inject(SecretsApi);
+  private readonly configsApi = inject(ConfigsApi);
+  private readonly toast = inject(MessageService);
 
   readonly networkOptions = signal<{ label: string; value: string }[]>([]);
   readonly secretOptions = signal<{ label: string; value: string }[]>([]);
@@ -73,6 +73,8 @@ export class ServiceFormComponent {
   private editingConfigIds: string[] = [];
 
   constructor() {
+    // Catalog lists and the create call are scoped to the active cluster by the
+    // X-Hivemind-Cluster header (clusterInterceptor) — no per-form picker.
     this.networkApi.list(1, 200).subscribe({
       next: (res) =>
         this.networkOptions.set(res.items.map((n) => ({ label: n.name, value: n.id }))),
@@ -123,7 +125,7 @@ export class ServiceFormComponent {
         secretIds: [],
         configIds: [],
         updateConfig: { ...(svc.update_config ?? DEFAULT_UPDATE_CONFIG) },
-        hive: this.hive()?.id
+        hive: this.hive()?.id,
       };
 
       forkJoin({

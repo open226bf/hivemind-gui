@@ -1,4 +1,9 @@
-<p-dialog header="Créer une config" [(visible)]="visible" [modal]="true" [style]="{ width: '560px' }">
+<p-dialog
+  header="Créer une config"
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '560px' }"
+>
   <div class="form">
     <label>Nom <span class="req">*</span></label>
     <input pInputText [(ngModel)]="form.name" placeholder="nginx.conf" />
@@ -7,7 +12,13 @@
     <input pInputText [(ngModel)]="form.target_path" placeholder="/etc/nginx/nginx.conf" />
 
     <label>Contenu <span class="req">*</span></label>
-    <textarea pTextarea [(ngModel)]="form.content" [rows]="8" [autoResize]="true" placeholder="# config content..."></textarea>
+    <textarea
+      pTextarea
+      [(ngModel)]="form.content"
+      [rows]="8"
+      [autoResize]="true"
+      placeholder="# config content..."
+    ></textarea>
 
     <label>Commentaire <span class="req">*</span></label>
     <input pInputText [(ngModel)]="form.comment" placeholder="Version initiale" />

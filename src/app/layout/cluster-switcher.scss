@@ -1,0 +1,26 @@
+.cluster-picker {
+  padding-top: 12px;
+  border-top: 1px solid var(--hm-border);
+}
+
+.nav-group-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--hm-text-muted);
+  padding: 6px 10px;
+}
+
+.cluster-picker ::ng-deep .cluster-select {
+  width: 100%;
+}
+
+.cluster-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cluster-trigger .pi {
+  font-size: 13px;
+  color: var(--hm-text-muted);
+}

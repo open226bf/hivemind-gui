@@ -22,6 +22,8 @@ export class NetworkFormComponent {
   readonly saved = output<void>();
   readonly saving = signal(false);
 
+  // The target cluster comes from the active selection (X-Hivemind-Cluster
+  // header set by clusterInterceptor); no per-form picker needed.
   form = { name: '', subnet: '', attachable: true, external: false };
 
   open(): void {
@@ -35,26 +37,40 @@ export class NetworkFormComponent {
 
   save(): void {
     if (!this.form.name) {
-      this.toast.add({ severity: 'warn', summary: 'Champ requis', detail: 'Le nom est obligatoire' });
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Champ requis',
+        detail: 'Le nom est obligatoire',
+      });
       return;
     }
     this.saving.set(true);
-    this.api.create({
-      name: this.form.name,
-      subnet: this.form.subnet || undefined,
-      attachable: this.form.attachable,
-      external: this.form.external,
-    }).subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.visible.set(false);
-        this.toast.add({ severity: 'success', summary: 'Créé', detail: `Réseau ${this.form.name}` });
-        this.saved.emit();
-      },
-      error: (err) => {
-        this.saving.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Création impossible' });
-      },
-    });
+    this.api
+      .create({
+        name: this.form.name,
+        subnet: this.form.subnet || undefined,
+        attachable: this.form.attachable,
+        external: this.form.external,
+      })
+      .subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.visible.set(false);
+          this.toast.add({
+            severity: 'success',
+            summary: 'Créé',
+            detail: `Réseau ${this.form.name}`,
+          });
+          this.saved.emit();
+        },
+        error: (err) => {
+          this.saving.set(false);
+          this.toast.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: err?.error?.message ?? 'Création impossible',
+          });
+        },
+      });
   }
 }

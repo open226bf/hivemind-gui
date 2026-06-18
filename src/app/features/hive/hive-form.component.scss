@@ -9,8 +9,12 @@
     margin-top: 8px;
   }
 
-  input { width: 100%; }
-  .req { color: #b54747; }
+  input {
+    width: 100%;
+  }
+  .req {
+    color: #b54747;
+  }
 }
 
 .palette {
@@ -30,5 +34,10 @@
   transition: transform 0.1s;
 }
 
-.swatch:hover { transform: scale(1.1); }
-.swatch.active { border-color: var(--hm-text, #222); box-shadow: 0 0 0 2px #fff inset; }
+.swatch:hover {
+  transform: scale(1.1);
+}
+.swatch.active {
+  border-color: var(--hm-text, #222);
+  box-shadow: 0 0 0 2px #fff inset;
+}

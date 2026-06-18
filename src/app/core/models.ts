@@ -70,6 +70,7 @@ export type ServiceStatus = 'draft' | 'deployed' | 'removed';
 
 export interface ServiceResponse {
   id: string;
+  cluster_id?: string;
   hive_id?: string;
   name: string;
   description: string;
@@ -178,12 +179,7 @@ export interface SetEnvVarsRequest {
   vars: EnvVar[];
 }
 
-export type DeploymentStatus =
-  | 'pending'
-  | 'in_progress'
-  | 'succeeded'
-  | 'failed'
-  | 'rolled_back';
+export type DeploymentStatus = 'pending' | 'in_progress' | 'succeeded' | 'failed' | 'rolled_back';
 
 export interface DeploymentResponse {
   id: string;
@@ -302,6 +298,7 @@ export interface RollbackResponse {
 
 export interface NetworkResponse {
   id: string;
+  cluster_id?: string;
   name: string;
   driver: string;
   scope: string;
@@ -342,6 +339,7 @@ export interface AttachNetworkRequest {
 
 export interface VolumeResponse {
   id: string;
+  cluster_id?: string;
   name: string;
   driver: string;
   created_at: string;
@@ -384,6 +382,24 @@ export interface MountsResponse {
   warnings: string[];
 }
 
+export type PortProtocol = 'tcp' | 'udp' | 'sctp';
+export type PublishMode = 'ingress' | 'host';
+
+export interface PortDTO {
+  target_port: number;
+  published_port: number;
+  protocol: PortProtocol;
+  mode: PublishMode;
+}
+
+export interface SetPortsRequest {
+  ports: PortDTO[];
+}
+
+export interface PortsResponse {
+  ports: PortDTO[];
+}
+
 // ─── Hives (projets) ─────────────────────────────────────────────────────────
 
 export interface HiveResponse {
@@ -422,7 +438,13 @@ export interface AssignHiveRequest {
 // ─── Service templates (F-V2-07) ─────────────────────────────────────────────
 
 export type LockableField =
-  | 'image' | 'tag' | 'replicas' | 'resources' | 'update_config' | 'placement' | 'networks';
+  | 'image'
+  | 'tag'
+  | 'replicas'
+  | 'resources'
+  | 'update_config'
+  | 'placement'
+  | 'networks';
 
 export interface TemplateSpecDTO {
   image: string;
@@ -499,6 +521,8 @@ export interface NodeInfo {
   cpus: number;
   memory_bytes: number;
   platform: string;
+  /** Agent clusters only: true when this node has a live agent tunnel. */
+  agent_connected?: boolean;
 }
 
 export interface ServiceSummary {
@@ -529,6 +553,69 @@ export interface ClusterOverview {
   catalog: CatalogSummary;
 }
 
+// ─── Cluster management (multi-cluster) ──────────────────────────────────────
+
+export type ClusterType = 'swarm';
+export type ClusterStatus = 'unknown' | 'reachable' | 'unreachable';
+export type ConnectionMode = 'direct' | 'agent';
+export type AgentStatus = 'pending' | 'online' | 'offline';
+
+export interface ClusterResponse {
+  id: string;
+  name: string;
+  type: ClusterType | string;
+  connection_mode: ConnectionMode | string;
+  endpoint?: string;
+  is_default: boolean;
+  status: ClusterStatus | string;
+  labels?: Record<string, string>;
+  tls_enabled: boolean;
+  agent_status?: AgentStatus | string;
+  agent_last_seen?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Returned by POST /clusters/:id/enroll — token shown once + deploy command.
+ *  When the CA is configured, also carries the agent's mTLS client certificate. */
+export interface EnrollClusterResponse {
+  cluster_id: string;
+  cluster_name: string;
+  token: string;
+  command: string;
+  install_command?: string;
+  hub_addr?: string;
+  client_cert?: string;
+  client_key?: string;
+  ca_cert?: string;
+}
+
+export interface ClusterListResponse {
+  items: ClusterResponse[];
+  total: number;
+  page: number;
+  size: number;
+}
+
+export interface CreateClusterRequest {
+  name: string;
+  type?: ClusterType | string;
+  endpoint?: string;
+  labels?: Record<string, string>;
+  ca_cert?: string;
+  client_cert?: string;
+  client_key?: string;
+}
+
+export interface UpdateClusterRequest {
+  name?: string;
+  endpoint?: string;
+  labels?: Record<string, string>;
+  ca_cert?: string;
+  client_cert?: string;
+  client_key?: string;
+}
+
 // ─── Service attachments ─────────────────────────────────────────────────────
 
 export interface ServiceSecretResponse {
@@ -547,6 +634,7 @@ export interface ServiceConfigResponse {
 
 export interface ConfigResponse {
   id: string;
+  cluster_id?: string;
   name: string;
   target_path: string;
   current_version: number;
@@ -608,6 +696,7 @@ export interface ImpactedService {
 
 export interface SecretResponse {
   id: string;
+  cluster_id?: string;
   name: string;
   target_path: string;
   current_version: number;

@@ -1,4 +1,9 @@
-<p-dialog header="Créer un réseau" [(visible)]="visible" [modal]="true" [style]="{ width: '460px' }">
+<p-dialog
+  header="Créer un réseau"
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '460px' }"
+>
   <div class="form">
     <label>Nom <span class="req">*</span></label>
     <input pInputText [(ngModel)]="form.name" placeholder="backend-net" />
@@ -6,7 +11,9 @@
 
     <label>Subnet</label>
     <input pInputText [(ngModel)]="form.subnet" placeholder="10.0.9.0/24" />
-    <small class="muted">CIDR du sous-réseau IPAM. Laisser vide pour attribution automatique par Docker.</small>
+    <small class="muted"
+      >CIDR du sous-réseau IPAM. Laisser vide pour attribution automatique par Docker.</small
+    >
 
     <div class="toggles">
       <div class="toggle-row">

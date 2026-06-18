@@ -1,14 +1,25 @@
-<p-dialog header="Créer un volume" [(visible)]="visible" [modal]="true" [style]="{ width: '460px' }">
+<p-dialog
+  header="Créer un volume"
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '460px' }"
+>
   <div class="form">
     <label>Nom <span class="req">*</span></label>
     <input pInputText [(ngModel)]="form.name" placeholder="app-data" />
     <small class="muted">Nom du volume nommé (lettres, chiffres, <code>_ . -</code>).</small>
 
     <label>Driver</label>
-    <p-select [options]="drivers" [(ngModel)]="form.driver" optionLabel="label" optionValue="value" appendTo="body" />
+    <p-select
+      [options]="drivers"
+      [(ngModel)]="form.driver"
+      optionLabel="label"
+      optionValue="value"
+      appendTo="body"
+    />
     <small class="muted">
-      Les volumes <code>local</code> sont créés par Docker sur chaque nœud au premier montage
-      et ne sont pas partagés entre nœuds.
+      Les volumes <code>local</code> sont créés par Docker sur chaque nœud au premier montage et ne
+      sont pas partagés entre nœuds.
     </small>
   </div>
   <ng-template #footer>

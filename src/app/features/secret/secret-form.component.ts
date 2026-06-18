@@ -22,6 +22,8 @@ export class SecretFormComponent {
   readonly saved = output<void>();
   readonly saving = signal(false);
 
+  // The target cluster comes from the active selection (X-Hivemind-Cluster
+  // header set by clusterInterceptor); no per-form picker needed.
   form = { name: '', target_path: '', value: '' };
 
   open(): void {
@@ -35,25 +37,39 @@ export class SecretFormComponent {
 
   save(): void {
     if (!this.form.name || !this.form.value) {
-      this.toast.add({ severity: 'warn', summary: 'Champs requis', detail: 'Nom et valeur sont obligatoires' });
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Champs requis',
+        detail: 'Nom et valeur sont obligatoires',
+      });
       return;
     }
     this.saving.set(true);
-    this.api.create({
-      name: this.form.name,
-      target_path: this.form.target_path || undefined,
-      value: this.form.value,
-    }).subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.visible.set(false);
-        this.toast.add({ severity: 'success', summary: 'Créé', detail: `Secret ${this.form.name}` });
-        this.saved.emit();
-      },
-      error: (err) => {
-        this.saving.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Création impossible' });
-      },
-    });
+    this.api
+      .create({
+        name: this.form.name,
+        target_path: this.form.target_path || undefined,
+        value: this.form.value,
+      })
+      .subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.visible.set(false);
+          this.toast.add({
+            severity: 'success',
+            summary: 'Créé',
+            detail: `Secret ${this.form.name}`,
+          });
+          this.saved.emit();
+        },
+        error: (err) => {
+          this.saving.set(false);
+          this.toast.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: err?.error?.message ?? 'Création impossible',
+          });
+        },
+      });
   }
 }

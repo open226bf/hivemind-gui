@@ -6,7 +6,13 @@
         <div class="subtitle">{{ services().length }} service(s)</div>
       </div>
       <div class="actions">
-        <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="load()" [loading]="loading()" />
+        <p-button
+          icon="pi pi-refresh"
+          severity="secondary"
+          [text]="true"
+          (onClick)="load()"
+          [loading]="loading()"
+        />
       </div>
     </div>
   }
@@ -31,7 +37,9 @@
               <div class="muted">{{ svc.description }}</div>
             }
           </td>
-          <td><code>{{ svc.full_image }}</code></td>
+          <td>
+            <code>{{ svc.full_image }}</code>
+          </td>
           <td>
             @if (live(svc.id); as ls) {
               <span
@@ -82,9 +90,10 @@
                 [text]="true"
                 size="small"
                 pTooltip="Retirer de Swarm"
-
                 (onClick)="undeploy(svc)"
-                [disabled]="isDeploying(svc.id) || svc.status === 'removed' || svc.status === 'draft'"
+                [disabled]="
+                  isDeploying(svc.id) || svc.status === 'removed' || svc.status === 'draft'
+                "
               />
               <p-button
                 icon="pi pi-trash"

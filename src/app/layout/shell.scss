@@ -1,0 +1,24 @@
+.shell {
+  display: grid;
+  grid-template-columns: var(--hm-sidebar-w) 1fr;
+  grid-template-rows: var(--hm-header-h) 1fr;
+  grid-template-areas:
+    'top top'
+    'side main';
+  height: 100vh;
+}
+
+hm-topbar {
+  grid-area: top;
+}
+
+hm-sidebar {
+  grid-area: side;
+  min-height: 0; /* allow the rail to scroll within the grid row */
+}
+
+.content {
+  grid-area: main;
+  overflow-y: auto;
+  background: var(--hm-bg);
+}

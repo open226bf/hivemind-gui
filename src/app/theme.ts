@@ -44,4 +44,60 @@ export const HivemindPreset = definePreset(Aura, {
       },
     },
   },
+  components: {
+    button: {
+      // AWS-console feel: squared corners, bold labels, crisp tiers.
+      root: {
+        borderRadius: '5px',
+        paddingX: '0.95rem',
+        paddingY: '0.55rem',
+        label: { fontWeight: '600' },
+      },
+      colorScheme: {
+        light: {
+          root: {
+            // "Normal" button (severity="secondary"): white with a defined
+            // border and dark text — clearly distinct from the solid amber
+            // primary, instead of the washed grey default.
+            secondary: {
+              background: '{surface.0}',
+              hoverBackground: '{surface.100}',
+              activeBackground: '{surface.200}',
+              borderColor: '{surface.300}',
+              hoverBorderColor: '{surface.400}',
+              activeBorderColor: '{surface.400}',
+              color: '{surface.700}',
+              hoverColor: '{surface.800}',
+              activeColor: '{surface.800}',
+            },
+          },
+        },
+      },
+    },
+    tabs: {
+      // Compact, flush tab strip on the page background (no white band). Panel
+      // padding is dropped only for table panels via :has() CSS (keeps form
+      // panels padded).
+      tablist: { background: 'transparent' },
+      tab: { padding: '0.55rem 0.9rem' },
+    },
+    tag: {
+      // Cloud-console badges: small, medium weight, soft tinted pill.
+      root: {
+        fontSize: '0.6875rem', // 11px
+        fontWeight: '600',
+        padding: '0.1rem 0.5rem',
+        borderRadius: '1rem', // pill
+      },
+      colorScheme: {
+        light: {
+          secondary: { background: '#eceef2', color: '#4d5375' },
+          success: { background: '#e7f6ec', color: '#1a7f4b' },
+          info: { background: '#e6f0fb', color: '#0b62c4' },
+          warn: { background: '#fdf2e3', color: '#946708' },
+          danger: { background: '#fdeceb', color: '#c0392b' },
+        },
+      },
+    },
+  },
 });

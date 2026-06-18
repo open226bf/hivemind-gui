@@ -1,4 +1,13 @@
-import { Component, DestroyRef, OnInit, effect, inject, input, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  effect,
+  inject,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TagModule } from 'primeng/tag';
@@ -25,7 +34,18 @@ interface Tab {
 @Component({
   selector: 'hm-service-detail',
   providers: [ServiceDetailStore],
-  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, TagModule, ButtonModule, InputNumberModule, ProgressSpinnerModule, ServiceFormComponent, RedeployConfirm],
+  imports: [
+    FormsModule,
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    TagModule,
+    ButtonModule,
+    InputNumberModule,
+    ProgressSpinnerModule,
+    ServiceFormComponent,
+    RedeployConfirm,
+  ],
   templateUrl: './service-detail.component.html',
   styleUrl: './service-detail.component.scss',
 })
@@ -52,14 +72,15 @@ export class ServiceDetail implements OnInit {
   readonly canManage = inject(AuthService).isOperator;
 
   readonly tabs: Tab[] = [
-    { label: 'Général',      path: 'general',     icon: 'pi-info-circle'  },
-    { label: 'Supervision',  path: 'supervision',  icon: 'pi-chart-bar'   },
-    { label: 'Logs',         path: 'logs',         icon: 'pi-align-left'  },
-    { label: 'Déploiements', path: 'deployments',  icon: 'pi-cloud-upload' },
-    { label: 'Variables',    path: 'variables',    icon: 'pi-sliders-h'   },
-    { label: 'Ressources',   path: 'resources',    icon: 'pi-microchip'   },
-    { label: 'Montages',     path: 'mounts',       icon: 'pi-database'    },
-    { label: 'Snapshots',    path: 'snapshots',    icon: 'pi-camera'      },
+    { label: 'Général', path: 'general', icon: 'pi-info-circle' },
+    { label: 'Supervision', path: 'supervision', icon: 'pi-chart-bar' },
+    { label: 'Logs', path: 'logs', icon: 'pi-align-left' },
+    { label: 'Déploiements', path: 'deployments', icon: 'pi-cloud-upload' },
+    { label: 'Variables', path: 'variables', icon: 'pi-sliders-h' },
+    { label: 'Ressources', path: 'resources', icon: 'pi-microchip' },
+    { label: 'Montages', path: 'mounts', icon: 'pi-database' },
+    { label: 'Ports', path: 'ports', icon: 'pi-arrow-right-arrow-left' },
+    { label: 'Snapshots', path: 'snapshots', icon: 'pi-camera' },
   ];
 
   constructor() {
@@ -124,7 +145,10 @@ export class ServiceDetail implements OnInit {
   }
 
   onRedeployConfirmed(opts: { repull: boolean }): void {
-    this.triggerDeploy('Redéploiement lancé', 'Recréation des tâches…', { force: true, repull: opts.repull });
+    this.triggerDeploy('Redéploiement lancé', 'Recréation des tâches…', {
+      force: true,
+      repull: opts.repull,
+    });
   }
 
   undeploy(): void {
@@ -141,13 +165,21 @@ export class ServiceDetail implements OnInit {
       accept: () => {
         this.api.undeploy(svc.id).subscribe({
           next: (updated) => {
-            this.toast.add({ severity: 'success', summary: 'Retiré', detail: `${svc.name} retiré du cluster` });
+            this.toast.add({
+              severity: 'success',
+              summary: 'Retiré',
+              detail: `${svc.name} retiré du cluster`,
+            });
             this.store.service.set(updated);
             this.store.liveStatus.set(null);
             this.reload();
           },
           error: (err) => {
-            this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Retrait impossible' });
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Retrait impossible',
+            });
           },
         });
       },
@@ -155,7 +187,11 @@ export class ServiceDetail implements OnInit {
   }
 
   /** Fires a deployment, optimistically marking the service as pending and polling for the outcome. */
-  private triggerDeploy(summary: string, detail: string, opts: { force?: boolean; repull?: boolean }): void {
+  private triggerDeploy(
+    summary: string,
+    detail: string,
+    opts: { force?: boolean; repull?: boolean },
+  ): void {
     const id = this.id();
     this.store.latestStatus.set('pending');
     this.api.deploy(id, opts).subscribe({
@@ -166,7 +202,11 @@ export class ServiceDetail implements OnInit {
       },
       error: (err) => {
         this.store.latestStatus.set(undefined);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Déploiement impossible' });
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Déploiement impossible',
+        });
       },
     });
   }
@@ -179,13 +219,21 @@ export class ServiceDetail implements OnInit {
       this.deployApi.get(deploymentId).subscribe({
         next: (dep) => {
           this.store.latestStatus.set(dep.status);
-          if (dep.status === 'succeeded' || dep.status === 'failed' || dep.status === 'rolled_back') {
+          if (
+            dep.status === 'succeeded' ||
+            dep.status === 'failed' ||
+            dep.status === 'rolled_back'
+          ) {
             this.polling = false;
             this.reload();
             this.toast.add(
               dep.status === 'succeeded'
                 ? { severity: 'success', summary: 'Déployé', detail: 'Déploiement terminé' }
-                : { severity: 'error', summary: 'Échec', detail: dep.error_message ?? 'Le déploiement a échoué' },
+                : {
+                    severity: 'error',
+                    summary: 'Échec',
+                    detail: dep.error_message ?? 'Le déploiement a échoué',
+                  },
             );
             return;
           }
@@ -205,7 +253,12 @@ export class ServiceDetail implements OnInit {
       .pipe(finalize(() => this.scaling.set(false)))
       .subscribe({
         next: () => this.triggerDeploy(`Scale → ${replicas}`, 'Déploiement lancé…', {}),
-        error: (err) => this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Mise à jour impossible' }),
+        error: (err) =>
+          this.toast.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: err?.error?.message ?? 'Mise à jour impossible',
+          }),
       });
   }
 

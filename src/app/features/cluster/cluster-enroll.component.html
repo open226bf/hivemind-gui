@@ -1,0 +1,274 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>{{ clusterId() ? 'Enrôler un agent' : 'Ajouter un cluster' }}</h1>
+      <div class="subtitle">
+        {{
+          clusterId()
+            ? clusterName()
+            : 'Connecte un cluster en direct (socket/mTLS) ou via un agent (dial-out).'
+        }}
+      </div>
+    </div>
+    <a routerLink="/clusters"
+      ><p-button label="Retour" icon="pi pi-arrow-left" severity="secondary" [text]="true"
+    /></a>
+  </div>
+
+  <!-- Identity + mode (hidden when re-enrolling an existing cluster) -->
+  @if (!enrollment()) {
+    <div class="card form">
+      @if (!clusterId()) {
+        <label>Nom <span class="req">*</span></label>
+        <input
+          pInputText
+          [(ngModel)]="form.name"
+          placeholder="prod-eu"
+          [class.invalid]="nameInvalid()"
+        />
+        @if (nameInvalid()) {
+          <small class="err"
+            >Minuscules, chiffres et tirets (slug DNS), p. ex. <code>prod-eu</code>.</small
+          >
+        }
+
+        <label>Labels</label>
+        <textarea
+          pTextarea
+          [(ngModel)]="form.labels"
+          rows="2"
+          placeholder="zone=eu-west&#10;tier=prod"
+        ></textarea>
+        <small class="muted">Une paire <code>clé=valeur</code> par ligne.</small>
+      }
+
+      <label>Mode de connexion</label>
+      <p-selectButton
+        [options]="modeOptions"
+        [(ngModel)]="mode"
+        optionLabel="label"
+        optionValue="value"
+        [allowEmpty]="false"
+      />
+
+      @if (mode === 'agent') {
+        <div class="mode-note">
+          <i class="pi pi-bolt"></i>
+          <span>
+            L'agent se déploie sur le cluster et <strong>compose vers Hivemind</strong> : aucune
+            ouverture entrante requise, et tu obtiens les métriques par nœud. On crée le cluster
+            puis on génère un token d'enrôlement à usage unique.
+          </span>
+        </div>
+      } @else {
+        <div class="mode-note">
+          <i class="pi pi-server"></i>
+          <span>
+            Hivemind se connecte directement au démon Docker d'un <strong>manager</strong>. Laisse
+            l'endpoint vide pour l'environnement Docker local du serveur, ou renseigne une adresse
+            TCP + TLS mutuel.
+          </span>
+        </div>
+
+        <label>Endpoint</label>
+        <input pInputText [(ngModel)]="form.endpoint" placeholder="tcp://10.0.0.10:2376" />
+
+        <button type="button" class="tls-toggle" (click)="toggleTls()">
+          <i
+            class="pi"
+            [class.pi-chevron-right]="!showTls()"
+            [class.pi-chevron-down]="showTls()"
+          ></i>
+          TLS mutuel (optionnel)
+        </button>
+        @if (showTls()) {
+          <div class="tls-body">
+            <small class="muted">Requis pour un démon distant en TCP. Collez le contenu PEM.</small>
+            <label>CA certificate (PEM)</label>
+            <textarea
+              pTextarea
+              [(ngModel)]="form.caCert"
+              rows="3"
+              placeholder="-----BEGIN CERTIFICATE-----"
+            ></textarea>
+            <label>Client certificate (PEM)</label>
+            <textarea
+              pTextarea
+              [(ngModel)]="form.clientCert"
+              rows="3"
+              placeholder="-----BEGIN CERTIFICATE-----"
+            ></textarea>
+            <label>Client key (PEM)</label>
+            <textarea
+              pTextarea
+              [(ngModel)]="form.clientKey"
+              rows="3"
+              placeholder="-----BEGIN PRIVATE KEY-----"
+            ></textarea>
+          </div>
+        }
+      }
+
+      <div class="form-actions">
+        @if (mode === 'agent') {
+          <p-button
+            [label]="clusterId() ? 'Générer un token' : 'Créer & générer le token'"
+            icon="pi pi-key"
+            (onClick)="generateToken()"
+            [loading]="saving()"
+            [disabled]="!nameOk()"
+          />
+        } @else {
+          <p-button
+            label="Créer le cluster"
+            icon="pi pi-check"
+            (onClick)="createDirect()"
+            [loading]="saving()"
+            [disabled]="!nameOk()"
+          />
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Enrollment result -->
+  @if (enrollment(); as enr) {
+    <div class="card enroll">
+      <div class="enroll-head">
+        <div>
+          <h2>Agent à déployer</h2>
+          <div class="subtitle">
+            Cluster <code>{{ enr.cluster_name }}</code>
+          </div>
+        </div>
+        <div class="agent-state">
+          <span class="muted">Statut agent</span>
+          <p-tag [value]="agentStatus() || 'en attente'" [severity]="agentSeverity()" />
+        </div>
+      </div>
+
+      <ol class="steps">
+        <li>Connecte-toi à un <strong>manager</strong> du cluster cible.</li>
+        <li>Colle la commande ci-dessous : elle télécharge et lance l'installation de l'agent.</li>
+      </ol>
+
+      <label>Commande d'installation (à lancer sur un manager)</label>
+      <div class="copybox">
+        <code>{{ enr.install_command || installCommand(enr.token) }}</code>
+        <p-button
+          icon="pi pi-copy"
+          [text]="true"
+          pTooltip="Copier"
+          (onClick)="copy(enr.install_command || installCommand(enr.token))"
+        />
+      </div>
+      <small class="muted">
+        Récupère le script (secrets + compose) et exécute <code>docker stack deploy</code>. Le token
+        est à usage unique.
+      </small>
+
+      <button type="button" class="tls-toggle" (click)="toggleAdvanced()">
+        <i
+          class="pi"
+          [class.pi-chevron-right]="!showAdvanced()"
+          [class.pi-chevron-down]="showAdvanced()"
+        ></i>
+        Méthode manuelle (avancé)
+      </button>
+      @if (showAdvanced()) {
+        <label>Commande de déploiement</label>
+        <div class="copybox">
+          <code>{{ enr.command }}</code>
+          <p-button
+            icon="pi pi-copy"
+            [text]="true"
+            pTooltip="Copier"
+            (onClick)="copy(enr.command)"
+          />
+        </div>
+
+        <label>Token d'enrôlement (affiché une seule fois)</label>
+        <div class="copybox">
+          <code class="token">{{ enr.token }}</code>
+          <p-button icon="pi pi-copy" [text]="true" pTooltip="Copier" (onClick)="copy(enr.token)" />
+        </div>
+
+        @if (enr.client_cert) {
+          <div class="mtls">
+            <div class="mtls-title"><i class="pi pi-shield"></i> mTLS (recommandé)</div>
+            <small class="muted">
+              L'agent s'authentifie par certificat client. Fournis ces valeurs à l'agent
+              (<code>HIVEMIND_HUB_ADDR</code>, <code>HIVEMIND_CLIENT_CERT</code>,
+              <code>HIVEMIND_CLIENT_KEY</code>, <code>HIVEMIND_CA_CERT</code>) — idéalement via des
+              secrets Docker. Affiché une seule fois.
+            </small>
+
+            <label>Adresse du hub</label>
+            <div class="copybox">
+              <code>{{ enr.hub_addr || '(non configurée)' }}</code>
+              @if (enr.hub_addr) {
+                <p-button
+                  icon="pi pi-copy"
+                  [text]="true"
+                  pTooltip="Copier"
+                  (onClick)="copy(enr.hub_addr)"
+                />
+              }
+            </div>
+
+            <label>Certificat client (PEM)</label>
+            <div class="copybox">
+              <pre>{{ enr.client_cert }}</pre>
+              <p-button
+                icon="pi pi-copy"
+                [text]="true"
+                pTooltip="Copier"
+                (onClick)="copy(enr.client_cert)"
+              />
+            </div>
+
+            <label>Clé privée client (PEM)</label>
+            <div class="copybox">
+              <pre>{{ enr.client_key }}</pre>
+              <p-button
+                icon="pi pi-copy"
+                [text]="true"
+                pTooltip="Copier"
+                (onClick)="copy(enr.client_key)"
+              />
+            </div>
+
+            <label>CA (PEM)</label>
+            <div class="copybox">
+              <pre>{{ enr.ca_cert }}</pre>
+              <p-button
+                icon="pi pi-copy"
+                [text]="true"
+                pTooltip="Copier"
+                (onClick)="copy(enr.ca_cert)"
+              />
+            </div>
+          </div>
+        }
+
+        <label>Manifeste <code>hivemind-agent.yml</code></label>
+        <div class="copybox manifest">
+          <pre>{{ manifest }}</pre>
+          <p-button icon="pi pi-copy" [text]="true" pTooltip="Copier" (onClick)="copy(manifest)" />
+        </div>
+      }
+
+      <div class="enroll-actions">
+        @if (agentStatus() === 'online') {
+          <span class="online-hint"><i class="pi pi-check-circle"></i> Agent connecté.</span>
+        } @else {
+          <span class="muted"
+            ><i class="pi pi-spin pi-spinner"></i> En attente de la première connexion de
+            l'agent…</span
+          >
+        }
+        <a routerLink="/clusters"><p-button label="Terminer" icon="pi pi-check" /></a>
+      </div>
+    </div>
+  }
+</div>

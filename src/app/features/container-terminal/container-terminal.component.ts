@@ -1,9 +1,9 @@
 import { Component, ElementRef, ViewChild, inject, input, model, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { DialogModule } from 'primeng/dialog';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 
-import { AuthService } from '../../core/auth.service';
 import { API_BASE } from '../../core/config';
 
 @Component({
@@ -19,7 +19,7 @@ export class ContainerTerminalComponent {
 
   @ViewChild('term') private termEl?: ElementRef<HTMLDivElement>;
 
-  private readonly auth = inject(AuthService);
+  private readonly http = inject(HttpClient);
   readonly connected = signal(false);
 
   private term?: Terminal;
@@ -53,13 +53,20 @@ export class ContainerTerminalComponent {
   }
 
   private connect(): void {
-    const token = this.auth.token();
-    if (!token) {
-      this.term?.writeln('\x1b[31mSession expirée — reconnectez-vous.\x1b[0m');
-      return;
-    }
+    // Exchange the (header-authenticated) bearer token for a single-use ticket,
+    // then open the socket with it. The access token never touches the URL.
+    this.http
+      .post<{ ticket: string }>(`${API_BASE}/services/${this.serviceId()}/exec/ticket`, {})
+      .subscribe({
+        next: (res) => this.openSocket(res.ticket),
+        error: () =>
+          this.term?.writeln('\x1b[31mImpossible d’ouvrir la session (autorisation refusée).\x1b[0m'),
+      });
+  }
+
+  private openSocket(ticket: string): void {
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    const params = new URLSearchParams({ container: this.containerId(), token });
+    const params = new URLSearchParams({ container: this.containerId(), ticket });
     const url = `${proto}://${location.host}${API_BASE}/services/${this.serviceId()}/exec?${params.toString()}`;
 
     const ws = new WebSocket(url);
