@@ -33,7 +33,7 @@
     </div>
   } @else if (overview(); as ov) {
     @if (!ov.cluster.reachable) {
-      <div class="banner warn">
+      <div class="banner warn flex gap-3 align-items-start">
         <i class="pi pi-exclamation-triangle"></i>
         <div>
           <strong>Orchestrateur injoignable</strong>
@@ -46,7 +46,7 @@
     }
 
     <!-- ─── Capacité & santé cluster ─── -->
-    <div class="grid kpis">
+    <div class="dash-grid kpis">
       <div class="card kpi">
         <span class="kpi-icon"><i class="pi pi-server"></i></span>
         <div>
@@ -94,7 +94,7 @@
     }
 
     <!-- ─── Compteurs métier ─── -->
-    <div class="grid summaries">
+    <div class="dash-grid summaries">
       <div class="card summary">
         <h2>Services</h2>
         <div class="big">{{ ov.services.total }}</div>

@@ -1,7 +1,9 @@
 <div class="page" [style.--hive-color]="color()">
-  <a class="back" routerLink="/hives"><i class="pi pi-arrow-left"></i> Ruches</a>
+  <a class="back inline-flex align-items-center gap-2 mb-3" routerLink="/hives"
+    ><i class="pi pi-arrow-left"></i> Ruches</a
+  >
 
-  <div class="detail-header">
+  <div class="detail-header flex align-items-center gap-3 mb-3">
     <span class="dot" [style.background]="color()"></span>
     <div class="titles">
       <h1>{{ isUnassigned() ? 'Sans ruche' : (hive()?.name ?? '…') }}</h1>
@@ -13,7 +15,7 @@
         }
       </div>
     </div>
-    <div class="header-actions">
+    <div class="flex align-items-center gap-2">
       @if (canManage() && !isUnassigned()) {
         <p-button
           label="Gérer les services"
@@ -70,7 +72,7 @@
     display="chip"
     appendTo="body"
     placeholder="Choisir des services"
-    styleClass="full"
+    styleClass="w-full mt-2"
   />
   <ng-template #footer>
     <p-button

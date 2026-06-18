@@ -146,10 +146,6 @@ input {
   margin-top: 22px;
 }
 
-::ng-deep .w-full {
-  width: 100%;
-}
-
 /* ─── Responsive: hide the brand panel on narrow screens ────────────────────── */
 @media (max-width: 860px) {
   .brand-side {

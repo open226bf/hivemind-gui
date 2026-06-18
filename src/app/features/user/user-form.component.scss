@@ -1,20 +1,8 @@
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
-  label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--hm-text-muted);
-    margin-top: 10px;
-  }
-
-  input,
-  ::ng-deep .p-password,
-  ::ng-deep .p-select {
-    width: 100%;
-  }
+.form label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hm-text-muted);
+  margin-top: 10px;
 }
 
 .req {
@@ -24,19 +12,4 @@
 .muted {
   color: var(--hm-text-muted);
   font-size: 12px;
-}
-
-.active-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 14px;
-
-  label.inline {
-    margin-top: 0;
-  }
-}
-
-::ng-deep .w-full {
-  width: 100%;
 }

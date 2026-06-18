@@ -6,7 +6,7 @@
 >
   @let t = template();
   @if (t) {
-    <div class="form">
+    <div class="form flex flex-column gap-2">
       <label>Nom du service <span class="req">*</span></label>
       <input pInputText [(ngModel)]="form.name" placeholder="orders-api" />
 

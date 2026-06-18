@@ -1,21 +1,21 @@
-<div class="logctl">
-  <span class="conn" [class.on]="connected()">
+<div class="logctl flex align-items-center gap-3 mb-3 flex-wrap">
+  <span class="conn inline-flex align-items-center gap-2" [class.on]="connected()">
     <span class="dot"></span>{{ connected() ? 'Connecté' : 'Déconnecté' }}
   </span>
 
-  <label class="ctl">
+  <label class="ctl inline-flex align-items-center gap-2">
     <span>Suivre</span>
     <p-toggleswitch [(ngModel)]="follow" (ngModelChange)="restart()" />
   </label>
 
-  <label class="ctl">
+  <label class="ctl inline-flex align-items-center gap-2">
     <span>Lignes</span>
     <input pInputText class="tail" type="number" min="1" [(ngModel)]="tail" (change)="restart()" />
   </label>
 
-  <span class="spacer"></span>
+  <span class="flex-1"></span>
 
-  <label class="ctl">
+  <label class="ctl inline-flex align-items-center gap-2">
     <span>Auto-défilement</span>
     <p-toggleswitch [(ngModel)]="autoScroll" />
   </label>
@@ -38,7 +38,9 @@
 </div>
 
 @if (error(); as e) {
-  <div class="banner error"><i class="pi pi-exclamation-triangle"></i> {{ e }}</div>
+  <div class="banner error flex gap-2 align-items-center">
+    <i class="pi pi-exclamation-triangle"></i> {{ e }}
+  </div>
 }
 
 <div #console class="console" (scroll)="onScroll()">

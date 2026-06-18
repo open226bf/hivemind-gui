@@ -1,15 +1,17 @@
 @let svc = store.service();
 
 <div class="page">
-  <a routerLink="/services" class="back"><i class="pi pi-arrow-left"></i> Services</a>
+  <a routerLink="/services" class="back inline-block mb-3"
+    ><i class="pi pi-arrow-left"></i> Services</a
+  >
 
   @if (svc) {
     <div class="page-header">
       <div>
-        <h1>
+        <h1 class="flex align-items-center gap-3">
           {{ svc.name }}
           @if (store.deploying()) {
-            <span class="deploying">
+            <span class="deploying inline-flex align-items-center gap-2">
               <p-progressSpinner [style]="{ width: '16px', height: '16px' }" strokeWidth="6" />
               déploiement en cours…
             </span>
@@ -19,11 +21,13 @@
         </h1>
         <div class="subtitle">{{ svc.full_image }}</div>
       </div>
-      <div class="actions">
+      <div class="flex align-items-center gap-2">
         <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="reload()" />
         @if (canManage()) {
-          <div class="scale-ctrl">
-            <span class="scale-label"><i class="pi pi-server"></i> Replicas</span>
+          <div class="scale-ctrl flex align-items-center gap-2">
+            <span class="scale-label flex align-items-center gap-1"
+              ><i class="pi pi-server"></i> Replicas</span
+            >
             <p-inputnumber
               [(ngModel)]="scaleValue"
               [min]="0"
@@ -68,7 +72,7 @@
     </div>
 
     @if (store.liveStatus()?.externally_removed) {
-      <div class="banner error">
+      <div class="banner error flex gap-3 align-items-start mb-3">
         <i class="pi pi-exclamation-triangle"></i>
         <div>
           <strong>Service retiré hors Hivemind</strong>
@@ -81,7 +85,7 @@
     }
 
     @if (store.lastFailure(); as fail) {
-      <div class="banner error">
+      <div class="banner error flex gap-3 align-items-start mb-3">
         <i class="pi pi-exclamation-triangle"></i>
         <div>
           <strong>Dernier déploiement en échec</strong>
@@ -90,7 +94,7 @@
       </div>
     }
 
-    <nav class="tab-nav">
+    <nav class="tab-nav flex">
       @for (tab of tabs; track tab.path) {
         <a [routerLink]="tab.path" routerLinkActive="active" class="tab-link">
           <i class="pi" [class]="tab.icon"></i>
@@ -101,7 +105,7 @@
 
     <router-outlet />
   } @else {
-    <div class="loading">
+    <div class="loading flex align-items-center gap-3">
       <p-progressSpinner strokeWidth="4" />
       Chargement du service…
     </div>

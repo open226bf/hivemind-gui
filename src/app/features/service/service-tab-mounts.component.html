@@ -1,7 +1,7 @@
 <div class="card section">
-  <div class="section-head">
+  <div class="section-head flex align-items-center justify-content-between">
     <h2>Montages</h2>
-    <div class="head-actions">
+    <div class="flex gap-2">
       @if (!editing()) {
         @if (canManage()) {
           <p-button
@@ -33,7 +33,7 @@
   </div>
 
   @for (w of warnings(); track $index) {
-    <div class="banner warn">
+    <div class="banner warn flex gap-2 align-items-start">
       <i class="pi pi-exclamation-triangle"></i>
       <div>{{ w }}</div>
     </div>
@@ -74,7 +74,7 @@
   }
 
   @if (editing()) {
-    <div class="banner info">
+    <div class="banner info flex gap-2 align-items-start">
       <i class="pi pi-info-circle"></i>
       <div>
         Les <strong>volumes nommés</strong> doivent exister dans le catalogue. Les
@@ -83,9 +83,9 @@
       </div>
     </div>
 
-    <div class="rows">
+    <div class="rows flex flex-column gap-2">
       @for (row of rows(); track $index) {
-        <div class="row">
+        <div class="row flex gap-2 align-items-center">
           <p-select
             class="type"
             [options]="typeOptions()"
@@ -116,7 +116,7 @@
 
           <input pInputText class="tgt" [(ngModel)]="row.target" placeholder="/chemin/conteneur" />
 
-          <label class="ro-toggle">
+          <label class="ro-toggle inline-flex align-items-center gap-2">
             <p-checkbox
               [(ngModel)]="row.read_only"
               [binary]="true"

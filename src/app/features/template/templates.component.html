@@ -4,7 +4,7 @@
       <h1>Templates</h1>
       <div class="subtitle">{{ templates().length }} modèle(s) de service</div>
     </div>
-    <div class="actions">
+    <div class="flex gap-2 align-items-center">
       <p-button
         icon="pi pi-refresh"
         severity="secondary"
@@ -50,7 +50,7 @@
               <span class="muted">—</span>
             }
           </td>
-          <td class="row-actions">
+          <td class="flex gap-2 justify-content-end">
             @if (canInstantiate()) {
               <p-button
                 label="Instancier"

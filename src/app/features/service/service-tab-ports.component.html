@@ -1,7 +1,7 @@
 <div class="card section">
-  <div class="section-head">
+  <div class="section-head flex align-items-center justify-content-between">
     <h2>Ports publiés</h2>
-    <div class="head-actions">
+    <div class="flex gap-2">
       @if (!editing()) {
         @if (canManage()) {
           <p-button
@@ -63,7 +63,7 @@
   }
 
   @if (editing()) {
-    <div class="banner info">
+    <div class="banner info flex gap-2 align-items-start">
       <i class="pi pi-info-circle"></i>
       <div>
         Le <strong>port publié</strong> est exposé sur le cluster (laisser vide pour une attribution
@@ -73,9 +73,9 @@
       </div>
     </div>
 
-    <div class="rows">
+    <div class="rows flex flex-column gap-2">
       @for (row of rows(); track $index) {
-        <div class="row">
+        <div class="row flex gap-2 align-items-center">
           <p-inputnumber
             class="pub"
             [(ngModel)]="row.published_port"

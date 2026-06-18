@@ -11,15 +11,6 @@
   padding: 6px 10px;
 }
 
-.cluster-picker ::ng-deep .cluster-select {
-  width: 100%;
-}
-
-.cluster-trigger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 .cluster-trigger .pi {
   font-size: 13px;
   color: var(--hm-text-muted);

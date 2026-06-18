@@ -4,7 +4,7 @@
       <h1>Clusters</h1>
       <div class="subtitle">{{ clusters().length }} cluster(s) d'orchestration</div>
     </div>
-    <div class="actions">
+    <div class="flex gap-2 align-items-center">
       <p-button
         icon="pi pi-refresh"
         severity="secondary"
@@ -76,7 +76,7 @@
             }
           </td>
           <td class="muted">{{ c.created_at | date: 'short' }}</td>
-          <td class="row-actions">
+          <td class="flex gap-1 justify-content-end align-items-center">
             <p-button
               icon="pi pi-bolt"
               severity="secondary"

@@ -4,7 +4,7 @@
       <h1>Configs</h1>
       <div class="subtitle">{{ configs().length }} config(s)</div>
     </div>
-    <div class="actions">
+    <div class="flex gap-2 align-items-center">
       <p-button
         icon="pi pi-refresh"
         severity="secondary"
@@ -39,7 +39,7 @@
           <td><p-tag [value]="'v' + c.current_version" severity="info" /></td>
           <td class="muted">{{ c.created_at | date: 'short' }}</td>
           <td class="muted">{{ c.updated_at | date: 'short' }}</td>
-          <td class="row-actions">
+          <td class="flex gap-2 justify-content-end">
             <p-button
               icon="pi pi-history"
               severity="secondary"

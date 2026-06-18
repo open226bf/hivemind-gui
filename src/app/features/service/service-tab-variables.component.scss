@@ -3,15 +3,7 @@
 }
 
 .section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 14px 18px 10px;
-}
-
-.head-actions {
-  display: flex;
-  gap: 8px;
 }
 
 h2 {
@@ -32,9 +24,6 @@ code {
 
 .masked {
   color: var(--hm-text-muted);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   font-size: 13px;
 }
 .val {
@@ -53,9 +42,6 @@ code {
 }
 
 .banner {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
   padding: 12px 16px;
   border-radius: 6px;
   margin: 0 18px 14px;
@@ -74,17 +60,10 @@ code {
 }
 
 .rows {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   padding: 0 18px;
 }
 
 .row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-
   .k {
     flex: 0 0 38%;
     font-family: monospace;
@@ -96,9 +75,6 @@ code {
 }
 
 .secret-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   font-size: 13px;
   color: var(--hm-text-muted);
   white-space: nowrap;
@@ -111,9 +87,6 @@ code {
 }
 .row-err.global {
   padding: 10px 18px 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 ::ng-deep .rows + p-button {

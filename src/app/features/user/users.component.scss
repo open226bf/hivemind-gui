@@ -1,7 +1,3 @@
-.actions {
-  display: flex;
-  gap: 8px;
-}
 .muted {
   color: var(--hm-text-muted);
   font-size: 12px;
@@ -39,12 +35,6 @@
   &.off {
     color: var(--hm-text-muted);
   }
-}
-
-.row-actions {
-  display: flex;
-  gap: 6px;
-  justify-content: flex-end;
 }
 
 .empty-state {

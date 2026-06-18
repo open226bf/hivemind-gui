@@ -4,7 +4,7 @@
   [modal]="true"
   [style]="{ width: '460px' }"
 >
-  <div class="form">
+  <div class="form flex flex-column gap-1">
     <label>Nom <span class="req">*</span></label>
     <input pInputText [(ngModel)]="form.name" placeholder="backend-net" />
     <small class="muted">Nom DNS overlay (minuscules, chiffres, tirets).</small>
@@ -15,13 +15,13 @@
       >CIDR du sous-réseau IPAM. Laisser vide pour attribution automatique par Docker.</small
     >
 
-    <div class="toggles">
-      <div class="toggle-row">
+    <div class="flex flex-column gap-3 mt-3">
+      <div class="toggle-row flex align-items-center gap-2 flex-wrap">
         <p-toggleswitch [(ngModel)]="form.attachable" />
         <span>Attachable</span>
         <small class="muted">Permet aux conteneurs hors Swarm de rejoindre ce réseau.</small>
       </div>
-      <div class="toggle-row">
+      <div class="toggle-row flex align-items-center gap-2 flex-wrap">
         <p-toggleswitch [(ngModel)]="form.external" />
         <span>External</span>
         <small class="muted">Réseau créé en dehors de la plateforme (ne sera pas supprimé).</small>

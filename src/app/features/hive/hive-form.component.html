@@ -4,7 +4,7 @@
   [modal]="true"
   [style]="{ width: '460px' }"
 >
-  <div class="form">
+  <div class="form flex flex-column gap-2">
     <label>Nom <span class="req">*</span></label>
     <input pInputText [(ngModel)]="form.name" placeholder="Plateforme paiement" />
 
@@ -12,7 +12,7 @@
     <input pInputText [(ngModel)]="form.description" placeholder="Optionnelle" />
 
     <label>Couleur</label>
-    <div class="palette">
+    <div class="palette flex gap-2 flex-wrap mt-1">
       @for (c of palette; track c) {
         <button
           type="button"

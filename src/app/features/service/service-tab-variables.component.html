@@ -1,7 +1,7 @@
 <div class="card section">
-  <div class="section-head">
+  <div class="section-head flex align-items-center justify-content-between">
     <h2>Variables d'environnement</h2>
-    <div class="head-actions">
+    <div class="flex gap-2">
       @if (!editing()) {
         @if (canManage()) {
           <p-button
@@ -48,7 +48,9 @@
           </td>
           <td>
             @if (v.is_secret) {
-              <span class="masked"><i class="pi pi-lock"></i> ••••••••</span>
+              <span class="masked inline-flex align-items-center gap-2"
+                ><i class="pi pi-lock"></i> ••••••••</span
+              >
             } @else {
               <span class="val">{{ v.value || '—' }}</span>
             }
@@ -73,7 +75,7 @@
   }
 
   @if (editing()) {
-    <div class="banner info">
+    <div class="banner info flex gap-2 align-items-start">
       <i class="pi pi-info-circle"></i>
       <div>
         L'enregistrement <strong>remplace l'intégralité</strong> des variables. Les valeurs secrètes
@@ -82,9 +84,12 @@
       </div>
     </div>
 
-    <div class="rows">
+    <div class="rows flex flex-column gap-2">
       @for (row of rows(); track $index) {
-        <div class="row" [class.invalid]="row.key && !keyValid(row.key)">
+        <div
+          class="row flex gap-2 align-items-center"
+          [class.invalid]="row.key && !keyValid(row.key)"
+        >
           <input
             pInputText
             class="k"
@@ -101,7 +106,7 @@
               row.wasSecretFromServer ? 'valeur masquée — saisir pour conserver' : 'valeur'
             "
           />
-          <label class="secret-toggle">
+          <label class="secret-toggle inline-flex align-items-center gap-2">
             <p-checkbox [(ngModel)]="row.is_secret" [binary]="true" />
             secret
           </label>
@@ -129,7 +134,7 @@
     />
 
     @if (duplicateKey(); as dup) {
-      <div class="row-err global">
+      <div class="row-err global flex align-items-center gap-2">
         <i class="pi pi-exclamation-triangle"></i> Clé en double : <code>{{ dup }}</code>
       </div>
     }

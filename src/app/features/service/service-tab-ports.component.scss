@@ -3,15 +3,7 @@
 }
 
 .section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 14px 18px 10px;
-}
-
-.head-actions {
-  display: flex;
-  gap: 8px;
 }
 
 h2 {
@@ -38,9 +30,6 @@ h2 {
 }
 
 .banner {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
   padding: 12px 16px;
   border-radius: 6px;
   margin: 0 18px 12px;
@@ -60,17 +49,10 @@ h2 {
 }
 
 .rows {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   padding: 0 18px;
 }
 
 .row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-
   .pub {
     flex: 0 0 120px;
   }

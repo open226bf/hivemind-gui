@@ -1,15 +1,4 @@
-.logctl {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
-
 .conn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   font-size: 13px;
   font-weight: 600;
   color: var(--hm-text-muted);
@@ -43,9 +32,6 @@
 }
 
 .ctl {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   font-size: 13px;
   color: var(--hm-text-muted);
 
@@ -54,14 +40,7 @@
   }
 }
 
-.spacer {
-  flex: 1;
-}
-
 .banner.error {
-  display: flex;
-  gap: 8px;
-  align-items: center;
   background: #fdecec;
   border: 1px solid #f5c6c6;
   color: #8a2b2b;

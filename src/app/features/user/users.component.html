@@ -4,7 +4,7 @@
       <h1>Utilisateurs</h1>
       <div class="subtitle">{{ users().length }} compte(s) · gestion des accès (RBAC)</div>
     </div>
-    <div class="actions">
+    <div class="flex gap-2 align-items-center">
       <p-button
         icon="pi pi-refresh"
         severity="secondary"
@@ -44,7 +44,7 @@
             }
           </td>
           <td class="muted">{{ u.created_at | date: 'short' }}</td>
-          <td class="row-actions">
+          <td class="flex gap-2 justify-content-end">
             <p-button
               icon="pi pi-pencil"
               severity="secondary"

@@ -3,13 +3,9 @@
 }
 
 .back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   color: var(--hm-text-muted);
   font-size: 13px;
   text-decoration: none;
-  margin-bottom: 12px;
 
   &:hover {
     color: var(--hm-primary, #2563eb);
@@ -17,11 +13,6 @@
 }
 
 .detail-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-
   .dot {
     width: 16px;
     height: 16px;
@@ -44,18 +35,8 @@
   }
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .dialog-hint {
   color: var(--hm-text-muted);
   font-size: 13px;
   margin: 0 0 4px;
-}
-::ng-deep .p-multiselect.full {
-  width: 100%;
-  margin-top: 8px;
 }

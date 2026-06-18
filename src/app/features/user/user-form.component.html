@@ -4,7 +4,7 @@
   [modal]="true"
   [style]="{ width: '440px' }"
 >
-  <div class="form">
+  <div class="form flex flex-column gap-1">
     <label>Email <span class="req">*</span></label>
     <input
       pInputText
@@ -43,8 +43,8 @@
     />
 
     @if (mode() === 'edit') {
-      <div class="active-row">
-        <label class="inline">Compte actif</label>
+      <div class="flex align-items-center justify-content-between mt-3">
+        <label class="mt-0">Compte actif</label>
         <p-toggleswitch [(ngModel)]="form.active" />
       </div>
       <small class="muted">Un compte inactif ne peut plus se connecter.</small>

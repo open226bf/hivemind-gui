@@ -4,7 +4,7 @@
       <h1>Déploiements</h1>
       <div class="subtitle">{{ total() }} déploiement(s) au total</div>
     </div>
-    <div class="actions">
+    <div class="flex gap-2 align-items-center">
       <p-button
         icon="pi pi-refresh"
         severity="secondary"
@@ -16,8 +16,8 @@
   </div>
 
   <div class="card filters">
-    <div class="filter-row">
-      <div class="filter">
+    <div class="flex gap-3 align-items-end flex-wrap">
+      <div class="filter flex flex-column gap-1 flex-1">
         <label>Service</label>
         <p-select
           [(ngModel)]="filterService"
@@ -30,7 +30,7 @@
           styleClass="filter-select"
         />
       </div>
-      <div class="filter">
+      <div class="filter flex flex-column gap-1 flex-1">
         <label>Statut</label>
         <p-select
           [(ngModel)]="filterStatus"
@@ -42,7 +42,7 @@
           styleClass="filter-select"
         />
       </div>
-      <div class="filter">
+      <div class="filter flex flex-column gap-1 flex-1">
         <label>Depuis</label>
         <p-datepicker
           [(ngModel)]="filterFrom"
@@ -53,7 +53,7 @@
           styleClass="filter-date"
         />
       </div>
-      <div class="filter">
+      <div class="filter flex flex-column gap-1 flex-1">
         <label>Jusqu'à</label>
         <p-datepicker
           [(ngModel)]="filterTo"
@@ -64,7 +64,7 @@
           styleClass="filter-date"
         />
       </div>
-      <div class="filter-actions">
+      <div class="flex align-items-end">
         <div>
           <p-button label="Filtrer" icon="pi pi-search" size="small" (onClick)="search()" />
           <p-button

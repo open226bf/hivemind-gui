@@ -8,10 +8,12 @@
       optionLabel="label"
       optionValue="value"
       appendTo="body"
-      styleClass="cluster-select"
+      styleClass="cluster-select w-full"
     >
       <ng-template #selectedItem let-opt>
-        <span class="cluster-trigger"><i class="pi pi-server"></i>{{ opt.label }}</span>
+        <span class="cluster-trigger flex align-items-center gap-2"
+          ><i class="pi pi-server"></i>{{ opt.label }}</span
+        >
       </ng-template>
     </p-select>
   </div>

@@ -4,7 +4,7 @@
   [style]="{ width: '480px' }"
   [header]="editingId() ? 'Modifier le template' : 'Créer un template'"
 >
-  <div class="form">
+  <div class="form flex flex-column gap-2">
     <label>Nom <span class="req">*</span></label>
     <input pInputText [(ngModel)]="form.name" placeholder="java-api" [disabled]="!!editingId()" />
     @if (editingId()) {

@@ -1,9 +1,9 @@
 @let svc = service();
 @if (svc) {
-  <div class="grid">
+  <div class="metrics-grid">
     <!-- ─── Ressources ──────────────────────────────────────────────── -->
     <div class="card section">
-      <div class="section-head">
+      <div class="section-head flex align-items-center justify-content-between">
         <h2>Ressources</h2>
         @if (canManage()) {
           @if (!editingRes()) {
@@ -15,7 +15,7 @@
               (onClick)="startEditRes()"
             />
           } @else {
-            <div class="head-actions">
+            <div class="flex gap-2">
               <p-button
                 label="Annuler"
                 severity="secondary"
@@ -48,7 +48,7 @@
           <dd>{{ mib(svc.resources.mem_limit) }}</dd>
         </dl>
       } @else {
-        <div class="fields pad">
+        <div class="fields pad flex flex-column gap-3">
           <label>
             <span>CPU réservé <em>(cœurs)</em></span>
             <p-inputNumber
@@ -88,20 +88,20 @@
             />
           </label>
           @if (maxNodeCpu()) {
-            <p class="cap-hint">
+            <p class="cap-hint flex align-items-center gap-2">
               <i class="pi pi-server"></i>
               Plus gros nœud : <strong>{{ maxNodeCpu() }}</strong> cœurs /
               <strong>{{ maxNodeMemMib() }}</strong> MiB.
             </p>
           }
           @if (resExceedsCapacity()) {
-            <div class="row-err">
+            <div class="row-err flex align-items-center gap-2">
               <i class="pi pi-ban"></i>
               Dépasse la capacité du plus gros nœud ({{ maxNodeCpu() }} cœurs /
               {{ maxNodeMemMib() }} MiB) — la tâche ne pourrait jamais être planifiée.
             </div>
           } @else if (resInvalid()) {
-            <div class="row-err">
+            <div class="row-err flex align-items-center gap-2">
               <i class="pi pi-exclamation-triangle"></i> Une limite non nulle doit être ≥ à sa
               réservation.
             </div>
@@ -112,7 +112,7 @@
 
     <!-- ─── Placement ───────────────────────────────────────────────── -->
     <div class="card section">
-      <div class="section-head">
+      <div class="section-head flex align-items-center justify-content-between">
         <h2>Placement</h2>
         @if (canManage()) {
           @if (!editingPlace()) {
@@ -124,7 +124,7 @@
               (onClick)="startEditPlace()"
             />
           } @else {
-            <div class="head-actions">
+            <div class="flex gap-2">
               <p-button
                 label="Annuler"
                 severity="secondary"
@@ -171,8 +171,8 @@
           <dd>{{ svc.placement.max_replicas_per_node || 'illimité' }}</dd>
         </dl>
       } @else {
-        <div class="fields pad">
-          <div class="banner info">
+        <div class="fields pad flex flex-column gap-3">
+          <div class="banner info flex gap-2 align-items-start">
             <i class="pi pi-info-circle"></i>
             <div>
               Une contrainte filtre les nœuds éligibles, p.&nbsp;ex.
@@ -181,10 +181,10 @@
             </div>
           </div>
 
-          <div class="field-group">
+          <div class="field-group flex flex-column gap-2">
             <span class="group-label">Contraintes</span>
             @for (c of placeForm.constraints; track $index) {
-              <div class="row">
+              <div class="row flex gap-2 align-items-center">
                 <input
                   pInputText
                   class="grow"
@@ -203,7 +203,7 @@
                 placeForm.constraints[$index].trim() &&
                 !constraintValid(placeForm.constraints[$index])
               ) {
-                <div class="row-err">
+                <div class="row-err flex align-items-center gap-2">
                   Format attendu : <code>clé==valeur</code> ou <code>clé!=valeur</code>
                 </div>
               }
@@ -218,10 +218,10 @@
             />
           </div>
 
-          <div class="field-group">
+          <div class="field-group flex flex-column gap-2">
             <span class="group-label">Préférences <em>(spread)</em></span>
             @for (p of placeForm.preferences; track $index) {
-              <div class="row">
+              <div class="row flex gap-2 align-items-center">
                 <input
                   pInputText
                   class="grow"
@@ -256,7 +256,7 @@
     </div>
   </div>
 
-  <p class="hint">
+  <p class="hint flex align-items-center gap-2">
     <i class="pi pi-info-circle"></i> Les modifications sont enregistrées et appliquées au prochain
     déploiement.
   </p>
