@@ -74,5 +74,23 @@ export const HivemindPreset = definePreset(Aura, {
         },
       },
     },
+    tag: {
+      // Cloud-console badges: small, medium weight, soft tinted pill.
+      root: {
+        fontSize: '0.6875rem', // 11px
+        fontWeight: '600',
+        padding: '0.1rem 0.5rem',
+        borderRadius: '1rem', // pill
+      },
+      colorScheme: {
+        light: {
+          secondary: { background: '#eceef2', color: '#4d5375' },
+          success: { background: '#e7f6ec', color: '#1a7f4b' },
+          info: { background: '#e6f0fb', color: '#0b62c4' },
+          warn: { background: '#fdf2e3', color: '#946708' },
+          danger: { background: '#fdeceb', color: '#c0392b' },
+        },
+      },
+    },
   },
 });
