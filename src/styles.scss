@@ -133,3 +133,16 @@ input {
 .card {
   border-radius: var(--hm-radius);
 }
+
+/* Tooltips — size to content (cap width) and wrap on words, not per character. */
+.p-tooltip {
+  max-width: 20rem;
+}
+.p-tooltip .p-tooltip-text {
+  width: max-content;
+  max-width: 20rem;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
