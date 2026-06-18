@@ -141,4 +141,14 @@ export class ClusterHealthView implements OnInit {
         return 'Inconnu';
     }
   }
+
+  formatCpus(cpus: number): string {
+    return Number.isInteger(cpus) ? `${cpus}` : cpus.toFixed(1);
+  }
+
+  formatMem(bytes: number): string {
+    const gib = bytes / 1024 ** 3;
+    if (gib >= 1) return `${gib.toFixed(gib < 10 ? 1 : 0)} GiB`;
+    return `${Math.round(bytes / 1024 ** 2)} MiB`;
+  }
 }

@@ -89,6 +89,15 @@
               </div>
             </div>
 
+            @if (n.cpus || n.memory_bytes) {
+              <div class="capacity muted flex align-items-center gap-2">
+                <span><i class="pi pi-server"></i> {{ formatCpus(n.cpus) }} vCPU</span>
+                <span>·</span>
+                <span><i class="pi pi-database"></i> {{ formatMem(n.memory_bytes) }}</span>
+                <span class="cap-note">capacité</span>
+              </div>
+            }
+
             <div class="rollup flex align-items-center gap-3">
               <span class="r ok">{{ n.ok }} sains</span>
               <span class="r warn">{{ n.warning }} dégradés</span>

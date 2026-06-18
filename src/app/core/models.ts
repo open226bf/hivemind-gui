@@ -731,6 +731,9 @@ export interface NodeHealth {
   role?: string;
   reachable: boolean;
   tunnel_up?: boolean;
+  /** Total capacity (not usage): cores and total RAM in bytes. */
+  cpus: number;
+  memory_bytes: number;
   worst: HealthVerdict | string;
   ok: number;
   warning: number;
