@@ -112,32 +112,12 @@ input {
 }
 
 /* ─── AWS-style controls (flat, squared, solid) ───────────────────────────────
-   No gradients anywhere; primary stays the brand amber, secondaries read as the
-   AWS "normal" white-with-border variant. Scoped to PrimeNG so feature markup
-   needs no change. */
+   Button shape/colour tiers live in the PrimeNG preset (theme.ts). Here we only
+   guarantee no gradients/shadows leak in and keep the squared radius. */
 .p-button {
-  border-radius: var(--hm-radius-btn);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  background-image: none; /* kill any theme gradient */
+  background-image: none; /* belt-and-braces: never a gradient */
   box-shadow: none;
-  transition:
-    background-color 0.12s ease,
-    border-color 0.12s ease;
-}
-.p-button:enabled:hover {
-  background-image: none;
-}
-/* "normal" (secondary outlined) button — AWS console look */
-.p-button.p-button-secondary.p-button-outlined,
-.p-button.p-button-outlined.p-button-secondary {
-  background: var(--hm-surface);
-  border-color: #b9c0ca;
-  color: var(--hm-text);
-}
-.p-button.p-button-secondary.p-button-outlined:enabled:hover {
-  background: #f3f4f7;
-  border-color: #9aa2af;
+  letter-spacing: 0.01em;
 }
 
 /* Inputs / selects — subtle squared radius */

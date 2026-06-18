@@ -44,4 +44,35 @@ export const HivemindPreset = definePreset(Aura, {
       },
     },
   },
+  components: {
+    button: {
+      // AWS-console feel: squared corners, bold labels, crisp tiers.
+      root: {
+        borderRadius: '2px',
+        paddingX: '0.95rem',
+        paddingY: '0.55rem',
+        label: { fontWeight: '600' },
+      },
+      colorScheme: {
+        light: {
+          root: {
+            // "Normal" button (severity="secondary"): white with a defined
+            // border and dark text — clearly distinct from the solid amber
+            // primary, instead of the washed grey default.
+            secondary: {
+              background: '{surface.0}',
+              hoverBackground: '{surface.100}',
+              activeBackground: '{surface.200}',
+              borderColor: '{surface.300}',
+              hoverBorderColor: '{surface.400}',
+              activeBorderColor: '{surface.400}',
+              color: '{surface.700}',
+              hoverColor: '{surface.800}',
+              activeColor: '{surface.800}',
+            },
+          },
+        },
+      },
+    },
+  },
 });

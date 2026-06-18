@@ -58,7 +58,7 @@
             <p-button
               label="Retirer"
               icon="pi pi-stop-circle"
-              severity="warn"
+              severity="danger"
               (onClick)="undeploy()"
               [disabled]="store.deploying()"
             />
@@ -72,7 +72,10 @@
         <i class="pi pi-exclamation-triangle"></i>
         <div>
           <strong>Service retiré hors Hivemind</strong>
-          <div>Ce service a été supprimé directement sur Swarm. Son statut a été synchronisé à "removed". Tu peux le redéployer ou supprimer sa définition.</div>
+          <div>
+            Ce service a été supprimé directement sur Swarm. Son statut a été synchronisé à
+            "removed". Tu peux le redéployer ou supprimer sa définition.
+          </div>
         </div>
       </div>
     }
@@ -97,7 +100,6 @@
     </nav>
 
     <router-outlet />
-
   } @else {
     <div class="loading">
       <p-progressSpinner strokeWidth="4" />
