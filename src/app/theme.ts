@@ -48,7 +48,7 @@ export const HivemindPreset = definePreset(Aura, {
     button: {
       // AWS-console feel: squared corners, bold labels, crisp tiers.
       root: {
-        borderRadius: '2px',
+        borderRadius: '5px',
         paddingX: '0.95rem',
         paddingY: '0.55rem',
         label: { fontWeight: '600' },
