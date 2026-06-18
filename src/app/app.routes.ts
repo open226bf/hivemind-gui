@@ -19,6 +19,11 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard.component').then((m) => m.Dashboard),
       },
       {
+        path: 'monitoring',
+        loadComponent: () =>
+          import('./features/monitoring/cluster-health.component').then((m) => m.ClusterHealthView),
+      },
+      {
         path: 'hives',
         loadComponent: () => import('./features/hive/hives.component').then((m) => m.Hives),
       },

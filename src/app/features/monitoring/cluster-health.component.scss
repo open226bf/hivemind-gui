@@ -1,0 +1,155 @@
+.toggle {
+  font-size: 13px;
+  color: var(--hm-text-muted);
+  white-space: nowrap;
+}
+
+.empty-state {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--hm-text-muted);
+}
+.empty-state .pi {
+  font-size: 26px;
+  display: block;
+  margin-bottom: 10px;
+  opacity: 0.6;
+}
+
+.note-card {
+  padding: 16px 18px;
+  margin-top: 8px;
+
+  .pi {
+    color: var(--hm-primary);
+    font-size: 18px;
+    margin-top: 1px;
+  }
+  p {
+    margin: 4px 0 0;
+    font-size: 13px;
+  }
+}
+
+/* ─── Summary KPIs ──────────────────────────────────────────────────────────── */
+.summary {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.kpi {
+  flex: 1 1 120px;
+  background: var(--hm-surface);
+  border: 1px solid var(--hm-border);
+  border-radius: var(--hm-radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.kpi-val {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.kpi-label {
+  font-size: 12px;
+  color: var(--hm-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.kpi.ok .kpi-val {
+  color: #3a9b59;
+}
+.kpi.warn .kpi-val {
+  color: #b8860b;
+}
+.kpi.crit .kpi-val {
+  color: #b54747;
+}
+
+.note {
+  font-size: 13px;
+  color: var(--hm-text-muted);
+  background: #eef4fb;
+  border: 1px solid #cfe0f3;
+  color: #2c5a86;
+  padding: 10px 14px;
+  border-radius: var(--hm-radius);
+  margin-bottom: 16px;
+}
+
+/* ─── Node cards ────────────────────────────────────────────────────────────── */
+.node-card {
+  padding: 16px 18px;
+  height: 100%;
+}
+.node-card.down {
+  border-color: #f0c4c4;
+}
+.node-head {
+  margin-bottom: 10px;
+}
+.ellipsis {
+  min-width: 0;
+}
+.node-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rollup {
+  font-size: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--hm-border);
+  margin-bottom: 10px;
+}
+.rollup .r {
+  font-weight: 600;
+}
+.rollup .ok {
+  color: #3a9b59;
+}
+.rollup .warn {
+  color: #b8860b;
+}
+.rollup .crit {
+  color: #b54747;
+}
+
+.containers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ctn {
+  font-size: 13px;
+  padding: 4px 0;
+}
+.ctn .svc {
+  font-weight: 600;
+}
+.ctn .reason {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+}
+.ctn .restarts {
+  color: #b54747;
+  font-weight: 600;
+}
+
+.all-ok {
+  font-size: 13px;
+}
+.all-ok .pi {
+  color: #3a9b59;
+}
+
+.muted {
+  color: var(--hm-text-muted);
+}

@@ -1,0 +1,127 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Santé du cluster</h1>
+      <div class="subtitle">
+        @if (health()) {
+          {{ nodeCount() }} nœud(s) · mis à jour {{ lastUpdated() | date: 'mediumTime' }}
+        } @else {
+          État des conteneurs par nœud
+        }
+      </div>
+    </div>
+    <div class="flex align-items-center gap-3">
+      <label class="flex align-items-center gap-2 toggle">
+        <p-toggleswitch [(ngModel)]="showHealthyModel" (ngModelChange)="showHealthy.set($event)" />
+        <span>Afficher les sains</span>
+      </label>
+      <p-button
+        icon="pi pi-refresh"
+        severity="secondary"
+        [text]="true"
+        (onClick)="refresh()"
+        [loading]="refreshing()"
+      />
+    </div>
+  </div>
+
+  @if (loading() && !health() && !unavailable()) {
+    <div class="empty-state"><i class="pi pi-spin pi-spinner"></i>Chargement…</div>
+  } @else if (unavailable()) {
+    <div class="card note-card flex gap-3 align-items-start">
+      <i class="pi pi-info-circle"></i>
+      <div>
+        <strong>Supervision indisponible pour ce cluster.</strong>
+        <p class="muted">
+          La collecte de santé n'est pas disponible ici (cluster en mode agent — bientôt — ou
+          backend simulé). Les clusters directs (sans agent) sont pris en charge.
+        </p>
+      </div>
+    </div>
+  } @else if (health(); as h) {
+    <div class="summary">
+      <div class="kpi">
+        <span class="kpi-val">{{ nodeCount() }}</span
+        ><span class="kpi-label">Nœuds</span>
+      </div>
+      <div class="kpi ok">
+        <span class="kpi-val">{{ totals().ok }}</span
+        ><span class="kpi-label">Sains</span>
+      </div>
+      <div class="kpi warn">
+        <span class="kpi-val">{{ totals().warning }}</span
+        ><span class="kpi-label">Dégradés</span>
+      </div>
+      <div class="kpi crit">
+        <span class="kpi-val">{{ totals().critical }}</span
+        ><span class="kpi-label">Critiques</span>
+      </div>
+    </div>
+
+    @if (partialMetrics()) {
+      <div class="note flex align-items-center gap-2">
+        <i class="pi pi-info-circle"></i>
+        Cluster direct : les métriques CPU/mémoire ne couvriront que le nœud connecté. La santé
+        reste cluster-wide.
+      </div>
+    }
+
+    <div class="grid">
+      @for (n of h.nodes; track n.node_id) {
+        <div class="col-12 lg:col-6">
+          <div class="card node-card" [class.down]="!n.reachable">
+            <div class="node-head flex align-items-center justify-content-between">
+              <div class="flex align-items-center gap-2 ellipsis">
+                <i class="pi pi-server"></i>
+                <span class="node-name">{{ n.hostname || n.node_id }}</span>
+                @if (n.role) {
+                  <p-tag [value]="n.role" severity="secondary" />
+                }
+              </div>
+              <div class="flex align-items-center gap-2">
+                @if (!n.reachable) {
+                  <p-tag value="injoignable" severity="danger" />
+                }
+                @if (n.tunnel_up === false) {
+                  <p-tag value="tunnel down" severity="danger" />
+                }
+                <p-tag [value]="verdictLabel(n.worst)" [severity]="tagSeverity(n.worst)" />
+              </div>
+            </div>
+
+            <div class="rollup flex align-items-center gap-3">
+              <span class="r ok">{{ n.ok }} sains</span>
+              <span class="r warn">{{ n.warning }} dégradés</span>
+              <span class="r crit">{{ n.critical }} critiques</span>
+            </div>
+
+            @if (visibleContainers(n).length) {
+              <div class="containers">
+                @for (c of visibleContainers(n); track c.task_id) {
+                  <div class="ctn flex align-items-center gap-2">
+                    <p-tag [value]="verdictLabel(c.verdict)" [severity]="tagSeverity(c.verdict)" />
+                    <span class="svc">{{ c.service_name || '—' }}</span>
+                    <span class="slot muted">slot {{ c.slot }}</span>
+                    <span class="state muted">{{ c.state }}</span>
+                    @if (c.restarts > 0) {
+                      <span class="restarts" pTooltip="redémarrages récents"
+                        >↻ {{ c.restarts }}</span
+                      >
+                    }
+                    @if (c.reason) {
+                      <span class="reason muted" [pTooltip]="c.reason">{{ c.reason }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="all-ok muted">
+                <i class="pi pi-check-circle"></i> Tous les conteneurs sont sains.
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
