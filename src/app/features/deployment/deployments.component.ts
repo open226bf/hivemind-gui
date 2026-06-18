@@ -17,7 +17,18 @@ const PAGE_SIZE = 20;
 
 @Component({
   selector: 'hm-deployments',
-  imports: [DatePipe, DecimalPipe, FormsModule, RouterLink, TableModule, ButtonModule, TagModule, SelectModule, DatePickerModule, TooltipModule],
+  imports: [
+    DatePipe,
+    DecimalPipe,
+    FormsModule,
+    RouterLink,
+    TableModule,
+    ButtonModule,
+    TagModule,
+    SelectModule,
+    DatePickerModule,
+    TooltipModule,
+  ],
   templateUrl: './deployments.component.html',
   styleUrl: './deployments.component.scss',
 })
@@ -56,7 +67,9 @@ export class Deployments {
   private loadServices(): void {
     this.svcApi.list(1, 200).subscribe({
       next: (res) => {
-        this.serviceOptions.set(res.items.map((s: ServiceResponse) => ({ label: s.name, value: s.id })));
+        this.serviceOptions.set(
+          res.items.map((s: ServiceResponse) => ({ label: s.name, value: s.id })),
+        );
         const map: Record<string, string> = {};
         for (const s of res.items) map[s.id] = s.name;
         this.serviceMap.set(map);
@@ -66,25 +79,31 @@ export class Deployments {
 
   search(page = 1): void {
     this.loading.set(true);
-    this.api.list({
-      service_id: this.filterService ?? undefined,
-      status: this.filterStatus ?? undefined,
-      from: this.filterFrom ? this.filterFrom.toISOString() : undefined,
-      to: this.filterTo ? this.filterTo.toISOString() : undefined,
-      page,
-      size: PAGE_SIZE,
-    }).subscribe({
-      next: (res) => {
-        this.deployments.set(res.items);
-        this.total.set(res.total);
-        this.first.set((page - 1) * PAGE_SIZE);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des déploiements impossible' });
-      },
-    });
+    this.api
+      .list({
+        service_id: this.filterService ?? undefined,
+        status: this.filterStatus ?? undefined,
+        from: this.filterFrom ? this.filterFrom.toISOString() : undefined,
+        to: this.filterTo ? this.filterTo.toISOString() : undefined,
+        page,
+        size: PAGE_SIZE,
+      })
+      .subscribe({
+        next: (res) => {
+          this.deployments.set(res.items);
+          this.total.set(res.total);
+          this.first.set((page - 1) * PAGE_SIZE);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.loading.set(false);
+          this.toast.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Chargement des déploiements impossible',
+          });
+        },
+      });
   }
 
   onPage(event: { first?: number | null; rows?: number | null }): void {

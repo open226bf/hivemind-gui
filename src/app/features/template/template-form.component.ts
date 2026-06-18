@@ -8,13 +8,25 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { MessageService } from 'primeng/api';
 
 import { NetworksApi, TemplatesApi } from '../../core/api';
-import { DEFAULT_UPDATE_CONFIG, LockableField, TemplateResponse, TemplateSpecDTO } from '../../core/models';
+import {
+  DEFAULT_UPDATE_CONFIG,
+  LockableField,
+  TemplateResponse,
+  TemplateSpecDTO,
+} from '../../core/models';
 
 const MIB = 1024 * 1024;
 
 @Component({
   selector: 'hm-template-form',
-  imports: [FormsModule, ButtonModule, DrawerModule, InputTextModule, InputNumberModule, MultiSelectModule],
+  imports: [
+    FormsModule,
+    ButtonModule,
+    DrawerModule,
+    InputTextModule,
+    InputNumberModule,
+    MultiSelectModule,
+  ],
   templateUrl: './template-form.component.html',
   styleUrl: './template-form.component.scss',
 })
@@ -43,7 +55,8 @@ export class TemplateFormComponent {
 
   constructor() {
     this.networksApi.list(1, 200).subscribe({
-      next: (res) => this.networkOptions.set(res.items.map((n) => ({ label: n.name, value: n.id }))),
+      next: (res) =>
+        this.networkOptions.set(res.items.map((n) => ({ label: n.name, value: n.id }))),
     });
   }
 
@@ -77,11 +90,19 @@ export class TemplateFormComponent {
   save(): void {
     const id = this.editingId();
     if (!id && !this.form.name) {
-      this.toast.add({ severity: 'warn', summary: 'Champ requis', detail: 'Le nom est obligatoire' });
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Champ requis',
+        detail: 'Le nom est obligatoire',
+      });
       return;
     }
     if (!this.form.image) {
-      this.toast.add({ severity: 'warn', summary: 'Champ requis', detail: "L'image est obligatoire" });
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Champ requis',
+        detail: "L'image est obligatoire",
+      });
       return;
     }
     this.saving.set(true);
@@ -105,19 +126,40 @@ export class TemplateFormComponent {
       next: () => {
         this.saving.set(false);
         this.visible.set(false);
-        this.toast.add({ severity: 'success', summary: id ? 'Modifié' : 'Créé', detail: `Template ${this.form.name}` });
+        this.toast.add({
+          severity: 'success',
+          summary: id ? 'Modifié' : 'Créé',
+          detail: `Template ${this.form.name}`,
+        });
         this.saved.emit();
       },
       error: (err: { error?: { message?: string } }) => {
         this.saving.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Opération impossible' });
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Opération impossible',
+        });
       },
     };
 
     if (id) {
-      this.api.update(id, { description: this.form.description, spec, locked_fields: this.form.lockedFields }).subscribe(done);
+      this.api
+        .update(id, {
+          description: this.form.description,
+          spec,
+          locked_fields: this.form.lockedFields,
+        })
+        .subscribe(done);
     } else {
-      this.api.create({ name: this.form.name, description: this.form.description, spec, locked_fields: this.form.lockedFields }).subscribe(done);
+      this.api
+        .create({
+          name: this.form.name,
+          description: this.form.description,
+          spec,
+          locked_fields: this.form.lockedFields,
+        })
+        .subscribe(done);
     }
   }
 

@@ -4,7 +4,7 @@
   [modal]="true"
   [style]="{ width: '560px' }"
 >
-  <div class="form">
+  <div class="form flex flex-column gap-1">
     <label>Nom <span class="req">*</span></label>
     <input pInputText [(ngModel)]="form.name" placeholder="prod-eu" />
 
@@ -27,7 +27,7 @@
     <small class="muted">Une paire <code>clé=valeur</code> par ligne.</small>
 
     @if (isAgent()) {
-      <div class="agent-note">
+      <div class="agent-note flex gap-2 align-items-start">
         <i class="pi pi-bolt"></i>
         <span
           >Cluster en mode <strong>agent</strong> : la connexion passe par le tunnel. Pour

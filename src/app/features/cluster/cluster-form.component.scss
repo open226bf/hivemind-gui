@@ -1,8 +1,4 @@
 .form {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
   label {
     font-size: 12px;
     font-weight: 600;
@@ -31,9 +27,6 @@
 }
 
 .agent-note {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
   background: var(--hm-bg);
   border-radius: 6px;
   padding: 10px 12px;

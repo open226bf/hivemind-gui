@@ -1,7 +1,14 @@
-.actions { display: flex; gap: 8px; }
-.muted { color: var(--hm-text-muted); font-size: 12px; }
-.mono { font-family: monospace; font-size: 12px; }
-.name-cell { font-weight: 600; }
+.muted {
+  color: var(--hm-text-muted);
+  font-size: 12px;
+}
+.mono {
+  font-family: monospace;
+  font-size: 12px;
+}
+.name-cell {
+  font-weight: 600;
+}
 
 code {
   font-size: 12px;
@@ -10,8 +17,6 @@ code {
   border-radius: 3px;
   font-family: monospace;
 }
-
-.row-actions { display: flex; gap: 6px; justify-content: flex-end; }
 
 .empty-state {
   padding: 32px;
@@ -23,7 +28,13 @@ code {
   align-items: center;
 }
 
-.card { margin-top: 0; }
+.card {
+  margin-top: 0;
+}
 
-.lock-tag { margin-right: 4px; }
-.small { font-size: 12px; }
+.lock-tag {
+  margin-right: 4px;
+}
+.small {
+  font-size: 12px;
+}

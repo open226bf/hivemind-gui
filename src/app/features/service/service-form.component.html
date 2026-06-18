@@ -4,7 +4,7 @@
   position="right"
   [style]="{ width: '760px' }"
 >
-  <div class="form">
+  <div class="form flex flex-column gap-1">
     @if (mode() === 'create') {
       <label>Nom <span class="req">*</span></label>
       <input pInputText [(ngModel)]="form.name" placeholder="mon-service" />
@@ -67,7 +67,11 @@
     />
     <small class="muted">Fichiers de config montés dans le conteneur au chemin configuré.</small>
 
-    <button type="button" class="strategy-toggle" (click)="showStrategy.set(!showStrategy())">
+    <button
+      type="button"
+      class="strategy-toggle flex align-items-center gap-2 mt-3"
+      (click)="showStrategy.set(!showStrategy())"
+    >
       <i
         class="pi"
         [class.pi-chevron-right]="!showStrategy()"
@@ -134,14 +138,18 @@
           styleClass="w-full"
         />
 
-        <button type="button" class="reset-link" (click)="resetStrategy()">
+        <button
+          type="button"
+          class="reset-link inline-flex align-items-center gap-2 mt-3"
+          (click)="resetStrategy()"
+        >
           <i class="pi pi-replay"></i> Réinitialiser aux valeurs par défaut
         </button>
       </div>
     }
 
     @if (mode() === 'edit') {
-      <small class="muted hint">
+      <small class="muted flex gap-2 align-items-center mt-3">
         <i class="pi pi-info-circle"></i>
         Les changements prennent effet au prochain déploiement.
       </small>
@@ -149,7 +157,7 @@
   </div>
 
   <ng-template #footer>
-    <div style="display: flex; gap: 10px">
+    <div class="flex gap-2">
       <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="close()" />
       <p-button
         [label]="mode() === 'create' ? 'Créer' : 'Enregistrer'"

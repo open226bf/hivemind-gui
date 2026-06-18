@@ -4,14 +4,20 @@
       <h1>Déploiements</h1>
       <div class="subtitle">{{ total() }} déploiement(s) au total</div>
     </div>
-    <div class="actions">
-      <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="search()" [loading]="loading()" />
+    <div class="flex gap-2 align-items-center">
+      <p-button
+        icon="pi pi-refresh"
+        severity="secondary"
+        [text]="true"
+        (onClick)="search()"
+        [loading]="loading()"
+      />
     </div>
   </div>
 
   <div class="card filters">
-    <div class="filter-row">
-      <div class="filter">
+    <div class="flex gap-3 align-items-end flex-wrap">
+      <div class="filter flex flex-column gap-1 flex-1">
         <label>Service</label>
         <p-select
           [(ngModel)]="filterService"
@@ -24,7 +30,7 @@
           styleClass="filter-select"
         />
       </div>
-      <div class="filter">
+      <div class="filter flex flex-column gap-1 flex-1">
         <label>Statut</label>
         <p-select
           [(ngModel)]="filterStatus"
@@ -36,18 +42,38 @@
           styleClass="filter-select"
         />
       </div>
-      <div class="filter">
+      <div class="filter flex flex-column gap-1 flex-1">
         <label>Depuis</label>
-        <p-datepicker [(ngModel)]="filterFrom" [showTime]="true" [showIcon]="true" dateFormat="dd/mm/yy" placeholder="Date début" styleClass="filter-date" />
+        <p-datepicker
+          [(ngModel)]="filterFrom"
+          [showTime]="true"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          placeholder="Date début"
+          styleClass="filter-date"
+        />
       </div>
-      <div class="filter">
+      <div class="filter flex flex-column gap-1 flex-1">
         <label>Jusqu'à</label>
-        <p-datepicker [(ngModel)]="filterTo" [showTime]="true" [showIcon]="true" dateFormat="dd/mm/yy" placeholder="Date fin" styleClass="filter-date" />
+        <p-datepicker
+          [(ngModel)]="filterTo"
+          [showTime]="true"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          placeholder="Date fin"
+          styleClass="filter-date"
+        />
       </div>
-      <div class="filter-actions">
+      <div class="flex align-items-end">
         <div>
           <p-button label="Filtrer" icon="pi pi-search" size="small" (onClick)="search()" />
-          <p-button label="Réinitialiser" severity="secondary" [text]="true" size="small" (onClick)="resetFilters()" />
+          <p-button
+            label="Réinitialiser"
+            severity="secondary"
+            [text]="true"
+            size="small"
+            (onClick)="resetFilters()"
+          />
         </div>
       </div>
     </div>
@@ -87,18 +113,24 @@
               <span class="muted mono">{{ d.service_id.slice(0, 8) }}…</span>
             }
           </td>
-          <td><code>{{ d.image_tag }}</code></td>
+          <td>
+            <code>{{ d.image_tag }}</code>
+          </td>
           <td class="muted">{{ d.trigger }}</td>
           <td class="muted">{{ d.started_at | date: 'short' }}</td>
           <td class="muted">{{ d.finished_at ? (d.finished_at | date: 'short') : '—' }}</td>
-          <td class="muted">{{ d.duration_ms ? (d.duration_ms / 1000 | number: '1.0-1') + ' s' : '—' }}</td>
+          <td class="muted">
+            {{ d.duration_ms ? (d.duration_ms / 1000 | number: '1.0-1') + ' s' : '—' }}
+          </td>
           <td class="err-msg">{{ d.error_message || '—' }}</td>
         </tr>
       </ng-template>
       <ng-template #emptymessage>
         <tr>
           <td colspan="8">
-            <div class="empty-state"><i class="pi pi-cloud-upload"></i>Aucun déploiement trouvé.</div>
+            <div class="empty-state">
+              <i class="pi pi-cloud-upload"></i>Aucun déploiement trouvé.
+            </div>
           </td>
         </tr>
       </ng-template>

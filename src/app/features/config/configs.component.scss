@@ -1,7 +1,14 @@
-.actions { display: flex; gap: 8px; }
-.muted { color: var(--hm-text-muted); font-size: 12px; }
-.mono { font-family: monospace; font-size: 12px; }
-.name-cell { font-weight: 600; }
+.muted {
+  color: var(--hm-text-muted);
+  font-size: 12px;
+}
+.mono {
+  font-family: monospace;
+  font-size: 12px;
+}
+.name-cell {
+  font-weight: 600;
+}
 
 code {
   font-size: 12px;
@@ -10,8 +17,6 @@ code {
   border-radius: 3px;
   font-family: monospace;
 }
-
-.row-actions { display: flex; gap: 6px; justify-content: flex-end; }
 
 .empty-state {
   padding: 32px;
@@ -38,7 +43,11 @@ code {
   flex-wrap: wrap;
 }
 
-.v-comment { font-style: italic; font-size: 13px; color: var(--hm-text); }
+.v-comment {
+  font-style: italic;
+  font-size: 13px;
+  color: var(--hm-text);
+}
 
 .v-content {
   margin: 0;
@@ -65,11 +74,18 @@ code {
   margin-bottom: 14px;
   font-size: 13px;
 
-  .pi { margin-top: 2px; }
+  .pi {
+    margin-top: 2px;
+  }
 }
 
-.svc-link { margin-right: 8px; font-family: monospace; }
-.small { font-size: 12px; }
+.svc-link {
+  margin-right: 8px;
+  font-family: monospace;
+}
+.small {
+  font-size: 12px;
+}
 
 .diff-bar {
   display: flex;
@@ -78,7 +94,10 @@ code {
   margin-bottom: 12px;
 }
 
-.diff-label { font-size: 13px; color: var(--hm-text-muted); }
+.diff-label {
+  font-size: 13px;
+  color: var(--hm-text-muted);
+}
 
 .diff {
   border: 1px solid var(--hm-border, #e2e2e2);
@@ -102,14 +121,28 @@ code {
     user-select: none;
     opacity: 0.7;
   }
-  .sign { flex: 0 0 16px; text-align: center; }
-  .text { flex: 1; padding-right: 10px; }
+  .sign {
+    flex: 0 0 16px;
+    text-align: center;
+  }
+  .text {
+    flex: 1;
+    padding-right: 10px;
+  }
 }
 
-.diff-line.add { background: #e6f4ea; }
-.diff-line.add .sign { color: #1f8a4c; }
-.diff-line.del { background: #fbe9e9; }
-.diff-line.del .sign { color: #b54747; }
+.diff-line.add {
+  background: #e6f4ea;
+}
+.diff-line.add .sign {
+  color: #1f8a4c;
+}
+.diff-line.del {
+  background: #fbe9e9;
+}
+.diff-line.del .sign {
+  color: #b54747;
+}
 
 .hist-title {
   font-size: 12px;
@@ -119,4 +152,6 @@ code {
   margin: 4px 0 10px;
 }
 
-.v-head .restore-btn { margin-left: auto; }
+.v-head .restore-btn {
+  margin-left: auto;
+}

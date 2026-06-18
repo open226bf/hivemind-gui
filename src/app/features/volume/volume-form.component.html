@@ -4,7 +4,7 @@
   [modal]="true"
   [style]="{ width: '460px' }"
 >
-  <div class="form">
+  <div class="form flex flex-column gap-1">
     <label>Nom <span class="req">*</span></label>
     <input pInputText [(ngModel)]="form.name" placeholder="app-data" />
     <small class="muted">Nom du volume nommé (lettres, chiffres, <code>_ . -</code>).</small>

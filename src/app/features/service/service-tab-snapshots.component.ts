@@ -15,7 +15,15 @@ import { ServiceDetailStore } from '../service/service-detail.store';
 
 @Component({
   selector: 'hm-service-tab-snapshots',
-  imports: [DatePipe, FormsModule, TableModule, ButtonModule, TagModule, DialogModule, InputTextModule],
+  imports: [
+    DatePipe,
+    FormsModule,
+    TableModule,
+    ButtonModule,
+    TagModule,
+    DialogModule,
+    InputTextModule,
+  ],
   templateUrl: './service-tab-snapshots.component.html',
   styleUrl: './service-tab-snapshots.component.scss',
 })
@@ -56,7 +64,11 @@ export class ServiceTabSnapshots implements OnInit {
       },
       error: () => {
         this.loading.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des snapshots impossible' });
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Chargement des snapshots impossible',
+        });
       },
     });
   }
@@ -74,12 +86,20 @@ export class ServiceTabSnapshots implements OnInit {
       next: () => {
         this.capturing.set(false);
         this.captureVisible.set(false);
-        this.toast.add({ severity: 'success', summary: 'Snapshot créé', detail: 'État du service capturé' });
+        this.toast.add({
+          severity: 'success',
+          summary: 'Snapshot créé',
+          detail: 'État du service capturé',
+        });
         this.load();
       },
       error: (err) => {
         this.capturing.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Capture impossible' });
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Capture impossible',
+        });
       },
     });
   }
@@ -99,7 +119,11 @@ export class ServiceTabSnapshots implements OnInit {
         this.snapshotsApi.rollback(snap.id).subscribe({
           next: (res) => {
             this.rollingBack.set(undefined);
-            this.toast.add({ severity: 'info', summary: 'Restauration lancée', detail: 'Redéploiement en cours…' });
+            this.toast.add({
+              severity: 'info',
+              summary: 'Restauration lancée',
+              detail: 'Redéploiement en cours…',
+            });
             if (res.warnings?.length) {
               this.warnings.set(res.warnings);
               this.warningsVisible.set(true);
@@ -110,7 +134,11 @@ export class ServiceTabSnapshots implements OnInit {
           },
           error: (err) => {
             this.rollingBack.set(undefined);
-            this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Restauration impossible' });
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Restauration impossible',
+            });
           },
         });
       },
@@ -129,11 +157,19 @@ export class ServiceTabSnapshots implements OnInit {
       accept: () => {
         this.snapshotsApi.remove(snap.id).subscribe({
           next: () => {
-            this.toast.add({ severity: 'success', summary: 'Supprimé', detail: 'Snapshot supprimé' });
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimé',
+              detail: 'Snapshot supprimé',
+            });
             this.snapshots.update((list) => list.filter((s) => s.id !== snap.id));
           },
           error: (err) => {
-            this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Suppression impossible' });
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible',
+            });
           },
         });
       },

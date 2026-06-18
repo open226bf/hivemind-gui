@@ -1,7 +1,12 @@
-<p-dialog [header]="'Instancier — ' + (template()?.name ?? '')" [(visible)]="visible" [modal]="true" [style]="{ width: '480px' }">
+<p-dialog
+  [header]="'Instancier — ' + (template()?.name ?? '')"
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '480px' }"
+>
   @let t = template();
   @if (t) {
-    <div class="form">
+    <div class="form flex flex-column gap-2">
       <label>Nom du service <span class="req">*</span></label>
       <input pInputText [(ngModel)]="form.name" placeholder="orders-api" />
 
@@ -11,28 +16,34 @@
       <div class="preset">
         <i class="pi pi-clone"></i>
         <div>
-          Pré-rempli depuis <strong>{{ t.name }}</strong> (v{{ t.version }}) :
-          image <code>{{ t.spec.image }}{{ t.spec.tag ? ':' + t.spec.tag : '' }}</code>,
-          {{ t.spec.replicas }} réplica(s).
+          Pré-rempli depuis <strong>{{ t.name }}</strong> (v{{ t.version }}) : image
+          <code>{{ t.spec.image }}{{ t.spec.tag ? ':' + t.spec.tag : '' }}</code
+          >, {{ t.spec.replicas }} réplica(s).
         </div>
       </div>
 
       <label>
         Tag
-        @if (isLocked('tag')) { <p-tag value="verrouillé" severity="warn" /> }
+        @if (isLocked('tag')) {
+          <p-tag value="verrouillé" severity="warn" />
+        }
       </label>
       <input pInputText [(ngModel)]="form.tag" [disabled]="isLocked('tag')" />
 
       <label>
         Réplicas
-        @if (isLocked('replicas')) { <p-tag value="verrouillé" severity="warn" /> }
+        @if (isLocked('replicas')) {
+          <p-tag value="verrouillé" severity="warn" />
+        }
       </label>
       <p-inputNumber [(ngModel)]="form.replicas" [min]="0" [disabled]="isLocked('replicas')" />
 
       @if (t.locked_fields.length) {
         <small class="muted">
           Champs imposés par le template :
-          @for (f of t.locked_fields; track f) { <code>{{ f }}</code> }
+          @for (f of t.locked_fields; track f) {
+            <code>{{ f }}</code>
+          }
         </small>
       }
     </div>

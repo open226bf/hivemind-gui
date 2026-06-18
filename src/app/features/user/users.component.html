@@ -4,8 +4,14 @@
       <h1>Utilisateurs</h1>
       <div class="subtitle">{{ users().length }} compte(s) · gestion des accès (RBAC)</div>
     </div>
-    <div class="actions">
-      <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="load()" [loading]="loading()" />
+    <div class="flex gap-2 align-items-center">
+      <p-button
+        icon="pi pi-refresh"
+        severity="secondary"
+        [text]="true"
+        (onClick)="load()"
+        [loading]="loading()"
+      />
       <p-button label="Créer un utilisateur" icon="pi pi-plus" (onClick)="openCreate()" />
     </div>
   </div>
@@ -25,7 +31,9 @@
         <tr>
           <td class="name-cell">
             <i class="pi pi-user"></i> {{ u.email }}
-            @if (u.id === currentUserId()) { <span class="you">vous</span> }
+            @if (u.id === currentUserId()) {
+              <span class="you">vous</span>
+            }
           </td>
           <td><p-tag [value]="u.role" [severity]="roleSeverity(u.role)" /></td>
           <td>
@@ -36,8 +44,15 @@
             }
           </td>
           <td class="muted">{{ u.created_at | date: 'short' }}</td>
-          <td class="row-actions">
-            <p-button icon="pi pi-pencil" severity="secondary" [text]="true" size="small" pTooltip="Modifier" (onClick)="openEdit(u)" />
+          <td class="flex gap-2 justify-content-end">
+            <p-button
+              icon="pi pi-pencil"
+              severity="secondary"
+              [text]="true"
+              size="small"
+              pTooltip="Modifier"
+              (onClick)="openEdit(u)"
+            />
             <p-button
               icon="pi pi-trash"
               severity="danger"

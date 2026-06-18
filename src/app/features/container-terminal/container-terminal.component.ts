@@ -60,7 +60,9 @@ export class ContainerTerminalComponent {
       .subscribe({
         next: (res) => this.openSocket(res.ticket),
         error: () =>
-          this.term?.writeln('\x1b[31mImpossible d’ouvrir la session (autorisation refusée).\x1b[0m'),
+          this.term?.writeln(
+            '\x1b[31mImpossible d’ouvrir la session (autorisation refusée).\x1b[0m',
+          ),
       });
   }
 
@@ -73,18 +75,31 @@ export class ContainerTerminalComponent {
     ws.binaryType = 'arraybuffer';
     this.ws = ws;
 
-    ws.onopen = () => { this.connected.set(true); this.refit(); };
+    ws.onopen = () => {
+      this.connected.set(true);
+      this.refit();
+    };
     ws.onmessage = (e) => {
       const data = typeof e.data === 'string' ? e.data : new Uint8Array(e.data);
       this.term?.write(data as Uint8Array);
     };
-    ws.onclose = () => { this.connected.set(false); this.term?.writeln('\r\n\x1b[90m[connexion fermée]\x1b[0m'); };
-    ws.onerror = () => { this.connected.set(false); this.term?.writeln('\r\n\x1b[31m[erreur de connexion]\x1b[0m'); };
+    ws.onclose = () => {
+      this.connected.set(false);
+      this.term?.writeln('\r\n\x1b[90m[connexion fermée]\x1b[0m');
+    };
+    ws.onerror = () => {
+      this.connected.set(false);
+      this.term?.writeln('\r\n\x1b[31m[erreur de connexion]\x1b[0m');
+    };
   }
 
   private refit(): void {
     if (!this.fit || !this.term) return;
-    try { this.fit.fit(); } catch { return; }
+    try {
+      this.fit.fit();
+    } catch {
+      return;
+    }
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send('1' + JSON.stringify({ cols: this.term.cols, rows: this.term.rows }));
     }

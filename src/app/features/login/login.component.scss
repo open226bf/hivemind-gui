@@ -39,14 +39,21 @@
   margin-bottom: 40px;
 }
 
-.logo-row .mark { width: 40px; height: 40px; display: block; }
+.logo-row .mark {
+  width: 40px;
+  height: 40px;
+  display: block;
+}
 
 .wordmark {
   font-size: 26px;
   font-weight: 500;
   letter-spacing: -0.4px;
 
-  b { color: #fbb040; font-weight: 700; }
+  b {
+    color: #fbb040;
+    font-weight: 700;
+  }
 }
 
 .brand-side h2 {
@@ -131,14 +138,20 @@ label {
   margin-top: 12px;
 }
 
-input { width: 100%; }
+input {
+  width: 100%;
+}
 
-.submit { margin-top: 22px; }
-
-::ng-deep .w-full { width: 100%; }
+.submit {
+  margin-top: 22px;
+}
 
 /* ─── Responsive: hide the brand panel on narrow screens ────────────────────── */
 @media (max-width: 860px) {
-  .brand-side { display: none; }
-  .form-side { flex: 1; }
+  .brand-side {
+    display: none;
+  }
+  .form-side {
+    flex: 1;
+  }
 }

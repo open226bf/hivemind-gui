@@ -1,24 +1,10 @@
-.section-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-
-  h2 {
-    margin: 0;
-  }
+.section-head h2 {
+  margin: 0;
 }
 
 .muted {
   color: var(--p-text-muted-color, #6b7280);
   font-size: 0.9rem;
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
 }
 
 .chip {
@@ -28,17 +14,6 @@
   background: var(--p-content-hover-background, #f1f5f9);
   color: var(--p-text-muted-color, #475569);
   white-space: nowrap;
-}
-
-.row-actions {
-  display: flex;
-  gap: 0.4rem;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.full {
-  width: 100%;
 }
 
 .warn-list {

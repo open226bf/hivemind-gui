@@ -15,7 +15,7 @@ export const authGuard: CanActivateFn = () => {
         catchError(() => {
           auth.logout();
           return of(router.createUrlTree(['/login']));
-        })
+        }),
       );
     }
     return true;
@@ -33,7 +33,7 @@ export const adminGuard: CanActivateFn = () => {
   if (auth.isAuthenticated() && !auth.user()) {
     return auth.loadMe().pipe(
       map(allow),
-      catchError(() => of(router.createUrlTree(['/login'])))
+      catchError(() => of(router.createUrlTree(['/login']))),
     );
   }
   return allow();

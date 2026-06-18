@@ -4,8 +4,14 @@
       <h1>Réseaux</h1>
       <div class="subtitle">{{ networks().length }} réseau(x) enregistré(s)</div>
     </div>
-    <div class="actions">
-      <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="load(); loadSwarm()" [loading]="loading()" />
+    <div class="flex gap-2 align-items-center">
+      <p-button
+        icon="pi pi-refresh"
+        severity="secondary"
+        [text]="true"
+        (onClick)="load(); loadSwarm()"
+        [loading]="loading()"
+      />
       @if (canManage()) {
         <p-button label="Créer un réseau" icon="pi pi-plus" (onClick)="openCreate()" />
       }
@@ -20,7 +26,7 @@
 
     <p-tabpanels>
       <p-tabpanel value="registered">
-        <div class="card">
+        <div class="card mt-3">
           <p-table [value]="networks()" [loading]="loading()" dataKey="id">
             <ng-template #header>
               <tr>
@@ -35,15 +41,34 @@
             </ng-template>
             <ng-template #body let-n>
               <tr>
-                <td class="name-cell"><code>{{ n.name }}</code></td>
+                <td class="name-cell">
+                  <code>{{ n.name }}</code>
+                </td>
                 <td class="muted mono">{{ n.subnet || 'auto' }}</td>
-                <td><p-tag [value]="n.attachable ? 'Oui' : 'Non'" [severity]="n.attachable ? 'success' : 'secondary'" /></td>
-                <td><p-tag [value]="n.external ? 'Oui' : 'Non'" [severity]="n.external ? 'warn' : 'secondary'" /></td>
+                <td>
+                  <p-tag
+                    [value]="n.attachable ? 'Oui' : 'Non'"
+                    [severity]="n.attachable ? 'success' : 'secondary'"
+                  />
+                </td>
+                <td>
+                  <p-tag
+                    [value]="n.external ? 'Oui' : 'Non'"
+                    [severity]="n.external ? 'warn' : 'secondary'"
+                  />
+                </td>
                 <td class="muted mono">{{ n.swarm_id ? n.swarm_id.slice(0, 12) : '—' }}</td>
                 <td class="muted">{{ n.created_at | date: 'short' }}</td>
-                <td class="row-actions">
+                <td class="flex gap-2 justify-content-end">
                   @if (canManage()) {
-                    <p-button icon="pi pi-trash" severity="danger" [text]="true" size="small" pTooltip="Supprimer" (onClick)="remove(n)" />
+                    <p-button
+                      icon="pi pi-trash"
+                      severity="danger"
+                      [text]="true"
+                      size="small"
+                      pTooltip="Supprimer"
+                      (onClick)="remove(n)"
+                    />
                   }
                 </td>
               </tr>
@@ -51,7 +76,9 @@
             <ng-template #emptymessage>
               <tr>
                 <td colspan="7">
-                  <div class="empty-state"><i class="pi pi-sitemap"></i>Aucun réseau enregistré.</div>
+                  <div class="empty-state">
+                    <i class="pi pi-sitemap"></i>Aucun réseau enregistré.
+                  </div>
                 </td>
               </tr>
             </ng-template>
@@ -60,7 +87,7 @@
       </p-tabpanel>
 
       <p-tabpanel value="swarm">
-        <div class="card">
+        <div class="card mt-3">
           <p-table [value]="swarmNetworks()" [loading]="swarmLoading()" dataKey="id">
             <ng-template #header>
               <tr>
@@ -73,7 +100,9 @@
             </ng-template>
             <ng-template #body let-n>
               <tr>
-                <td class="name-cell"><code>{{ n.name }}</code></td>
+                <td class="name-cell">
+                  <code>{{ n.name }}</code>
+                </td>
                 <td class="muted mono">{{ n.id.slice(0, 12) }}</td>
                 <td class="muted">{{ n.driver }}</td>
                 <td class="muted">{{ n.scope }}</td>
@@ -83,7 +112,9 @@
             <ng-template #emptymessage>
               <tr>
                 <td colspan="5">
-                  <div class="empty-state"><i class="pi pi-sitemap"></i>Aucun réseau overlay sur le cluster.</div>
+                  <div class="empty-state">
+                    <i class="pi pi-sitemap"></i>Aucun réseau overlay sur le cluster.
+                  </div>
                 </td>
               </tr>
             </ng-template>

@@ -4,8 +4,14 @@
       <h1>Ruches</h1>
       <div class="subtitle">{{ hives().length }} ruche(s) · regroupez vos services par projet</div>
     </div>
-    <div class="header-right">
-      <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="load()" [loading]="loading()" />
+    <div class="flex align-items-center gap-2">
+      <p-button
+        icon="pi pi-refresh"
+        severity="secondary"
+        [text]="true"
+        (onClick)="load()"
+        [loading]="loading()"
+      />
       @if (canManage()) {
         <p-button label="Créer une ruche" icon="pi pi-plus" (onClick)="openCreate()" />
       }
@@ -18,7 +24,9 @@
         <div class="hex deployed"><span class="hex-label">🐝</span></div>
       </div>
       <h2>Aucune ruche pour l'instant</h2>
-      <p>Créez une ruche pour regrouper vos services par projet. Chaque service devient une alvéole.</p>
+      <p>
+        Créez une ruche pour regrouper vos services par projet. Chaque service devient une alvéole.
+      </p>
       @if (canManage()) {
         <p-button label="Créer ma première ruche" icon="pi pi-plus" (onClick)="openCreate()" />
       }
@@ -27,11 +35,30 @@
 
   <div class="hives-grid">
     @for (h of hives(); track h.id) {
-      <div class="hive-card" role="button" tabindex="0" [style.--hive-color]="h.color || '#E8920C'" (click)="open(h)" (keydown.enter)="open(h)">
+      <div
+        class="hive-card"
+        role="button"
+        tabindex="0"
+        [style.--hive-color]="h.color || '#E8920C'"
+        (click)="open(h)"
+        (keydown.enter)="open(h)"
+      >
         @if (canManage()) {
           <div class="card-actions" (click)="$event.stopPropagation()">
-            <p-button icon="pi pi-pencil" severity="secondary" [text]="true" size="small" (onClick)="openEdit(h)" />
-            <p-button icon="pi pi-trash" severity="danger" [text]="true" size="small" (onClick)="remove(h)" />
+            <p-button
+              icon="pi pi-pencil"
+              severity="secondary"
+              [text]="true"
+              size="small"
+              (onClick)="openEdit(h)"
+            />
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              [text]="true"
+              size="small"
+              (onClick)="remove(h)"
+            />
           </div>
         }
         <div class="card-body">
@@ -50,14 +77,24 @@
     }
 
     @if (unassignedCount() > 0) {
-      <div class="hive-card unassigned" role="button" tabindex="0" (click)="openUnassigned()" (keydown.enter)="openUnassigned()">
+      <div
+        class="hive-card unassigned"
+        role="button"
+        tabindex="0"
+        (click)="openUnassigned()"
+        (keydown.enter)="openUnassigned()"
+      >
         <div class="card-body">
           <span class="dot grey"></span>
           <h3 class="name">Sans ruche</h3>
           <p class="desc">Services non rattachés à un projet</p>
         </div>
         <div class="card-foot">
-          <span class="count-label"><span class="count">{{ unassignedCount() }}</span> service{{ unassignedCount() > 1 ? 's' : '' }}</span>
+          <span class="count-label"
+            ><span class="count">{{ unassignedCount() }}</span> service{{
+              unassignedCount() > 1 ? 's' : ''
+            }}</span
+          >
           <span class="open">Voir <i class="pi pi-arrow-right"></i></span>
         </div>
       </div>

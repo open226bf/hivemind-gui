@@ -3,7 +3,11 @@
 <div class="livectl">
   <span class="live-dot" [class.on]="autoRefresh()"></span>
   <span class="live-label">
-    @if (autoRefresh()) { Temps réel } @else { En pause }
+    @if (autoRefresh()) {
+      Temps réel
+    } @else {
+      En pause
+    }
   </span>
   <p-toggleswitch [(ngModel)]="autoRefreshModel" (ngModelChange)="setAutoRefresh($event)" />
   @if (lastUpdated(); as ts) {
@@ -52,10 +56,17 @@
         <div class="ru-head">
           <i class="pi pi-sync pi-spin"></i>
           <strong>Rolling update en cours</strong>
-          <span class="ru-count">{{ status?.running ?? 0 }} / {{ status?.desired ?? 0 }} tâches à jour</span>
+          <span class="ru-count"
+            >{{ status?.running ?? 0 }} / {{ status?.desired ?? 0 }} tâches à jour</span
+          >
         </div>
         <div class="ru-bar">
-          <div class="ru-fill" [style.width.%]="status && status.desired > 0 ? (status.running / status.desired) * 100 : 0"></div>
+          <div
+            class="ru-fill"
+            [style.width.%]="
+              status && status.desired > 0 ? (status.running / status.desired) * 100 : 0
+            "
+          ></div>
         </div>
       </div>
     }
@@ -64,7 +75,10 @@
       <div class="health-bar-wrap">
         <div class="health-bar">
           <div class="bar-fill ok" [style.width.%]="(status.running / status.desired) * 100"></div>
-          <div class="bar-fill warn" [style.width.%]="(status.pending / status.desired) * 100"></div>
+          <div
+            class="bar-fill warn"
+            [style.width.%]="(status.pending / status.desired) * 100"
+          ></div>
           <div class="bar-fill err" [style.width.%]="(status.failed / status.desired) * 100"></div>
         </div>
         <span class="bar-label">{{ status.running }}/{{ status.desired }} running</span>
@@ -91,7 +105,9 @@
     <ng-template #body let-t>
       <tr class="task-row" (click)="openTask(t)">
         <td class="muted">{{ t.slot }}</td>
-        <td><code>{{ t.id.slice(0, 12) }}</code></td>
+        <td>
+          <code>{{ t.id.slice(0, 12) }}</code>
+        </td>
         <td class="muted img-col">{{ shortImage(t.image) }}</td>
         <td class="muted">{{ t.node ? t.node.slice(0, 12) : '—' }}</td>
         <td class="mono ip-col">{{ primaryIp(t) }}</td>
@@ -113,7 +129,12 @@
   </p-table>
 </div>
 
-<p-drawer [(visible)]="drawerVisible" position="right" [style]="{ width: '480px' }" header="Détail du conteneur">
+<p-drawer
+  [(visible)]="drawerVisible"
+  position="right"
+  [style]="{ width: '480px' }"
+  header="Détail du conteneur"
+>
   @if (selectedTask(); as t) {
     <div class="drawer-body">
       <div class="dr-head">
@@ -175,7 +196,13 @@
       }
 
       <div class="dr-actions">
-        <p-button label="Voir les logs du service" icon="pi pi-align-left" severity="secondary" [outlined]="true" (onClick)="goToLogs()" />
+        <p-button
+          label="Voir les logs du service"
+          icon="pi pi-align-left"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="goToLogs()"
+        />
         <p-button
           label="Attacher un shell"
           icon="pi pi-desktop"

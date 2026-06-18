@@ -1,10 +1,16 @@
 .form {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
-  label { font-size: 12px; font-weight: 600; color: var(--hm-text-muted); margin-top: 10px; }
-  input, textarea { width: 100%; }
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--hm-text-muted);
+    margin-top: 10px;
+  }
+  input,
+  textarea {
+    width: 100%;
+  }
 }
 
-.req { color: #d9534f; }
+.req {
+  color: #d9534f;
+}

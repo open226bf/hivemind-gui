@@ -15,7 +15,15 @@ import { NetworkFormComponent } from './network-form.component';
 
 @Component({
   selector: 'hm-networks',
-  imports: [DatePipe, TableModule, ButtonModule, TagModule, TooltipModule, TabsModule, NetworkFormComponent],
+  imports: [
+    DatePipe,
+    TableModule,
+    ButtonModule,
+    TagModule,
+    TooltipModule,
+    TabsModule,
+    NetworkFormComponent,
+  ],
   templateUrl: './networks.component.html',
   styleUrl: './networks.component.scss',
 })
@@ -46,16 +54,31 @@ export class Networks {
   load(): void {
     this.loading.set(true);
     this.api.list(1, 50).subscribe({
-      next: (res) => { this.networks.set(res.items); this.loading.set(false); },
-      error: () => { this.loading.set(false); this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des réseaux impossible' }); },
+      next: (res) => {
+        this.networks.set(res.items);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Chargement des réseaux impossible',
+        });
+      },
     });
   }
 
   loadSwarm(): void {
     this.swarmLoading.set(true);
     this.api.swarm().subscribe({
-      next: (nets) => { this.swarmNetworks.set(nets); this.swarmLoading.set(false); },
-      error: () => { this.swarmLoading.set(false); },
+      next: (nets) => {
+        this.swarmNetworks.set(nets);
+        this.swarmLoading.set(false);
+      },
+      error: () => {
+        this.swarmLoading.set(false);
+      },
     });
   }
 
@@ -71,8 +94,17 @@ export class Networks {
   remove(n: NetworkResponse): void {
     if (!confirm(`Supprimer le réseau "${n.name}" ?`)) return;
     this.api.remove(n.id).subscribe({
-      next: () => { this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${n.name} supprimé` }); this.load(); },
-      error: (err) => { this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Suppression impossible' }); },
+      next: () => {
+        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${n.name} supprimé` });
+        this.load();
+      },
+      error: (err) => {
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Suppression impossible',
+        });
+      },
     });
   }
 }

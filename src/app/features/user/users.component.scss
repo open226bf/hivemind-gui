@@ -1,7 +1,17 @@
-.actions { display: flex; gap: 8px; }
-.muted { color: var(--hm-text-muted); font-size: 12px; }
-.name-cell { font-weight: 600; display: flex; align-items: center; gap: 8px; }
-.name-cell .pi { font-size: 13px; color: var(--hm-text-muted); }
+.muted {
+  color: var(--hm-text-muted);
+  font-size: 12px;
+}
+.name-cell {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.name-cell .pi {
+  font-size: 13px;
+  color: var(--hm-text-muted);
+}
 
 .you {
   font-size: 10px;
@@ -19,11 +29,13 @@
   gap: 6px;
   font-size: 13px;
 
-  &.on { color: #3a9b59; }
-  &.off { color: var(--hm-text-muted); }
+  &.on {
+    color: #3a9b59;
+  }
+  &.off {
+    color: var(--hm-text-muted);
+  }
 }
-
-.row-actions { display: flex; gap: 6px; justify-content: flex-end; }
 
 .empty-state {
   padding: 32px;

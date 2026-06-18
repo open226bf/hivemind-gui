@@ -4,8 +4,14 @@
       <h1>Templates</h1>
       <div class="subtitle">{{ templates().length }} modèle(s) de service</div>
     </div>
-    <div class="actions">
-      <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="load()" [loading]="loading()" />
+    <div class="flex gap-2 align-items-center">
+      <p-button
+        icon="pi pi-refresh"
+        severity="secondary"
+        [text]="true"
+        (onClick)="load()"
+        [loading]="loading()"
+      />
       @if (isAdmin()) {
         <p-button label="Créer un template" icon="pi pi-plus" (onClick)="openCreate()" />
       }
@@ -28,29 +34,59 @@
         <tr>
           <td class="name-cell">
             <code>{{ t.name }}</code>
-            @if (t.description) { <div class="muted small">{{ t.description }}</div> }
+            @if (t.description) {
+              <div class="muted small">{{ t.description }}</div>
+            }
           </td>
           <td class="mono muted">{{ t.spec.image }}{{ t.spec.tag ? ':' + t.spec.tag : '' }}</td>
           <td>{{ t.spec.replicas }}</td>
           <td><p-tag [value]="'v' + t.version" severity="info" /></td>
           <td>
             @if (t.locked_fields.length) {
-              @for (f of t.locked_fields; track f) { <p-tag [value]="f" severity="warn" styleClass="lock-tag" /> }
-            } @else { <span class="muted">—</span> }
+              @for (f of t.locked_fields; track f) {
+                <p-tag [value]="f" severity="warn" styleClass="lock-tag" />
+              }
+            } @else {
+              <span class="muted">—</span>
+            }
           </td>
-          <td class="row-actions">
+          <td class="flex gap-2 justify-content-end">
             @if (canInstantiate()) {
-              <p-button label="Instancier" icon="pi pi-bolt" [text]="true" size="small" (onClick)="openInstantiate(t)" />
+              <p-button
+                label="Instancier"
+                icon="pi pi-bolt"
+                [text]="true"
+                size="small"
+                (onClick)="openInstantiate(t)"
+              />
             }
             @if (isAdmin()) {
-              <p-button icon="pi pi-pencil" severity="secondary" [text]="true" size="small" pTooltip="Modifier" (onClick)="openEdit(t)" />
-              <p-button icon="pi pi-trash" severity="danger" [text]="true" size="small" pTooltip="Supprimer" (onClick)="remove(t)" />
+              <p-button
+                icon="pi pi-pencil"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                pTooltip="Modifier"
+                (onClick)="openEdit(t)"
+              />
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [text]="true"
+                size="small"
+                pTooltip="Supprimer"
+                (onClick)="remove(t)"
+              />
             }
           </td>
         </tr>
       </ng-template>
       <ng-template #emptymessage>
-        <tr><td colspan="6"><div class="empty-state"><i class="pi pi-clone"></i>Aucun template.</div></td></tr>
+        <tr>
+          <td colspan="6">
+            <div class="empty-state"><i class="pi pi-clone"></i>Aucun template.</div>
+          </td>
+        </tr>
       </ng-template>
     </p-table>
   </div>

@@ -4,14 +4,28 @@
   [modal]="true"
   [style]="{ width: '440px' }"
 >
-  <div class="form">
+  <div class="form flex flex-column gap-1">
     <label>Email <span class="req">*</span></label>
-    <input pInputText [(ngModel)]="form.email" [disabled]="mode() === 'edit'" placeholder="dev@exemple.com" />
+    <input
+      pInputText
+      [(ngModel)]="form.email"
+      [disabled]="mode() === 'edit'"
+      placeholder="dev@exemple.com"
+    />
 
     <label>
-      Mot de passe @if (mode() === 'create') { <span class="req">*</span> }
+      Mot de passe
+      @if (mode() === 'create') {
+        <span class="req">*</span>
+      }
     </label>
-    <p-password [(ngModel)]="form.password" [feedback]="false" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full" />
+    <p-password
+      [(ngModel)]="form.password"
+      [feedback]="false"
+      [toggleMask]="true"
+      styleClass="w-full"
+      inputStyleClass="w-full"
+    />
     @if (mode() === 'edit') {
       <small class="muted">Laissez vide pour conserver le mot de passe actuel.</small>
     } @else {
@@ -29,8 +43,8 @@
     />
 
     @if (mode() === 'edit') {
-      <div class="active-row">
-        <label class="inline">Compte actif</label>
+      <div class="flex align-items-center justify-content-between mt-3">
+        <label class="mt-0">Compte actif</label>
         <p-toggleswitch [(ngModel)]="form.active" />
       </div>
       <small class="muted">Un compte inactif ne peut plus se connecter.</small>

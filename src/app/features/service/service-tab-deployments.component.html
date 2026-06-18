@@ -16,7 +16,9 @@
     <ng-template #body let-d>
       <tr>
         <td><p-tag [value]="d.status" [severity]="severity(d.status)" /></td>
-        <td><code>{{ d.image_tag }}</code></td>
+        <td>
+          <code>{{ d.image_tag }}</code>
+        </td>
         <td class="muted">{{ d.trigger }}</td>
         <td class="muted">{{ d.started_at | date: 'short' }}</td>
         <td class="muted">

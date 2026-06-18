@@ -5,7 +5,7 @@
         <h1>Services</h1>
         <div class="subtitle">{{ services().length }} service(s)</div>
       </div>
-      <div class="actions">
+      <div class="flex gap-2 align-items-center">
         <p-button
           icon="pi pi-refresh"
           severity="secondary"
@@ -64,7 +64,7 @@
             }
           </td>
           <td class="muted">{{ svc.updated_at | date: 'short' }}</td>
-          <td class="row-actions">
+          <td class="flex gap-2 justify-content-end">
             @if (canManage()) {
               <p-button
                 icon="pi pi-pencil"
