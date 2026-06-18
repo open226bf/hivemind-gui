@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { API_BASE } from './config';
 import {
   AddConfigVersionRequest,
+  ClusterHealth,
   ClusterListResponse,
   ClusterOverview,
   ClusterResponse,
@@ -504,5 +505,17 @@ export class DeploymentsApi {
     if (opts.page) params = params.set('page', opts.page);
     if (opts.size) params = params.set('size', opts.size);
     return this.http.get<DeploymentListResponse>(`${API_BASE}/deployments`, { params });
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class MonitoringApi {
+  private readonly http = inject(HttpClient);
+
+  /** Per-node health snapshot of the active cluster (cluster scope via the
+   *  X-Hivemind-Cluster interceptor). 503 when the cluster can't provide
+   *  telemetry (stub backend, or an agent cluster before the agent collector). */
+  clusterHealth(): Observable<ClusterHealth> {
+    return this.http.get<ClusterHealth>(`${API_BASE}/monitoring/health`);
   }
 }

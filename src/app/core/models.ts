@@ -704,3 +704,45 @@ export interface CreateSecretRequest {
   target_path?: string;
   value: string;
 }
+
+// ─── Monitoring (cluster health) ─────────────────────────────────────────────
+
+export type HealthVerdict = 'ok' | 'warning' | 'critical' | 'unknown';
+
+/** Per-container normalised health on a node. */
+export interface ContainerHealth {
+  task_id: string;
+  container_id?: string;
+  service_id?: string;
+  service_name?: string;
+  slot: number;
+  state: string;
+  verdict: HealthVerdict | string;
+  reason?: string;
+  restarts: number;
+  exit_code?: number;
+  since: string;
+}
+
+/** A node with its containers and a verdict rollup. tunnel_up is agent-mode only. */
+export interface NodeHealth {
+  node_id: string;
+  hostname?: string;
+  role?: string;
+  reachable: boolean;
+  tunnel_up?: boolean;
+  worst: HealthVerdict | string;
+  ok: number;
+  warning: number;
+  critical: number;
+  containers: ContainerHealth[];
+}
+
+/** Per-node health snapshot of the active cluster (GET /monitoring/health). */
+export interface ClusterHealth {
+  cluster_id?: string;
+  observed_at: string;
+  /** 'cluster' (agent: cluster-wide metrics) or 'connected-node' (direct). */
+  metrics_coverage: string;
+  nodes: NodeHealth[];
+}
