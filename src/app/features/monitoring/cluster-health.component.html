@@ -25,6 +25,25 @@
     </div>
   </div>
 
+  @if (alerts().length) {
+    <div class="card alerts">
+      <div class="alerts-head flex align-items-center gap-2">
+        <i class="pi pi-exclamation-triangle"></i>
+        <strong>{{ alerts().length }} alerte(s) active(s)</strong>
+      </div>
+      @for (a of alerts(); track a.id) {
+        <div class="alert-row flex align-items-center gap-2">
+          <p-tag [value]="verdictLabel(a.severity)" [severity]="tagSeverity(a.severity)" />
+          <span class="a-summary">{{ a.summary }}</span>
+          @if (a.detail) {
+            <span class="a-detail muted" [pTooltip]="a.detail">{{ a.detail }}</span>
+          }
+          <span class="a-time muted">{{ a.fired_at | date: 'short' }}</span>
+        </div>
+      }
+    </div>
+  }
+
   @if (loading() && !health() && !unavailable()) {
     <div class="empty-state"><i class="pi pi-spin pi-spinner"></i>Chargement…</div>
   } @else if (unavailable()) {

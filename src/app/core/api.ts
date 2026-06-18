@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { API_BASE } from './config';
 import {
   AddConfigVersionRequest,
+  AlertListResponse,
   ClusterHealth,
   ClusterListResponse,
   ClusterOverview,
@@ -517,5 +518,10 @@ export class MonitoringApi {
    *  telemetry (stub backend, or an agent cluster before the agent collector). */
   clusterHealth(): Observable<ClusterHealth> {
     return this.http.get<ClusterHealth>(`${API_BASE}/monitoring/health`);
+  }
+
+  /** Active alerts across clusters (event-driven engine). */
+  alerts(): Observable<AlertListResponse> {
+    return this.http.get<AlertListResponse>(`${API_BASE}/monitoring/alerts`);
   }
 }
