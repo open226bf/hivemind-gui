@@ -749,3 +749,23 @@ export interface ClusterHealth {
   metrics_coverage: string;
   nodes: NodeHealth[];
 }
+
+/** A firing alert from the event-driven alert engine (GET /monitoring/alerts). */
+export interface Alert {
+  id: string;
+  severity: HealthVerdict | string;
+  /** task_failed | crash_loop | node_unreachable | … */
+  kind: string;
+  cluster_id?: string;
+  service_id?: string;
+  node_id?: string;
+  container_id?: string;
+  summary: string;
+  detail?: string;
+  fired_at: string;
+}
+
+export interface AlertListResponse {
+  items: Alert[];
+  total: number;
+}

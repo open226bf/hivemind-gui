@@ -4,6 +4,37 @@
   white-space: nowrap;
 }
 
+/* ─── Active alerts banner ──────────────────────────────────────────────────── */
+.alerts {
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  border-left: 3px solid #b54747;
+}
+.alerts-head {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.alerts-head .pi {
+  color: #b54747;
+}
+.alert-row {
+  font-size: 13px;
+  padding: 4px 0;
+}
+.alert-row .a-summary {
+  font-weight: 600;
+}
+.alert-row .a-detail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 280px;
+}
+.alert-row .a-time {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
 .empty-state {
   padding: 48px 24px;
   text-align: center;

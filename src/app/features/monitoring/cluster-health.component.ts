@@ -12,7 +12,13 @@ import { catchError } from 'rxjs/operators';
 
 import { MonitoringApi } from '../../core/api';
 import { ClusterContextService } from '../../core/cluster-context.service';
-import { ClusterHealth, ContainerHealth, HealthVerdict, NodeHealth } from '../../core/models';
+import {
+  Alert,
+  ClusterHealth,
+  ContainerHealth,
+  HealthVerdict,
+  NodeHealth,
+} from '../../core/models';
 
 const REFRESH_MS = 8000;
 
@@ -48,6 +54,9 @@ export class ClusterHealthView implements OnInit {
   readonly unavailable = signal(false);
   readonly showHealthy = signal(false);
   showHealthyModel = false;
+
+  /** Active alerts from the engine (cross-cluster). */
+  readonly alerts = signal<Alert[]>([]);
 
   /** Cluster-wide verdict rollup, summed over nodes. */
   readonly totals = computed(() => {
@@ -91,6 +100,8 @@ export class ClusterHealthView implements OnInit {
     if (isRefresh) this.refreshing.set(true);
     else this.loading.set(true);
 
+    this.fetchAlerts();
+
     this.api
       .clusterHealth()
       .pipe(
@@ -109,6 +120,13 @@ export class ClusterHealthView implements OnInit {
         this.loading.set(false);
         this.refreshing.set(false);
       });
+  }
+
+  private fetchAlerts(): void {
+    this.api
+      .alerts()
+      .pipe(catchError(() => EMPTY))
+      .subscribe((r) => this.alerts.set(r.items));
   }
 
   /** Containers to render for a node: struggling only, unless "show healthy". */
