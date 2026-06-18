@@ -74,6 +74,13 @@ export const HivemindPreset = definePreset(Aura, {
         },
       },
     },
+    tabs: {
+      // Compact, flush tab strip on the page background (no white band). Panel
+      // padding is dropped only for table panels via :has() CSS (keeps form
+      // panels padded).
+      tablist: { background: 'transparent' },
+      tab: { padding: '0.55rem 0.9rem' },
+    },
     tag: {
       // Cloud-console badges: small, medium weight, soft tinted pill.
       root: {
