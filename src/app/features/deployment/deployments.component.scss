@@ -1,6 +1,14 @@
-.actions { display: flex; gap: 8px; }
-.muted { color: var(--hm-text-muted); font-size: 12px; }
-.mono { font-family: monospace; }
+.actions {
+  display: flex;
+  gap: 8px;
+}
+.muted {
+  color: var(--hm-text-muted);
+  font-size: 12px;
+}
+.mono {
+  font-family: monospace;
+}
 
 code {
   font-size: 12px;
@@ -10,8 +18,14 @@ code {
   font-family: monospace;
 }
 
-.err-msg { font-size: 12px; color: #b54747; max-width: 260px; }
-.svc-link { font-weight: 600; }
+.err-msg {
+  font-size: 12px;
+  color: #b54747;
+  max-width: 260px;
+}
+.svc-link {
+  font-weight: 600;
+}
 
 .empty-state {
   padding: 32px;
@@ -23,7 +37,10 @@ code {
   align-items: center;
 }
 
-.filters { padding: 14px 18px; margin-bottom: 0; }
+.filters {
+  padding: 14px 18px;
+  margin-bottom: 0;
+}
 
 .filter-row {
   display: flex;
@@ -48,6 +65,6 @@ code {
 }
 
 .filter-actions {
-  flex-direction: row; gap: 8px;
+  flex-direction: row;
+  gap: 8px;
 }
-

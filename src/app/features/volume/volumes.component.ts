@@ -15,7 +15,15 @@ import { VolumeFormComponent } from './volume-form.component';
 
 @Component({
   selector: 'hm-volumes',
-  imports: [DatePipe, TableModule, ButtonModule, TagModule, TooltipModule, TabsModule, VolumeFormComponent],
+  imports: [
+    DatePipe,
+    TableModule,
+    ButtonModule,
+    TagModule,
+    TooltipModule,
+    TabsModule,
+    VolumeFormComponent,
+  ],
   templateUrl: './volumes.component.html',
   styleUrl: './volumes.component.scss',
 })
@@ -46,16 +54,31 @@ export class Volumes {
   load(): void {
     this.loading.set(true);
     this.api.list(1, 50).subscribe({
-      next: (res) => { this.volumes.set(res.items); this.loading.set(false); },
-      error: () => { this.loading.set(false); this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des volumes impossible' }); },
+      next: (res) => {
+        this.volumes.set(res.items);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Chargement des volumes impossible',
+        });
+      },
     });
   }
 
   loadSwarm(): void {
     this.swarmLoading.set(true);
     this.api.swarm().subscribe({
-      next: (vols) => { this.swarmVolumes.set(vols); this.swarmLoading.set(false); },
-      error: () => { this.swarmLoading.set(false); },
+      next: (vols) => {
+        this.swarmVolumes.set(vols);
+        this.swarmLoading.set(false);
+      },
+      error: () => {
+        this.swarmLoading.set(false);
+      },
     });
   }
 
@@ -71,8 +94,17 @@ export class Volumes {
   remove(v: VolumeResponse): void {
     if (!confirm(`Supprimer le volume "${v.name}" ?`)) return;
     this.api.remove(v.id).subscribe({
-      next: () => { this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${v.name} supprimé` }); this.load(); },
-      error: (err) => { this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Suppression impossible (volume monté ?)' }); },
+      next: () => {
+        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${v.name} supprimé` });
+        this.load();
+      },
+      error: (err) => {
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Suppression impossible (volume monté ?)',
+        });
+      },
     });
   }
 }

@@ -6,12 +6,26 @@
 >
   <div class="form">
     <label>Email <span class="req">*</span></label>
-    <input pInputText [(ngModel)]="form.email" [disabled]="mode() === 'edit'" placeholder="dev@exemple.com" />
+    <input
+      pInputText
+      [(ngModel)]="form.email"
+      [disabled]="mode() === 'edit'"
+      placeholder="dev@exemple.com"
+    />
 
     <label>
-      Mot de passe @if (mode() === 'create') { <span class="req">*</span> }
+      Mot de passe
+      @if (mode() === 'create') {
+        <span class="req">*</span>
+      }
     </label>
-    <p-password [(ngModel)]="form.password" [feedback]="false" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full" />
+    <p-password
+      [(ngModel)]="form.password"
+      [feedback]="false"
+      [toggleMask]="true"
+      styleClass="w-full"
+      inputStyleClass="w-full"
+    />
     @if (mode() === 'edit') {
       <small class="muted">Laissez vide pour conserver le mot de passe actuel.</small>
     } @else {

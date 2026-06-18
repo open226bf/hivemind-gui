@@ -32,9 +32,7 @@ export class AuthService {
   }
 
   loadMe(): Observable<MeResponse> {
-    return this.http
-      .get<MeResponse>(`${API_BASE}/auth/me`)
-      .pipe(tap((u) => this.user.set(u)));
+    return this.http.get<MeResponse>(`${API_BASE}/auth/me`).pipe(tap((u) => this.user.set(u)));
   }
 
   /**

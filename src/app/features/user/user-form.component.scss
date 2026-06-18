@@ -17,7 +17,9 @@
   }
 }
 
-.req { color: #d9534f; }
+.req {
+  color: #d9534f;
+}
 
 .muted {
   color: var(--hm-text-muted);
@@ -30,7 +32,9 @@
   justify-content: space-between;
   margin-top: 14px;
 
-  label.inline { margin-top: 0; }
+  label.inline {
+    margin-top: 0;
+  }
 }
 
 ::ng-deep .w-full {

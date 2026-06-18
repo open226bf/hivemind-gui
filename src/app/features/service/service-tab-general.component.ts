@@ -20,7 +20,10 @@ export class ServiceTabGeneral {
   constructor() {
     effect(() => {
       const id = this.store.service()?.hive_id;
-      if (!id) { this.hiveName.set(null); return; }
+      if (!id) {
+        this.hiveName.set(null);
+        return;
+      }
       this.hivesApi.get(id).subscribe({
         next: (h) => this.hiveName.set(h.name),
         error: () => this.hiveName.set(null),

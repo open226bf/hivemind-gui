@@ -36,8 +36,18 @@ export class Users {
   load(): void {
     this.loading.set(true);
     this.api.list().subscribe({
-      next: (res) => { this.users.set(res.items); this.loading.set(false); },
-      error: () => { this.loading.set(false); this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des utilisateurs impossible' }); },
+      next: (res) => {
+        this.users.set(res.items);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Chargement des utilisateurs impossible',
+        });
+      },
     });
   }
 
@@ -53,8 +63,17 @@ export class Users {
     if (u.id === this.currentUserId()) return;
     if (!confirm(`Supprimer l'utilisateur "${u.email}" ?`)) return;
     this.api.remove(u.id).subscribe({
-      next: () => { this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${u.email} supprimé` }); this.load(); },
-      error: (err) => { this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Suppression impossible' }); },
+      next: () => {
+        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${u.email} supprimé` });
+        this.load();
+      },
+      error: (err) => {
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Suppression impossible',
+        });
+      },
     });
   }
 

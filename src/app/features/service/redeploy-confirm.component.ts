@@ -27,8 +27,8 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
         <div>
           <strong>Êtes-vous sûr ?</strong>
           <p class="muted">
-            Toutes les tâches de <strong>{{ serviceName() }}</strong> seront recréées selon la stratégie
-            de mise à jour configurée.
+            Toutes les tâches de <strong>{{ serviceName() }}</strong> seront recréées selon la
+            stratégie de mise à jour configurée.
           </p>
         </div>
       </div>
@@ -47,24 +47,43 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
       </ng-template>
     </p-dialog>
   `,
-  styles: [`
-    .confirm-body { display: flex; gap: 1rem; align-items: flex-start; padding: 0.25rem 0 1rem; }
-    .icon-circle {
-      flex-shrink: 0;
-      width: 40px; height: 40px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--p-orange-50, #fff7ed);
-      color: var(--p-orange-500, #f97316);
-      font-size: 1.1rem;
-    }
-    .muted { color: var(--p-text-muted-color, #6b7280); margin: 0.25rem 0 0; }
-    .small { font-size: 0.85rem; }
-    .toggle-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0.75rem 0; gap: 1rem;
-      border-top: 1px solid var(--p-content-border-color, #e5e7eb);
-    }
-  `],
+  styles: [
+    `
+      .confirm-body {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        padding: 0.25rem 0 1rem;
+      }
+      .icon-circle {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--p-orange-50, #fff7ed);
+        color: var(--p-orange-500, #f97316);
+        font-size: 1.1rem;
+      }
+      .muted {
+        color: var(--p-text-muted-color, #6b7280);
+        margin: 0.25rem 0 0;
+      }
+      .small {
+        font-size: 0.85rem;
+      }
+      .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        gap: 1rem;
+        border-top: 1px solid var(--p-content-border-color, #e5e7eb);
+      }
+    `,
+  ],
 })
 export class RedeployConfirm {
   readonly visible = signal(false);

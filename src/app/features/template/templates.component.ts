@@ -13,7 +13,14 @@ import { TemplateInstantiateComponent } from './template-instantiate.component';
 
 @Component({
   selector: 'hm-templates',
-  imports: [TableModule, ButtonModule, TagModule, TooltipModule, TemplateFormComponent, TemplateInstantiateComponent],
+  imports: [
+    TableModule,
+    ButtonModule,
+    TagModule,
+    TooltipModule,
+    TemplateFormComponent,
+    TemplateInstantiateComponent,
+  ],
   templateUrl: './templates.component.html',
   styleUrl: './templates.component.scss',
 })
@@ -39,8 +46,18 @@ export class Templates {
   load(): void {
     this.loading.set(true);
     this.api.list().subscribe({
-      next: (res) => { this.templates.set(res.items); this.loading.set(false); },
-      error: () => { this.loading.set(false); this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement des templates impossible' }); },
+      next: (res) => {
+        this.templates.set(res.items);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Chargement des templates impossible',
+        });
+      },
     });
   }
 
@@ -59,8 +76,17 @@ export class Templates {
   remove(t: TemplateResponse): void {
     if (!confirm(`Supprimer le template "${t.name}" ?`)) return;
     this.api.remove(t.id).subscribe({
-      next: () => { this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${t.name} supprimé` }); this.load(); },
-      error: (err) => { this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Suppression impossible' }); },
+      next: () => {
+        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${t.name} supprimé` });
+        this.load();
+      },
+      error: (err) => {
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Suppression impossible',
+        });
+      },
     });
   }
 }

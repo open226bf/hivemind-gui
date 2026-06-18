@@ -5,7 +5,9 @@
   padding: 0 0 8px;
 }
 
-.section { align-self: start; }
+.section {
+  align-self: start;
+}
 
 .section-head {
   display: flex;
@@ -14,7 +16,10 @@
   padding: 14px 18px 10px;
 }
 
-.head-actions { display: flex; gap: 8px; }
+.head-actions {
+  display: flex;
+  gap: 8px;
+}
 
 h2 {
   font-size: 13px;
@@ -24,7 +29,9 @@ h2 {
   margin: 0;
 }
 
-.pad { padding: 4px 18px 18px; }
+.pad {
+  padding: 4px 18px 18px;
+}
 
 dl {
   display: grid;
@@ -34,8 +41,15 @@ dl {
   font-size: 14px;
 }
 
-dt { color: var(--hm-text-muted); }
-dd { margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+dt {
+  color: var(--hm-text-muted);
+}
+dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 
 code {
   font-size: 12px;
@@ -45,9 +59,17 @@ code {
   font-family: monospace;
 }
 
-em { font-style: normal; color: var(--hm-text-muted); font-size: 12px; }
+em {
+  font-style: normal;
+  color: var(--hm-text-muted);
+  font-size: 12px;
+}
 
-.fields { display: flex; flex-direction: column; gap: 14px; }
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
 label {
   display: flex;
@@ -55,12 +77,20 @@ label {
   gap: 6px;
   font-size: 13px;
 
-  span { color: var(--hm-text-muted); }
+  span {
+    color: var(--hm-text-muted);
+  }
   ::ng-deep .p-inputnumber,
-  ::ng-deep input { width: 100%; }
+  ::ng-deep input {
+    width: 100%;
+  }
 }
 
-.field-group { display: flex; flex-direction: column; gap: 8px; }
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 .group-label {
   font-size: 13px;
@@ -73,7 +103,10 @@ label {
   gap: 8px;
   align-items: center;
 
-  .grow { flex: 1; font-family: monospace; }
+  .grow {
+    flex: 1;
+    font-family: monospace;
+  }
 }
 
 .row-err {
@@ -102,8 +135,13 @@ label {
   font-size: 13px;
   line-height: 1.5;
 
-  .pi { font-size: 16px; margin-top: 1px; }
-  code { background: rgba(255, 255, 255, 0.6); }
+  .pi {
+    font-size: 16px;
+    margin-top: 1px;
+  }
+  code {
+    background: rgba(255, 255, 255, 0.6);
+  }
 }
 
 .banner.info {

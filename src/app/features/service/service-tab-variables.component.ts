@@ -86,7 +86,10 @@ export class ServiceTabVariables implements OnInit {
   }
 
   addRow(): void {
-    this.rows.update((rs) => [...rs, { key: '', value: '', is_secret: false, wasSecretFromServer: false }]);
+    this.rows.update((rs) => [
+      ...rs,
+      { key: '', value: '', is_secret: false, wasSecretFromServer: false },
+    ]);
   }
 
   removeRow(index: number): void {
@@ -104,11 +107,19 @@ export class ServiceTabVariables implements OnInit {
         this.saving.set(false);
         this.editing.set(false);
         this.vars.set(res.vars);
-        this.toast.add({ severity: 'success', summary: 'Enregistré', detail: `${res.count} variable(s)` });
+        this.toast.add({
+          severity: 'success',
+          summary: 'Enregistré',
+          detail: `${res.count} variable(s)`,
+        });
       },
       error: (err) => {
         this.saving.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Enregistrement impossible' });
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Enregistrement impossible',
+        });
       },
     });
   }

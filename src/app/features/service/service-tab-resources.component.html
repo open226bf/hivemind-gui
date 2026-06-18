@@ -7,11 +7,30 @@
         <h2>Ressources</h2>
         @if (canManage()) {
           @if (!editingRes()) {
-            <p-button label="Modifier" icon="pi pi-pencil" severity="secondary" size="small" (onClick)="startEditRes()" />
+            <p-button
+              label="Modifier"
+              icon="pi pi-pencil"
+              severity="secondary"
+              size="small"
+              (onClick)="startEditRes()"
+            />
           } @else {
             <div class="head-actions">
-              <p-button label="Annuler" severity="secondary" [text]="true" size="small" (onClick)="cancelRes()" />
-              <p-button label="Enregistrer" icon="pi pi-check" size="small" (onClick)="saveRes()" [loading]="savingRes()" [disabled]="resInvalid()" />
+              <p-button
+                label="Annuler"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                (onClick)="cancelRes()"
+              />
+              <p-button
+                label="Enregistrer"
+                icon="pi pi-check"
+                size="small"
+                (onClick)="saveRes()"
+                [loading]="savingRes()"
+                [disabled]="resInvalid()"
+              />
             </div>
           }
         }
@@ -19,43 +38,73 @@
 
       @if (!editingRes()) {
         <dl class="pad">
-          <dt>CPU réservé</dt><dd>{{ svc.resources.cpu_reservation || '—' }}</dd>
-          <dt>CPU limite</dt><dd>{{ svc.resources.cpu_limit || '—' }}</dd>
-          <dt>Mémoire réservée</dt><dd>{{ mib(svc.resources.mem_reservation) }}</dd>
-          <dt>Mémoire limite</dt><dd>{{ mib(svc.resources.mem_limit) }}</dd>
+          <dt>CPU réservé</dt>
+          <dd>{{ svc.resources.cpu_reservation || '—' }}</dd>
+          <dt>CPU limite</dt>
+          <dd>{{ svc.resources.cpu_limit || '—' }}</dd>
+          <dt>Mémoire réservée</dt>
+          <dd>{{ mib(svc.resources.mem_reservation) }}</dd>
+          <dt>Mémoire limite</dt>
+          <dd>{{ mib(svc.resources.mem_limit) }}</dd>
         </dl>
       } @else {
         <div class="fields pad">
           <label>
             <span>CPU réservé <em>(cœurs)</em></span>
-            <p-inputNumber [(ngModel)]="resForm.cpu_reservation" [min]="0" [maxFractionDigits]="2" [step]="0.25" placeholder="0.25" />
+            <p-inputNumber
+              [(ngModel)]="resForm.cpu_reservation"
+              [min]="0"
+              [maxFractionDigits]="2"
+              [step]="0.25"
+              placeholder="0.25"
+            />
           </label>
           <label>
             <span>CPU limite <em>(cœurs, 0 = illimité)</em></span>
-            <p-inputNumber [(ngModel)]="resForm.cpu_limit" [min]="0" [maxFractionDigits]="2" [step]="0.25" placeholder="0.5" />
+            <p-inputNumber
+              [(ngModel)]="resForm.cpu_limit"
+              [min]="0"
+              [maxFractionDigits]="2"
+              [step]="0.25"
+              placeholder="0.5"
+            />
           </label>
           <label>
             <span>Mémoire réservée <em>(MiB)</em></span>
-            <p-inputNumber [(ngModel)]="resForm.mem_reservation_mib" [min]="0" suffix=" MiB" placeholder="128" />
+            <p-inputNumber
+              [(ngModel)]="resForm.mem_reservation_mib"
+              [min]="0"
+              suffix=" MiB"
+              placeholder="128"
+            />
           </label>
           <label>
             <span>Mémoire limite <em>(MiB, 0 = illimitée)</em></span>
-            <p-inputNumber [(ngModel)]="resForm.mem_limit_mib" [min]="0" suffix=" MiB" placeholder="256" />
+            <p-inputNumber
+              [(ngModel)]="resForm.mem_limit_mib"
+              [min]="0"
+              suffix=" MiB"
+              placeholder="256"
+            />
           </label>
           @if (maxNodeCpu()) {
             <p class="cap-hint">
               <i class="pi pi-server"></i>
-              Plus gros nœud : <strong>{{ maxNodeCpu() }}</strong> cœurs / <strong>{{ maxNodeMemMib() }}</strong> MiB.
+              Plus gros nœud : <strong>{{ maxNodeCpu() }}</strong> cœurs /
+              <strong>{{ maxNodeMemMib() }}</strong> MiB.
             </p>
           }
           @if (resExceedsCapacity()) {
             <div class="row-err">
               <i class="pi pi-ban"></i>
-              Dépasse la capacité du plus gros nœud ({{ maxNodeCpu() }} cœurs / {{ maxNodeMemMib() }} MiB) —
-              la tâche ne pourrait jamais être planifiée.
+              Dépasse la capacité du plus gros nœud ({{ maxNodeCpu() }} cœurs /
+              {{ maxNodeMemMib() }} MiB) — la tâche ne pourrait jamais être planifiée.
             </div>
           } @else if (resInvalid()) {
-            <div class="row-err"><i class="pi pi-exclamation-triangle"></i> Une limite non nulle doit être ≥ à sa réservation.</div>
+            <div class="row-err">
+              <i class="pi pi-exclamation-triangle"></i> Une limite non nulle doit être ≥ à sa
+              réservation.
+            </div>
           }
         </div>
       }
@@ -67,11 +116,30 @@
         <h2>Placement</h2>
         @if (canManage()) {
           @if (!editingPlace()) {
-            <p-button label="Modifier" icon="pi pi-pencil" severity="secondary" size="small" (onClick)="startEditPlace()" />
+            <p-button
+              label="Modifier"
+              icon="pi pi-pencil"
+              severity="secondary"
+              size="small"
+              (onClick)="startEditPlace()"
+            />
           } @else {
             <div class="head-actions">
-              <p-button label="Annuler" severity="secondary" [text]="true" size="small" (onClick)="cancelPlace()" />
-              <p-button label="Enregistrer" icon="pi pi-check" size="small" (onClick)="savePlace()" [loading]="savingPlace()" [disabled]="placeInvalid()" />
+              <p-button
+                label="Annuler"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                (onClick)="cancelPlace()"
+              />
+              <p-button
+                label="Enregistrer"
+                icon="pi pi-check"
+                size="small"
+                (onClick)="savePlace()"
+                [loading]="savingPlace()"
+                [disabled]="placeInvalid()"
+              />
             </div>
           }
         }
@@ -82,14 +150,22 @@
           <dt>Contraintes</dt>
           <dd>
             @if (svc.placement.constraints.length) {
-              @for (c of svc.placement.constraints; track $index) { <code>{{ c }}</code> }
-            } @else { — }
+              @for (c of svc.placement.constraints; track $index) {
+                <code>{{ c }}</code>
+              }
+            } @else {
+              —
+            }
           </dd>
           <dt>Préférences <em>(spread)</em></dt>
           <dd>
             @if (svc.placement.preferences.length) {
-              @for (p of svc.placement.preferences; track $index) { <code>{{ p }}</code> }
-            } @else { — }
+              @for (p of svc.placement.preferences; track $index) {
+                <code>{{ p }}</code>
+              }
+            } @else {
+              —
+            }
           </dd>
           <dt>Max réplicas / nœud</dt>
           <dd>{{ svc.placement.max_replicas_per_node || 'illimité' }}</dd>
@@ -100,9 +176,8 @@
             <i class="pi pi-info-circle"></i>
             <div>
               Une contrainte filtre les nœuds éligibles, p.&nbsp;ex.
-              <code>node.role==worker</code> ou <code>node.labels.zone!=dmz</code>.
-              Une préférence répartit les réplicas sur un attribut, p.&nbsp;ex.
-              <code>node.labels.zone</code>.
+              <code>node.role==worker</code> ou <code>node.labels.zone!=dmz</code>. Une préférence
+              répartit les réplicas sur un attribut, p.&nbsp;ex. <code>node.labels.zone</code>.
             </div>
           </div>
 
@@ -110,25 +185,66 @@
             <span class="group-label">Contraintes</span>
             @for (c of placeForm.constraints; track $index) {
               <div class="row">
-                <input pInputText class="grow" [(ngModel)]="placeForm.constraints[$index]" placeholder="node.role==worker" />
-                <p-button icon="pi pi-trash" severity="danger" [text]="true" size="small" (onClick)="removeConstraint($index)" />
+                <input
+                  pInputText
+                  class="grow"
+                  [(ngModel)]="placeForm.constraints[$index]"
+                  placeholder="node.role==worker"
+                />
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [text]="true"
+                  size="small"
+                  (onClick)="removeConstraint($index)"
+                />
               </div>
-              @if (placeForm.constraints[$index].trim() && !constraintValid(placeForm.constraints[$index])) {
-                <div class="row-err">Format attendu : <code>clé==valeur</code> ou <code>clé!=valeur</code></div>
+              @if (
+                placeForm.constraints[$index].trim() &&
+                !constraintValid(placeForm.constraints[$index])
+              ) {
+                <div class="row-err">
+                  Format attendu : <code>clé==valeur</code> ou <code>clé!=valeur</code>
+                </div>
               }
             }
-            <p-button label="Ajouter une contrainte" icon="pi pi-plus" severity="secondary" [text]="true" size="small" (onClick)="addConstraint()" />
+            <p-button
+              label="Ajouter une contrainte"
+              icon="pi pi-plus"
+              severity="secondary"
+              [text]="true"
+              size="small"
+              (onClick)="addConstraint()"
+            />
           </div>
 
           <div class="field-group">
             <span class="group-label">Préférences <em>(spread)</em></span>
             @for (p of placeForm.preferences; track $index) {
               <div class="row">
-                <input pInputText class="grow" [(ngModel)]="placeForm.preferences[$index]" placeholder="node.labels.zone" />
-                <p-button icon="pi pi-trash" severity="danger" [text]="true" size="small" (onClick)="removePreference($index)" />
+                <input
+                  pInputText
+                  class="grow"
+                  [(ngModel)]="placeForm.preferences[$index]"
+                  placeholder="node.labels.zone"
+                />
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [text]="true"
+                  size="small"
+                  (onClick)="removePreference($index)"
+                />
               </div>
             }
-            <p-button label="Ajouter une préférence" icon="pi pi-plus" severity="secondary" [text]="true" size="small" (onClick)="addPreference()" />
+            <p-button
+              label="Ajouter une préférence"
+              icon="pi pi-plus"
+              severity="secondary"
+              [text]="true"
+              size="small"
+              (onClick)="addPreference()"
+            />
           </div>
 
           <label>
@@ -140,5 +256,8 @@
     </div>
   </div>
 
-  <p class="hint"><i class="pi pi-info-circle"></i> Les modifications sont enregistrées et appliquées au prochain déploiement.</p>
+  <p class="hint">
+    <i class="pi pi-info-circle"></i> Les modifications sont enregistrées et appliquées au prochain
+    déploiement.
+  </p>
 }

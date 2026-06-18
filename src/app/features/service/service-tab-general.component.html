@@ -4,14 +4,25 @@
     <div class="card pad">
       <h2>Image &amp; déploiement</h2>
       <dl>
-        <dt>Image</dt><dd><code>{{ svc.full_image }}</code></dd>
-        <dt>Tag</dt><dd>{{ svc.tag || 'latest' }}</dd>
-        <dt>Replicas souhaités</dt><dd>{{ svc.replicas }}</dd>
+        <dt>Image</dt>
+        <dd>
+          <code>{{ svc.full_image }}</code>
+        </dd>
+        <dt>Tag</dt>
+        <dd>{{ svc.tag || 'latest' }}</dd>
+        <dt>Replicas souhaités</dt>
+        <dd>{{ svc.replicas }}</dd>
         @if (svc.command.length) {
-          <dt>Command</dt><dd><code>{{ svc.command.join(' ') }}</code></dd>
+          <dt>Command</dt>
+          <dd>
+            <code>{{ svc.command.join(' ') }}</code>
+          </dd>
         }
         @if (svc.entrypoint.length) {
-          <dt>Entrypoint</dt><dd><code>{{ svc.entrypoint.join(' ') }}</code></dd>
+          <dt>Entrypoint</dt>
+          <dd>
+            <code>{{ svc.entrypoint.join(' ') }}</code>
+          </dd>
         }
       </dl>
     </div>
@@ -19,10 +30,14 @@
     <div class="card pad">
       <h2>Ressources</h2>
       <dl>
-        <dt>CPU réservé</dt><dd>{{ svc.resources.cpu_reservation || '—' }}</dd>
-        <dt>CPU limite</dt><dd>{{ svc.resources.cpu_limit || '—' }}</dd>
-        <dt>Mémoire réservée</dt><dd>{{ mib(svc.resources.mem_reservation) }}</dd>
-        <dt>Mémoire limite</dt><dd>{{ mib(svc.resources.mem_limit) }}</dd>
+        <dt>CPU réservé</dt>
+        <dd>{{ svc.resources.cpu_reservation || '—' }}</dd>
+        <dt>CPU limite</dt>
+        <dd>{{ svc.resources.cpu_limit || '—' }}</dd>
+        <dt>Mémoire réservée</dt>
+        <dd>{{ mib(svc.resources.mem_reservation) }}</dd>
+        <dt>Mémoire limite</dt>
+        <dd>{{ mib(svc.resources.mem_limit) }}</dd>
       </dl>
     </div>
 
@@ -32,39 +47,59 @@
         <dt>Contraintes</dt>
         <dd>
           @if (svc.placement.constraints.length) {
-            @for (c of svc.placement.constraints; track $index) { <code>{{ c }}</code> }
-          } @else { — }
+            @for (c of svc.placement.constraints; track $index) {
+              <code>{{ c }}</code>
+            }
+          } @else {
+            —
+          }
         </dd>
         <dt>Préférences</dt>
         <dd>
           @if (svc.placement.preferences.length) {
-            @for (p of svc.placement.preferences; track $index) { <code>{{ p }}</code> }
-          } @else { — }
+            @for (p of svc.placement.preferences; track $index) {
+              <code>{{ p }}</code>
+            }
+          } @else {
+            —
+          }
         </dd>
-        <dt>Max réplicas / nœud</dt><dd>{{ svc.placement.max_replicas_per_node || 'illimité' }}</dd>
+        <dt>Max réplicas / nœud</dt>
+        <dd>{{ svc.placement.max_replicas_per_node || 'illimité' }}</dd>
       </dl>
     </div>
 
     <div class="card pad">
       <h2>Stratégie de mise à jour</h2>
       <dl>
-        <dt>Parallélisme</dt><dd>{{ svc.update_config.parallelism }}</dd>
-        <dt>Délai</dt><dd>{{ svc.update_config.delay_seconds }} s</dd>
-        <dt>Échec → action</dt><dd>{{ svc.update_config.failure_action }}</dd>
-        <dt>Ordre</dt><dd>{{ svc.update_config.order }}</dd>
-        <dt>Max taux d'échec</dt><dd>{{ (svc.update_config.max_failure_ratio * 100).toFixed(0) }} %</dd>
+        <dt>Parallélisme</dt>
+        <dd>{{ svc.update_config.parallelism }}</dd>
+        <dt>Délai</dt>
+        <dd>{{ svc.update_config.delay_seconds }} s</dd>
+        <dt>Échec → action</dt>
+        <dd>{{ svc.update_config.failure_action }}</dd>
+        <dt>Ordre</dt>
+        <dd>{{ svc.update_config.order }}</dd>
+        <dt>Max taux d'échec</dt>
+        <dd>{{ (svc.update_config.max_failure_ratio * 100).toFixed(0) }} %</dd>
       </dl>
     </div>
 
     <div class="card pad">
       <h2>Métadonnées</h2>
       <dl>
-        <dt>ID</dt><dd class="mono muted">{{ svc.id }}</dd>
-        <dt>Ruche</dt><dd>{{ hiveName() || '—' }}</dd>
-        <dt>Description</dt><dd>{{ svc.description || '—' }}</dd>
-        <dt>Créé le</dt><dd>{{ svc.created_at | date: 'medium' }}</dd>
-        <dt>Mis à jour</dt><dd>{{ svc.updated_at | date: 'medium' }}</dd>
-        <dt>Swarm ID</dt><dd class="mono muted">{{ svc.swarm_service_id || '—' }}</dd>
+        <dt>ID</dt>
+        <dd class="mono muted">{{ svc.id }}</dd>
+        <dt>Ruche</dt>
+        <dd>{{ hiveName() || '—' }}</dd>
+        <dt>Description</dt>
+        <dd>{{ svc.description || '—' }}</dd>
+        <dt>Créé le</dt>
+        <dd>{{ svc.created_at | date: 'medium' }}</dd>
+        <dt>Mis à jour</dt>
+        <dd>{{ svc.updated_at | date: 'medium' }}</dd>
+        <dt>Swarm ID</dt>
+        <dd class="mono muted">{{ svc.swarm_service_id || '—' }}</dd>
       </dl>
     </div>
   </div>

@@ -46,13 +46,24 @@ export class TemplateInstantiateComponent {
     const t = this.template();
     if (!t) return;
     if (!this.form.name) {
-      this.toast.add({ severity: 'warn', summary: 'Champ requis', detail: 'Le nom du service est obligatoire' });
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Champ requis',
+        detail: 'Le nom du service est obligatoire',
+      });
       return;
     }
-    const body: InstantiateTemplateRequest = { name: this.form.name, description: this.form.description || undefined };
+    const body: InstantiateTemplateRequest = {
+      name: this.form.name,
+      description: this.form.description || undefined,
+    };
     // Only send overrides for fields the template leaves unlocked.
     if (!this.isLocked('tag') && this.form.tag !== t.spec.tag) body.tag = this.form.tag;
-    if (!this.isLocked('replicas') && this.form.replicas != null && this.form.replicas !== t.spec.replicas) {
+    if (
+      !this.isLocked('replicas') &&
+      this.form.replicas != null &&
+      this.form.replicas !== t.spec.replicas
+    ) {
       body.replicas = this.form.replicas;
     }
 
@@ -61,12 +72,20 @@ export class TemplateInstantiateComponent {
       next: (svc) => {
         this.saving.set(false);
         this.visible.set(false);
-        this.toast.add({ severity: 'success', summary: 'Service créé', detail: `${svc.name} depuis ${t.name}` });
+        this.toast.add({
+          severity: 'success',
+          summary: 'Service créé',
+          detail: `${svc.name} depuis ${t.name}`,
+        });
         this.router.navigate(['/services', svc.id]);
       },
       error: (err) => {
         this.saving.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Instanciation impossible' });
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Instanciation impossible',
+        });
       },
     });
   }

@@ -201,12 +201,6 @@ export interface DeploymentListResponse {
   size: number;
 }
 
-export interface ApiError {
-  code: string;
-  message: string;
-  details?: unknown;
-}
-
 // ─── Service snapshots (point-in-time restore points) ────────────────────────
 
 export interface SnapshotSummary {
@@ -331,10 +325,6 @@ export interface SwarmNetworkInfo {
   subnet?: string;
 }
 
-export interface AttachNetworkRequest {
-  network_id: string;
-}
-
 // ─── Volumes & mounts (F-V2-06) ──────────────────────────────────────────────
 
 export interface VolumeResponse {
@@ -429,10 +419,6 @@ export interface UpdateHiveRequest {
   name: string;
   description?: string;
   color?: string;
-}
-
-export interface AssignHiveRequest {
-  hive_id: string | null;
 }
 
 // ─── Service templates (F-V2-07) ─────────────────────────────────────────────
@@ -716,9 +702,5 @@ export interface SecretListResponse {
 export interface CreateSecretRequest {
   name: string;
   target_path?: string;
-  value: string;
-}
-
-export interface RotateSecretRequest {
   value: string;
 }

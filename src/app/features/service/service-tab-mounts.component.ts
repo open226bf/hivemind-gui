@@ -22,7 +22,15 @@ interface MountRow {
 
 @Component({
   selector: 'hm-service-tab-mounts',
-  imports: [FormsModule, TableModule, TagModule, ButtonModule, InputTextModule, SelectModule, CheckboxModule],
+  imports: [
+    FormsModule,
+    TableModule,
+    TagModule,
+    ButtonModule,
+    InputTextModule,
+    SelectModule,
+    CheckboxModule,
+  ],
   templateUrl: './service-tab-mounts.component.html',
   styleUrl: './service-tab-mounts.component.scss',
 })
@@ -48,7 +56,11 @@ export class ServiceTabMounts implements OnInit {
 
   readonly typeOptions = computed(() => [
     { label: 'Volume nommé', value: 'volume' as MountType, disabled: false },
-    { label: 'Bind mount (hôte)' + (this.isAdmin() ? '' : ' — Admin'), value: 'bind' as MountType, disabled: !this.isAdmin() },
+    {
+      label: 'Bind mount (hôte)' + (this.isAdmin() ? '' : ' — Admin'),
+      value: 'bind' as MountType,
+      disabled: !this.isAdmin(),
+    },
     { label: 'tmpfs (mémoire)', value: 'tmpfs' as MountType, disabled: false },
   ]);
 
@@ -68,7 +80,8 @@ export class ServiceTabMounts implements OnInit {
   ngOnInit(): void {
     this.reload();
     this.volumesApi.list(1, 200).subscribe({
-      next: (res) => this.volumeOptions.set(res.items.map((v) => ({ label: v.name, value: v.name }))),
+      next: (res) =>
+        this.volumeOptions.set(res.items.map((v) => ({ label: v.name, value: v.name }))),
     });
   }
 
@@ -127,11 +140,19 @@ export class ServiceTabMounts implements OnInit {
         this.editing.set(false);
         this.mounts.set(res.mounts);
         this.warnings.set(res.warnings ?? []);
-        this.toast.add({ severity: 'success', summary: 'Enregistré', detail: `${res.mounts.length} montage(s) — appliqué au prochain déploiement.` });
+        this.toast.add({
+          severity: 'success',
+          summary: 'Enregistré',
+          detail: `${res.mounts.length} montage(s) — appliqué au prochain déploiement.`,
+        });
       },
       error: (err) => {
         this.saving.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Enregistrement impossible' });
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Enregistrement impossible',
+        });
       },
     });
   }

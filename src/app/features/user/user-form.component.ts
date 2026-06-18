@@ -13,7 +13,15 @@ import { Role, UserResponse } from '../../core/models';
 
 @Component({
   selector: 'hm-user-form',
-  imports: [FormsModule, ButtonModule, DialogModule, InputTextModule, PasswordModule, SelectModule, ToggleSwitchModule],
+  imports: [
+    FormsModule,
+    ButtonModule,
+    DialogModule,
+    InputTextModule,
+    PasswordModule,
+    SelectModule,
+    ToggleSwitchModule,
+  ],
   templateUrl: './user-form.component.html',
   styleUrl: './user-form.component.scss',
 })
@@ -55,14 +63,20 @@ export class UserFormComponent {
   save(): void {
     if (this.mode() === 'create') {
       if (!this.form.email || !this.form.password) {
-        this.toast.add({ severity: 'warn', summary: 'Champs requis', detail: 'Email et mot de passe sont obligatoires' });
+        this.toast.add({
+          severity: 'warn',
+          summary: 'Champs requis',
+          detail: 'Email et mot de passe sont obligatoires',
+        });
         return;
       }
       this.saving.set(true);
-      this.api.create({ email: this.form.email, password: this.form.password, role: this.form.role }).subscribe({
-        next: () => this.onSaved('Créé', this.form.email),
-        error: (e) => this.onError(e),
-      });
+      this.api
+        .create({ email: this.form.email, password: this.form.password, role: this.form.role })
+        .subscribe({
+          next: () => this.onSaved('Créé', this.form.email),
+          error: (e) => this.onError(e),
+        });
     } else {
       this.saving.set(true);
       this.api
@@ -87,7 +101,11 @@ export class UserFormComponent {
 
   private onError(err: { error?: { message?: string } }): void {
     this.saving.set(false);
-    this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Opération impossible' });
+    this.toast.add({
+      severity: 'error',
+      summary: 'Erreur',
+      detail: err?.error?.message ?? 'Opération impossible',
+    });
   }
 
   private empty() {

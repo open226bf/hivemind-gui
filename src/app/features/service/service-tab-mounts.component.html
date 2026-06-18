@@ -4,11 +4,30 @@
     <div class="head-actions">
       @if (!editing()) {
         @if (canManage()) {
-          <p-button label="Modifier" icon="pi pi-pencil" severity="secondary" size="small" (onClick)="startEdit()" />
+          <p-button
+            label="Modifier"
+            icon="pi pi-pencil"
+            severity="secondary"
+            size="small"
+            (onClick)="startEdit()"
+          />
         }
       } @else {
-        <p-button label="Annuler" severity="secondary" [text]="true" size="small" (onClick)="cancel()" />
-        <p-button label="Enregistrer" icon="pi pi-check" size="small" (onClick)="save()" [loading]="saving()" [disabled]="!valid()" />
+        <p-button
+          label="Annuler"
+          severity="secondary"
+          [text]="true"
+          size="small"
+          (onClick)="cancel()"
+        />
+        <p-button
+          label="Enregistrer"
+          icon="pi pi-check"
+          size="small"
+          (onClick)="save()"
+          [loading]="saving()"
+          [disabled]="!valid()"
+        />
       }
     </div>
   </div>
@@ -36,12 +55,20 @@
           <td class="mono">{{ m.type === 'tmpfs' ? '—' : m.source }}</td>
           <td class="mono">{{ m.target }}</td>
           <td>
-            @if (m.read_only) { <i class="pi pi-lock" title="Lecture seule"></i> } @else { <span class="muted">non</span> }
+            @if (m.read_only) {
+              <i class="pi pi-lock" title="Lecture seule"></i>
+            } @else {
+              <span class="muted">non</span>
+            }
           </td>
         </tr>
       </ng-template>
       <ng-template #emptymessage>
-        <tr><td colspan="4"><div class="empty-state"><i class="pi pi-database"></i>Aucun montage déclaré.</div></td></tr>
+        <tr>
+          <td colspan="4">
+            <div class="empty-state"><i class="pi pi-database"></i>Aucun montage déclaré.</div>
+          </td>
+        </tr>
       </ng-template>
     </p-table>
   }
@@ -50,8 +77,9 @@
     <div class="banner info">
       <i class="pi pi-info-circle"></i>
       <div>
-        Les <strong>volumes nommés</strong> doivent exister dans le catalogue. Les <strong>bind mounts</strong>
-        (chemin de l'hôte) sont réservés aux administrateurs et journalisés. Les <strong>tmpfs</strong> sont éphémères (en mémoire).
+        Les <strong>volumes nommés</strong> doivent exister dans le catalogue. Les
+        <strong>bind mounts</strong> (chemin de l'hôte) sont réservés aux administrateurs et
+        journalisés. Les <strong>tmpfs</strong> sont éphémères (en mémoire).
       </div>
     </div>
 
@@ -89,14 +117,26 @@
           <input pInputText class="tgt" [(ngModel)]="row.target" placeholder="/chemin/conteneur" />
 
           <label class="ro-toggle">
-            <p-checkbox [(ngModel)]="row.read_only" [binary]="true" [disabled]="row.type === 'tmpfs'" />
+            <p-checkbox
+              [(ngModel)]="row.read_only"
+              [binary]="true"
+              [disabled]="row.type === 'tmpfs'"
+            />
             RO
           </label>
 
-          <p-button icon="pi pi-trash" severity="danger" [text]="true" size="small" (onClick)="removeRow($index)" />
+          <p-button
+            icon="pi pi-trash"
+            severity="danger"
+            [text]="true"
+            size="small"
+            (onClick)="removeRow($index)"
+          />
         </div>
         @if (row.target && !row.target.startsWith('/')) {
-          <div class="row-err">La cible doit être un chemin absolu (commençant par <code>/</code>).</div>
+          <div class="row-err">
+            La cible doit être un chemin absolu (commençant par <code>/</code>).
+          </div>
         }
         @if (row.type === 'bind' && row.source && !row.source.startsWith('/')) {
           <div class="row-err">La source d'un bind mount doit être un chemin absolu de l'hôte.</div>
@@ -104,6 +144,13 @@
       }
     </div>
 
-    <p-button label="Ajouter un montage" icon="pi pi-plus" severity="secondary" [text]="true" size="small" (onClick)="addRow()" />
+    <p-button
+      label="Ajouter un montage"
+      icon="pi pi-plus"
+      severity="secondary"
+      [text]="true"
+      size="small"
+      (onClick)="addRow()"
+    />
   }
 </div>

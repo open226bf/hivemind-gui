@@ -8,7 +8,17 @@ import { MessageService } from 'primeng/api';
 import { HivesApi } from '../../core/api';
 import { HiveResponse } from '../../core/models';
 
-const PALETTE = ['#E8920C', '#FBB040', '#43a047', '#fb8c00', '#8e24aa', '#e53935', '#00897b', '#5e35b1', '#6d4c41'];
+const PALETTE = [
+  '#E8920C',
+  '#FBB040',
+  '#43a047',
+  '#fb8c00',
+  '#8e24aa',
+  '#e53935',
+  '#00897b',
+  '#5e35b1',
+  '#6d4c41',
+];
 
 @Component({
   selector: 'hm-hive-form',
@@ -45,22 +55,38 @@ export class HiveFormComponent {
 
   save(): void {
     if (!this.form.name.trim()) {
-      this.toast.add({ severity: 'warn', summary: 'Champ requis', detail: 'Le nom est obligatoire' });
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Champ requis',
+        detail: 'Le nom est obligatoire',
+      });
       return;
     }
     this.saving.set(true);
-    const body = { name: this.form.name.trim(), description: this.form.description || undefined, color: this.form.color };
+    const body = {
+      name: this.form.name.trim(),
+      description: this.form.description || undefined,
+      color: this.form.color,
+    };
     const id = this.editingId();
     const done = {
       next: () => {
         this.saving.set(false);
         this.visible.set(false);
-        this.toast.add({ severity: 'success', summary: id ? 'Modifiée' : 'Créée', detail: `Ruche ${this.form.name}` });
+        this.toast.add({
+          severity: 'success',
+          summary: id ? 'Modifiée' : 'Créée',
+          detail: `Ruche ${this.form.name}`,
+        });
         this.saved.emit();
       },
       error: (err: { error?: { message?: string } }) => {
         this.saving.set(false);
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message ?? 'Opération impossible' });
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Opération impossible',
+        });
       },
     };
     if (id) this.api.update(id, body).subscribe(done);

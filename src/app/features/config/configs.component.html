@@ -5,7 +5,13 @@
       <div class="subtitle">{{ configs().length }} config(s)</div>
     </div>
     <div class="actions">
-      <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (onClick)="load()" [loading]="loading()" />
+      <p-button
+        icon="pi pi-refresh"
+        severity="secondary"
+        [text]="true"
+        (onClick)="load()"
+        [loading]="loading()"
+      />
       @if (canManage()) {
         <p-button label="Créer une config" icon="pi pi-plus" (onClick)="openCreate()" />
       }
@@ -26,16 +32,39 @@
       </ng-template>
       <ng-template #body let-c>
         <tr>
-          <td class="name-cell"><code>{{ c.name }}</code></td>
+          <td class="name-cell">
+            <code>{{ c.name }}</code>
+          </td>
           <td class="muted mono">{{ c.target_path || '—' }}</td>
           <td><p-tag [value]="'v' + c.current_version" severity="info" /></td>
           <td class="muted">{{ c.created_at | date: 'short' }}</td>
           <td class="muted">{{ c.updated_at | date: 'short' }}</td>
           <td class="row-actions">
-            <p-button icon="pi pi-history" severity="secondary" [text]="true" size="small" pTooltip="Versions" (onClick)="openVersions(c)" />
+            <p-button
+              icon="pi pi-history"
+              severity="secondary"
+              [text]="true"
+              size="small"
+              pTooltip="Versions"
+              (onClick)="openVersions(c)"
+            />
             @if (canManage()) {
-              <p-button icon="pi pi-plus-circle" severity="secondary" [text]="true" size="small" pTooltip="Nouvelle version" (onClick)="openAddVersion(c)" />
-              <p-button icon="pi pi-trash" severity="danger" [text]="true" size="small" pTooltip="Supprimer" (onClick)="remove(c)" />
+              <p-button
+                icon="pi pi-plus-circle"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                pTooltip="Nouvelle version"
+                (onClick)="openAddVersion(c)"
+              />
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [text]="true"
+                size="small"
+                pTooltip="Supprimer"
+                (onClick)="remove(c)"
+              />
             }
           </td>
         </tr>
@@ -51,7 +80,12 @@
   </div>
 </div>
 
-<p-drawer [(visible)]="drawerVisible" position="right" [style]="{ width: '620px' }" [header]="'Versions — ' + (versionTarget()?.name ?? '')">
+<p-drawer
+  [(visible)]="drawerVisible"
+  position="right"
+  [style]="{ width: '620px' }"
+  [header]="'Versions — ' + (versionTarget()?.name ?? '')"
+>
   @if (versionsLoading()) {
     <div class="empty-state"><i class="pi pi-spin pi-spinner"></i>Chargement…</div>
   } @else {
@@ -63,7 +97,9 @@
           @for (s of impacted(); track s.service_id) {
             <a class="svc-link" [routerLink]="['/services', s.service_id]">{{ s.name }}</a>
           }
-          <div class="muted small">Une nouvelle version est appliquée au prochain déploiement de chaque service.</div>
+          <div class="muted small">
+            Une nouvelle version est appliquée au prochain déploiement de chaque service.
+          </div>
         </div>
       </div>
     }
@@ -71,15 +107,38 @@
     @if (versions().length >= 2) {
       <div class="diff-bar">
         <span class="diff-label">Comparer</span>
-        <p-select [options]="versionOptions()" [(ngModel)]="diffFrom" optionLabel="label" optionValue="value" appendTo="body" placeholder="de…" />
+        <p-select
+          [options]="versionOptions()"
+          [(ngModel)]="diffFrom"
+          optionLabel="label"
+          optionValue="value"
+          appendTo="body"
+          placeholder="de…"
+        />
         <i class="pi pi-arrow-right muted"></i>
-        <p-select [options]="versionOptions()" [(ngModel)]="diffTo" optionLabel="label" optionValue="value" appendTo="body" placeholder="vers…" />
-        <p-button label="Diff" icon="pi pi-code" size="small" (onClick)="runDiff()" [loading]="diffLoading()" [disabled]="diffFrom == null || diffTo == null" />
+        <p-select
+          [options]="versionOptions()"
+          [(ngModel)]="diffTo"
+          optionLabel="label"
+          optionValue="value"
+          appendTo="body"
+          placeholder="vers…"
+        />
+        <p-button
+          label="Diff"
+          icon="pi pi-code"
+          size="small"
+          (onClick)="runDiff()"
+          [loading]="diffLoading()"
+          [disabled]="diffFrom == null || diffTo == null"
+        />
       </div>
 
       @if (diffLines(); as lines) {
         @if (lines.length === 0) {
-          <div class="empty-state small"><i class="pi pi-equals"></i>Versions identiques (ou même version sélectionnée).</div>
+          <div class="empty-state small">
+            <i class="pi pi-equals"></i>Versions identiques (ou même version sélectionnée).
+          </div>
         } @else {
           <div class="diff">
             @for (l of lines; track $index) {
@@ -105,7 +164,15 @@
             <span class="v-comment">{{ v.comment }}</span>
           }
           @if (canManage() && v.version !== versionTarget()?.current_version) {
-            <p-button label="Restaurer" icon="pi pi-replay" severity="secondary" [text]="true" size="small" styleClass="restore-btn" (onClick)="restore(v)" />
+            <p-button
+              label="Restaurer"
+              icon="pi pi-replay"
+              severity="secondary"
+              [text]="true"
+              size="small"
+              styleClass="restore-btn"
+              (onClick)="restore(v)"
+            />
           }
         </div>
         <pre class="v-content">{{ v.content }}</pre>

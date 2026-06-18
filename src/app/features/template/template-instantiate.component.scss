@@ -13,10 +13,17 @@
   }
 
   input,
-  ::ng-deep .p-inputnumber { width: 100%; }
+  ::ng-deep .p-inputnumber {
+    width: 100%;
+  }
 
-  .req { color: #b54747; }
-  .muted { color: var(--hm-text-muted); font-size: 12px; }
+  .req {
+    color: #b54747;
+  }
+  .muted {
+    color: var(--hm-text-muted);
+    font-size: 12px;
+  }
 
   code {
     font-size: 12px;
@@ -39,6 +46,8 @@
     font-size: 13px;
     margin-top: 10px;
 
-    .pi { margin-top: 2px; }
+    .pi {
+      margin-top: 2px;
+    }
   }
 }

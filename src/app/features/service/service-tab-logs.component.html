@@ -19,8 +19,22 @@
     <span>Auto-défilement</span>
     <p-toggleswitch [(ngModel)]="autoScroll" />
   </label>
-  <p-button icon="pi pi-refresh" label="Recharger" severity="secondary" size="small" [text]="true" (onClick)="restart()" />
-  <p-button icon="pi pi-trash" label="Effacer" severity="secondary" size="small" [text]="true" (onClick)="clear()" />
+  <p-button
+    icon="pi pi-refresh"
+    label="Recharger"
+    severity="secondary"
+    size="small"
+    [text]="true"
+    (onClick)="restart()"
+  />
+  <p-button
+    icon="pi pi-trash"
+    label="Effacer"
+    severity="secondary"
+    size="small"
+    [text]="true"
+    (onClick)="clear()"
+  />
 </div>
 
 @if (error(); as e) {

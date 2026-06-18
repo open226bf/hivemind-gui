@@ -1,11 +1,22 @@
-<p-drawer [(visible)]="visible" position="right" [style]="{ width: '480px' }" [header]="editingId() ? 'Modifier le template' : 'Créer un template'">
+<p-drawer
+  [(visible)]="visible"
+  position="right"
+  [style]="{ width: '480px' }"
+  [header]="editingId() ? 'Modifier le template' : 'Créer un template'"
+>
   <div class="form">
     <label>Nom <span class="req">*</span></label>
     <input pInputText [(ngModel)]="form.name" placeholder="java-api" [disabled]="!!editingId()" />
-    @if (editingId()) { <small class="muted">Le nom est immuable.</small> }
+    @if (editingId()) {
+      <small class="muted">Le nom est immuable.</small>
+    }
 
     <label>Description</label>
-    <input pInputText [(ngModel)]="form.description" placeholder="API Java standard (Spring Boot)" />
+    <input
+      pInputText
+      [(ngModel)]="form.description"
+      placeholder="API Java standard (Spring Boot)"
+    />
 
     <div class="row2">
       <div>
@@ -44,14 +55,35 @@
     </div>
 
     <label>Réseaux par défaut</label>
-    <p-multiSelect [options]="networkOptions()" [(ngModel)]="form.networkIds" optionLabel="label" optionValue="value" appendTo="body" placeholder="Aucun" />
+    <p-multiSelect
+      [options]="networkOptions()"
+      [(ngModel)]="form.networkIds"
+      optionLabel="label"
+      optionValue="value"
+      appendTo="body"
+      placeholder="Aucun"
+    />
 
     <label>Champs verrouillés</label>
-    <p-multiSelect [options]="lockOptions" [(ngModel)]="form.lockedFields" optionLabel="label" optionValue="value" appendTo="body" placeholder="Aucun (tous modifiables)" />
-    <small class="muted">Les champs verrouillés ne peuvent pas être modifiés lors de l'instanciation.</small>
+    <p-multiSelect
+      [options]="lockOptions"
+      [(ngModel)]="form.lockedFields"
+      optionLabel="label"
+      optionValue="value"
+      appendTo="body"
+      placeholder="Aucun (tous modifiables)"
+    />
+    <small class="muted"
+      >Les champs verrouillés ne peuvent pas être modifiés lors de l'instanciation.</small
+    >
   </div>
   <ng-template #footer>
     <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="close()" />
-    <p-button [label]="editingId() ? 'Enregistrer' : 'Créer'" icon="pi pi-check" (onClick)="save()" [loading]="saving()" />
+    <p-button
+      [label]="editingId() ? 'Enregistrer' : 'Créer'"
+      icon="pi pi-check"
+      (onClick)="save()"
+      [loading]="saving()"
+    />
   </ng-template>
 </p-drawer>
