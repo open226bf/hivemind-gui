@@ -101,6 +101,21 @@
   white-space: nowrap;
 }
 
+.capacity {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.capacity .pi {
+  font-size: 11px;
+}
+.cap-note {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.65;
+  margin-left: 2px;
+}
+
 .rollup {
   font-size: 12px;
   padding-bottom: 10px;
