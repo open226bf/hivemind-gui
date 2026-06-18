@@ -134,6 +134,14 @@ input {
   border-radius: var(--hm-radius);
 }
 
+/* Tab panels that wrap a table carry no padding/background — the card inside
+   is the only surface, flush with the tab strip. */
+.p-tabpanels:has(.p-datatable),
+.p-tabpanel:has(.p-datatable) {
+  padding: 0;
+  background: transparent;
+}
+
 /* Tables sit flush inside their card — the card owns the border + rounded
    corners, so the datatable drops its own (no "box-in-a-box" gap). */
 .card:has(.p-datatable) {
