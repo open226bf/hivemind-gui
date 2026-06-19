@@ -188,6 +188,15 @@
   color: #b54747;
   font-weight: 600;
 }
+.ctn .usage {
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--hm-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.ctn .usage .pi {
+  font-size: 11px;
+}
 
 .all-ok {
   font-size: 13px;

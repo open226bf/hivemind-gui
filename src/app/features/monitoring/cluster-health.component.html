@@ -139,6 +139,21 @@
                     @if (c.reason) {
                       <span class="reason muted" [pTooltip]="c.reason">{{ c.reason }}</span>
                     }
+                    @if (metric(c.container_id); as m) {
+                      <span class="usage ml-auto flex align-items-center gap-3">
+                        <span class="u-cpu" [pTooltip]="(m.cpu_percent | number: '1.0-1') + ' %'">
+                          CPU {{ m.cpu_percent | number: '1.0-0' }}%
+                        </span>
+                        <span
+                          class="u-mem"
+                          [pTooltip]="
+                            formatMem(m.mem_used_bytes) + ' / ' + formatMem(m.mem_limit_bytes)
+                          "
+                        >
+                          <i class="pi pi-database"></i> {{ formatMem(m.mem_used_bytes) }}
+                        </span>
+                      </span>
+                    }
                   </div>
                 }
               </div>

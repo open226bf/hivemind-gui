@@ -8,6 +8,7 @@ import {
   AlertListResponse,
   ClusterHealth,
   ClusterListResponse,
+  MetricsResponse,
   ClusterOverview,
   ClusterResponse,
   CreateClusterRequest,
@@ -523,5 +524,10 @@ export class MonitoringApi {
   /** Active alerts across clusters (event-driven engine). */
   alerts(): Observable<AlertListResponse> {
     return this.http.get<AlertListResponse>(`${API_BASE}/monitoring/alerts`);
+  }
+
+  /** Per-container CPU/memory snapshot of the active cluster. */
+  metrics(): Observable<MetricsResponse> {
+    return this.http.get<MetricsResponse>(`${API_BASE}/monitoring/metrics`);
   }
 }
