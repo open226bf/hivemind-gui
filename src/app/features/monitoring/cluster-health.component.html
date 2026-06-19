@@ -10,7 +10,23 @@
         }
       </div>
     </div>
-    <div class="flex align-items-center gap-3">
+    <div class="flex align-items-center gap-3 flex-wrap">
+      <p-select
+        [options]="nodeOptions()"
+        [(ngModel)]="nodeFilterModel"
+        (ngModelChange)="nodeFilter.set($event)"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="node-filter"
+      />
+      <p-selectButton
+        [options]="viewOptions"
+        [(ngModel)]="viewModeModel"
+        (ngModelChange)="viewMode.set($event)"
+        optionLabel="label"
+        optionValue="value"
+        [allowEmpty]="false"
+      />
       <label class="flex align-items-center gap-2 toggle">
         <p-toggleswitch [(ngModel)]="showHealthyModel" (ngModelChange)="showHealthy.set($event)" />
         <span>Afficher les sains</span>
@@ -85,86 +101,133 @@
       </div>
     }
 
-    <div class="grid">
-      @for (n of h.nodes; track n.node_id) {
-        <div class="col-12 lg:col-6">
-          <div class="card node-card" [class.down]="!n.reachable">
-            <div class="node-head flex align-items-center justify-content-between">
-              <div class="flex align-items-center gap-2 ellipsis">
-                <i class="pi pi-server"></i>
-                <span class="node-name">{{ n.hostname || n.node_id }}</span>
-                @if (n.role) {
-                  <p-tag [value]="n.role" severity="secondary" />
-                }
+    @if (viewMode() === 'cards') {
+      <div class="grid">
+        @for (n of visibleNodes(); track n.node_id) {
+          <div class="col-12 lg:col-6">
+            <div class="card node-card" [class.down]="!n.reachable">
+              <div class="node-head flex align-items-center justify-content-between">
+                <div class="flex align-items-center gap-2 ellipsis">
+                  <i class="pi pi-server"></i>
+                  <span class="node-name">{{ n.hostname || n.node_id }}</span>
+                  @if (n.role) {
+                    <p-tag [value]="n.role" severity="secondary" />
+                  }
+                </div>
+                <div class="flex align-items-center gap-2">
+                  @if (!n.reachable) {
+                    <p-tag value="injoignable" severity="danger" />
+                  }
+                  @if (n.tunnel_up === false) {
+                    <p-tag value="tunnel down" severity="danger" />
+                  }
+                  <p-tag [value]="verdictLabel(n.worst)" [severity]="tagSeverity(n.worst)" />
+                </div>
               </div>
-              <div class="flex align-items-center gap-2">
-                @if (!n.reachable) {
-                  <p-tag value="injoignable" severity="danger" />
-                }
-                @if (n.tunnel_up === false) {
-                  <p-tag value="tunnel down" severity="danger" />
-                }
-                <p-tag [value]="verdictLabel(n.worst)" [severity]="tagSeverity(n.worst)" />
+
+              @if (n.cpus || n.memory_bytes) {
+                <div class="capacity muted flex align-items-center gap-2">
+                  <span><i class="pi pi-server"></i> {{ formatCpus(n.cpus) }} vCPU</span>
+                  <span>·</span>
+                  <span><i class="pi pi-database"></i> {{ formatMem(n.memory_bytes) }}</span>
+                  <span class="cap-note">capacité</span>
+                </div>
+              }
+
+              <div class="rollup flex align-items-center gap-3">
+                <span class="r ok">{{ n.ok }} sains</span>
+                <span class="r warn">{{ n.warning }} dégradés</span>
+                <span class="r crit">{{ n.critical }} critiques</span>
               </div>
-            </div>
 
-            @if (n.cpus || n.memory_bytes) {
-              <div class="capacity muted flex align-items-center gap-2">
-                <span><i class="pi pi-server"></i> {{ formatCpus(n.cpus) }} vCPU</span>
-                <span>·</span>
-                <span><i class="pi pi-database"></i> {{ formatMem(n.memory_bytes) }}</span>
-                <span class="cap-note">capacité</span>
-              </div>
-            }
-
-            <div class="rollup flex align-items-center gap-3">
-              <span class="r ok">{{ n.ok }} sains</span>
-              <span class="r warn">{{ n.warning }} dégradés</span>
-              <span class="r crit">{{ n.critical }} critiques</span>
-            </div>
-
-            @if (visibleContainers(n).length) {
-              <div class="containers">
-                @for (c of visibleContainers(n); track c.task_id) {
-                  <div class="ctn flex align-items-center gap-2">
-                    <p-tag [value]="verdictLabel(c.verdict)" [severity]="tagSeverity(c.verdict)" />
-                    <span class="svc">{{ c.service_name || '—' }}</span>
-                    <span class="slot muted">slot {{ c.slot }}</span>
-                    <span class="state muted">{{ c.state }}</span>
-                    @if (c.restarts > 0) {
-                      <span class="restarts" pTooltip="redémarrages récents"
-                        >↻ {{ c.restarts }}</span
-                      >
-                    }
-                    @if (c.reason) {
-                      <span class="reason muted" [pTooltip]="c.reason">{{ c.reason }}</span>
-                    }
-                    @if (metric(c.container_id); as m) {
-                      <span class="usage ml-auto flex align-items-center gap-3">
-                        <span class="u-cpu" [pTooltip]="(m.cpu_percent | number: '1.0-1') + ' %'">
-                          CPU {{ m.cpu_percent | number: '1.0-0' }}%
-                        </span>
-                        <span
-                          class="u-mem"
-                          [pTooltip]="
-                            formatMem(m.mem_used_bytes) + ' / ' + formatMem(m.mem_limit_bytes)
-                          "
+              @if (visibleContainers(n).length) {
+                <div class="containers">
+                  @for (c of visibleContainers(n); track c.task_id) {
+                    <div class="ctn flex align-items-center gap-2">
+                      <p-tag
+                        [value]="verdictLabel(c.verdict)"
+                        [severity]="tagSeverity(c.verdict)"
+                      />
+                      <span class="svc">{{ c.service_name || '—' }}</span>
+                      <span class="slot muted">slot {{ c.slot }}</span>
+                      <span class="state muted">{{ c.state }}</span>
+                      @if (c.restarts > 0) {
+                        <span class="restarts" pTooltip="redémarrages récents"
+                          >↻ {{ c.restarts }}</span
                         >
-                          <i class="pi pi-database"></i> {{ formatMem(m.mem_used_bytes) }}
+                      }
+                      @if (c.reason) {
+                        <span class="reason muted" [pTooltip]="c.reason">{{ c.reason }}</span>
+                      }
+                      @if (metric(c.container_id); as m) {
+                        <span class="usage ml-auto flex align-items-center gap-3">
+                          <span class="u-cpu" [pTooltip]="(m.cpu_percent | number: '1.0-1') + ' %'">
+                            CPU {{ m.cpu_percent | number: '1.0-0' }}%
+                          </span>
+                          <span
+                            class="u-mem"
+                            [pTooltip]="
+                              formatMem(m.mem_used_bytes) + ' / ' + formatMem(m.mem_limit_bytes)
+                            "
+                          >
+                            <i class="pi pi-database"></i> {{ formatMem(m.mem_used_bytes) }}
+                          </span>
                         </span>
-                      </span>
-                    }
-                  </div>
-                }
-              </div>
-            } @else {
-              <div class="all-ok muted">
-                <i class="pi pi-check-circle"></i> Tous les conteneurs sont sains.
-              </div>
+                      }
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="all-ok muted">
+                  <i class="pi pi-check-circle"></i> Tous les conteneurs sont sains.
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="card task-list">
+        @for (row of rows(); track row.container.task_id) {
+          <div class="ctn flex align-items-center gap-2">
+            <p-tag
+              [value]="verdictLabel(row.container.verdict)"
+              [severity]="tagSeverity(row.container.verdict)"
+            />
+            <span class="svc">{{ row.container.service_name || '—' }}</span>
+            <span class="slot muted">slot {{ row.container.slot }}</span>
+            <span class="node-col muted"><i class="pi pi-server"></i> {{ row.node }}</span>
+            <span class="state muted">{{ row.container.state }}</span>
+            @if (row.container.restarts > 0) {
+              <span class="restarts" pTooltip="redémarrages récents"
+                >↻ {{ row.container.restarts }}</span
+              >
+            }
+            @if (row.container.reason) {
+              <span class="reason muted" [pTooltip]="row.container.reason">{{
+                row.container.reason
+              }}</span>
+            }
+            @if (metric(row.container.container_id); as m) {
+              <span class="usage ml-auto flex align-items-center gap-3">
+                <span class="u-cpu" [pTooltip]="(m.cpu_percent | number: '1.0-1') + ' %'">
+                  CPU {{ m.cpu_percent | number: '1.0-0' }}%
+                </span>
+                <span
+                  class="u-mem"
+                  [pTooltip]="formatMem(m.mem_used_bytes) + ' / ' + formatMem(m.mem_limit_bytes)"
+                >
+                  <i class="pi pi-database"></i> {{ formatMem(m.mem_used_bytes) }}
+                </span>
+              </span>
             }
           </div>
-        </div>
-      }
-    </div>
+        } @empty {
+          <div class="all-ok muted">
+            <i class="pi pi-check-circle"></i> Aucune tâche à afficher.
+          </div>
+        }
+      </div>
+    }
   }
 </div>
