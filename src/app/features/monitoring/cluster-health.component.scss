@@ -197,6 +197,26 @@
 .ctn .usage .pi {
   font-size: 11px;
 }
+.ctn .node-col {
+  white-space: nowrap;
+}
+.ctn .node-col .pi {
+  font-size: 11px;
+}
+
+/* ─── List (flat task table) ────────────────────────────────────────────────── */
+.task-list {
+  padding: 6px 18px;
+}
+.task-list .ctn {
+  border-bottom: 1px solid var(--hm-border);
+}
+.task-list .ctn:last-child {
+  border-bottom: 0;
+}
+.node-filter {
+  min-width: 190px;
+}
 
 .all-ok {
   font-size: 13px;

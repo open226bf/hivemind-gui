@@ -7,6 +7,8 @@ import { TagModule } from 'primeng/tag';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { TooltipModule } from 'primeng/tooltip';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { SelectModule } from 'primeng/select';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { EMPTY, interval } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -39,6 +41,8 @@ type TagSeverity = 'success' | 'warn' | 'danger' | 'secondary' | 'info';
     ToggleSwitchModule,
     TooltipModule,
     ProgressSpinnerModule,
+    SelectModule,
+    SelectButtonModule,
   ],
   templateUrl: './cluster-health.component.html',
   styleUrl: './cluster-health.component.scss',
@@ -64,6 +68,57 @@ export class ClusterHealthView implements OnInit {
 
   /** Latest per-container usage, keyed by container id (joined to health). */
   readonly metricsByContainer = signal<Record<string, MetricSample>>({});
+
+  /** 'list' = flat task table, 'cards' = per-node cards. */
+  readonly viewMode = signal<'list' | 'cards'>('list');
+  viewModeModel: 'list' | 'cards' = 'list';
+  readonly viewOptions = [
+    { label: 'Liste', value: 'list' },
+    { label: 'Cartes', value: 'cards' },
+  ];
+
+  /** Selected node id, '' = all nodes. */
+  readonly nodeFilter = signal('');
+  nodeFilterModel = '';
+
+  /** Node dropdown options ("Tous les nœuds" + one per node). */
+  readonly nodeOptions = computed(() => {
+    const opts = [{ label: 'Tous les nœuds', value: '' }];
+    for (const n of this.health()?.nodes ?? []) {
+      opts.push({ label: n.hostname || n.node_id, value: n.node_id });
+    }
+    return opts;
+  });
+
+  /** Flat task rows for the list view: every container (filtered by node + the
+   *  "show healthy" toggle), worst-first then by service name. */
+  readonly rows = computed(() => {
+    const h = this.health();
+    if (!h) return [];
+    const nf = this.nodeFilter();
+    const showAll = this.showHealthy();
+    const out: { node: string; container: ContainerHealth }[] = [];
+    for (const n of h.nodes) {
+      if (nf && n.node_id !== nf) continue;
+      for (const c of n.containers) {
+        if (!showAll && c.verdict === 'ok') continue;
+        out.push({ node: n.hostname || n.node_id, container: c });
+      }
+    }
+    const rank = (v: string) => (v === 'critical' ? 0 : v === 'warning' ? 1 : v === 'ok' ? 2 : 3);
+    return out.sort(
+      (a, b) =>
+        rank(a.container.verdict) - rank(b.container.verdict) ||
+        (a.container.service_name || '').localeCompare(b.container.service_name || ''),
+    );
+  });
+
+  /** Nodes to render as cards (card view), respecting the node filter. */
+  readonly visibleNodes = computed(() => {
+    const nodes = this.health()?.nodes ?? [];
+    const nf = this.nodeFilter();
+    return nf ? nodes.filter((n) => n.node_id === nf) : nodes;
+  });
 
   /** Cluster-wide verdict rollup, summed over nodes. */
   readonly totals = computed(() => {
