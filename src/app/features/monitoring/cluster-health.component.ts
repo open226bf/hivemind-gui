@@ -1,5 +1,5 @@
 import { Component, DestroyRef, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ButtonModule } from 'primeng/button';
@@ -17,6 +17,7 @@ import {
   ClusterHealth,
   ContainerHealth,
   HealthVerdict,
+  MetricSample,
   NodeHealth,
 } from '../../core/models';
 
@@ -31,6 +32,7 @@ type TagSeverity = 'success' | 'warn' | 'danger' | 'secondary' | 'info';
   selector: 'hm-cluster-health',
   imports: [
     DatePipe,
+    DecimalPipe,
     FormsModule,
     ButtonModule,
     TagModule,
@@ -52,11 +54,16 @@ export class ClusterHealthView implements OnInit {
   readonly lastUpdated = signal<Date | null>(null);
   /** 503 — the active cluster can't provide telemetry (stub / agent cluster). */
   readonly unavailable = signal(false);
-  readonly showHealthy = signal(false);
-  showHealthyModel = false;
+  // Default on: this is a health + usage view, so show every container (with its
+  // verdict and CPU/mem) rather than only the struggling ones.
+  readonly showHealthy = signal(true);
+  showHealthyModel = true;
 
   /** Active alerts from the engine (cross-cluster). */
   readonly alerts = signal<Alert[]>([]);
+
+  /** Latest per-container usage, keyed by container id (joined to health). */
+  readonly metricsByContainer = signal<Record<string, MetricSample>>({});
 
   /** Cluster-wide verdict rollup, summed over nodes. */
   readonly totals = computed(() => {
@@ -101,6 +108,7 @@ export class ClusterHealthView implements OnInit {
     else this.loading.set(true);
 
     this.fetchAlerts();
+    this.fetchMetrics();
 
     this.api
       .clusterHealth()
@@ -127,6 +135,22 @@ export class ClusterHealthView implements OnInit {
       .alerts()
       .pipe(catchError(() => EMPTY))
       .subscribe((r) => this.alerts.set(r.items));
+  }
+
+  private fetchMetrics(): void {
+    this.api
+      .metrics()
+      .pipe(catchError(() => EMPTY))
+      .subscribe((r) => {
+        const byId: Record<string, MetricSample> = {};
+        for (const s of r.items) byId[s.container_id] = s;
+        this.metricsByContainer.set(byId);
+      });
+  }
+
+  /** Usage sample for a container id, if available. */
+  metric(containerId?: string): MetricSample | undefined {
+    return containerId ? this.metricsByContainer()[containerId] : undefined;
   }
 
   /** Containers to render for a node: struggling only, unless "show healthy". */

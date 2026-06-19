@@ -750,6 +750,24 @@ export interface ClusterHealth {
   nodes: NodeHealth[];
 }
 
+/** One container's resource usage (GET /monitoring/metrics). Joined to the
+ *  health snapshot by container_id. */
+export interface MetricSample {
+  container_id: string;
+  node_id?: string;
+  at: string;
+  cpu_percent: number;
+  mem_used_bytes: number;
+  mem_limit_bytes: number;
+  mem_percent: number;
+}
+
+export interface MetricsResponse {
+  /** 'connected-node' (direct) or 'cluster' (agent). */
+  metrics_coverage: string;
+  items: MetricSample[];
+}
+
 /** A firing alert from the event-driven alert engine (GET /monitoring/alerts). */
 export interface Alert {
   id: string;
