@@ -1,0 +1,64 @@
+.muted {
+  opacity: 0.65;
+}
+
+.info {
+  color: #3b82f6;
+}
+
+.note {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.overview {
+  .ov-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.gauges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.node-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  height: 100%;
+
+  &.down {
+    opacity: 0.6;
+  }
+}
+
+.node-head {
+  min-width: 0;
+}
+
+.node-name {
+  font-weight: 600;
+}
+
+.ellipsis {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.node-foot {
+  font-size: 0.85rem;
+}

@@ -1,0 +1,100 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Ressources des nœuds</h1>
+      <div class="subtitle">
+        @if (health()) {
+          {{ nodeUsages().length }} nœud(s) · mis à jour {{ lastUpdated() | date: 'mediumTime' }}
+        } @else {
+          Usage CPU / mémoire par nœud
+        }
+      </div>
+    </div>
+    <p-button
+      icon="pi pi-refresh"
+      severity="secondary"
+      [text]="true"
+      (onClick)="refresh()"
+      [loading]="refreshing()"
+    />
+  </div>
+
+  @if (loading() && !health() && !unavailable()) {
+    <div class="empty-state"><i class="pi pi-spin pi-spinner"></i>Chargement…</div>
+  } @else if (unavailable()) {
+    <div class="card flex gap-3 align-items-start">
+      <i class="pi pi-info-circle info"></i>
+      <div>
+        <strong>Supervision indisponible pour ce cluster.</strong>
+        <p class="muted">
+          La collecte de métriques n'est pas disponible ici (backend simulé ou cluster sans
+          télémétrie). Les clusters directs et les clusters en mode agent sont pris en charge.
+        </p>
+      </div>
+    </div>
+  } @else if (health()) {
+    @if (partialMetrics()) {
+      <div class="note flex align-items-center gap-2">
+        <i class="pi pi-info-circle info"></i>
+        Cluster direct : les jauges ne couvrent que le nœud connecté. Passez en mode agent pour
+        l'usage cluster-wide sur tous les nœuds.
+      </div>
+    }
+
+    <div class="card overview">
+      <div class="ov-title muted">Vue d'ensemble du cluster</div>
+      <div class="gauges">
+        <hm-resource-gauge
+          [value]="clusterUsage().cpuPercent"
+          label="CPU"
+          [detail]="clusterCpuDetail()"
+        />
+        <hm-resource-gauge
+          [value]="clusterUsage().memPercent"
+          label="RAM"
+          [detail]="clusterMemDetail()"
+        />
+      </div>
+    </div>
+
+    <div class="grid">
+      @for (u of nodeUsages(); track u.node.node_id) {
+        <div class="col-12 md:col-6 lg:col-4">
+          <div class="card node-card" [class.down]="!u.node.reachable">
+            <div class="node-head flex align-items-center justify-content-between gap-2">
+              <div class="flex align-items-center gap-2 ellipsis">
+                <i class="pi pi-server"></i>
+                <span class="node-name ellipsis" [pTooltip]="u.node.hostname || u.node.node_id">{{
+                  u.node.hostname || u.node.node_id
+                }}</span>
+                @if (u.node.role) {
+                  <p-tag [value]="u.node.role" severity="secondary" />
+                }
+              </div>
+              <div class="flex align-items-center gap-2">
+                @if (!u.node.reachable) {
+                  <p-tag value="injoignable" severity="danger" />
+                }
+                @if (u.node.tunnel_up === false) {
+                  <p-tag value="tunnel down" severity="danger" />
+                } @else if (u.node.tunnel_up === true) {
+                  <p-tag value="tunnel" severity="success" />
+                }
+              </div>
+            </div>
+
+            <div class="gauges">
+              <hm-resource-gauge [value]="u.cpuPercent" label="CPU" [detail]="cpuDetail(u)" />
+              <hm-resource-gauge [value]="u.memPercent" label="RAM" [detail]="memDetail(u)" />
+            </div>
+
+            <div class="node-foot muted flex align-items-center gap-2">
+              <i class="pi pi-box"></i>
+              {{ u.containerCount }} conteneur(s) mesuré(s)
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

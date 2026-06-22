@@ -25,6 +25,7 @@ export class Sidebar {
     { label: 'Ruches', icon: 'pi-box', path: '/hives' },
     { label: 'Services', icon: 'pi-server', path: '/services' },
     { label: 'Santé', icon: 'pi-heart', path: '/monitoring' },
+    { label: 'Métriques', icon: 'pi-chart-line', path: '/metrics' },
     { label: 'Réseaux', icon: 'pi-sitemap', path: '/networks' },
     { label: 'Volumes', icon: 'pi-database', path: '/volumes' },
     { label: 'Secrets', icon: 'pi-lock', path: '/secrets' },
