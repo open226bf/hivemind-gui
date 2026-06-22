@@ -118,6 +118,31 @@ export class NodeResourcesView implements OnInit {
     };
   });
 
+  /** Summary stats for the cluster overview (nodes, total cores/RAM, containers,
+   *  tunnel coverage). tunnelsKnown is 0 on direct clusters (no per-node tunnel). */
+  readonly clusterStats = computed(() => {
+    const us = this.nodeUsages();
+    let containers = 0;
+    let tunnelsUp = 0;
+    let tunnelsKnown = 0;
+    for (const u of us) {
+      containers += u.containerCount;
+      if (u.node.tunnel_up !== undefined && u.node.tunnel_up !== null) {
+        tunnelsKnown++;
+        if (u.node.tunnel_up) tunnelsUp++;
+      }
+    }
+    const c = this.clusterUsage();
+    return {
+      nodes: us.length,
+      cores: c.cores,
+      memTotal: c.mem,
+      containers,
+      tunnelsUp,
+      tunnelsKnown,
+    };
+  });
+
   constructor() {
     // Re-fetch when the header cluster selection changes.
     effect(() => {
