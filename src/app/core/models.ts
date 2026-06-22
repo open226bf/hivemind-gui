@@ -724,6 +724,14 @@ export interface ContainerHealth {
   since: string;
 }
 
+/** Real host-level usage of a node (whole node, from the agent's /proc reading).
+ *  Present only in agent mode with a recent heartbeat. */
+export interface HostUsage {
+  cpu_percent: number;
+  mem_used_bytes: number;
+  mem_total_bytes: number;
+}
+
 /** A node with its containers and a verdict rollup. tunnel_up is agent-mode only. */
 export interface NodeHealth {
   node_id: string;
@@ -734,6 +742,8 @@ export interface NodeHealth {
   /** Total capacity (not usage): cores and total RAM in bytes. */
   cpus: number;
   memory_bytes: number;
+  /** Real whole-node usage (agent mode); absent in direct mode. */
+  host_usage?: HostUsage;
   worst: HealthVerdict | string;
   ok: number;
   warning: number;

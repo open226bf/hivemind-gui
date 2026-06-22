@@ -88,9 +88,19 @@
               <hm-resource-gauge [value]="u.memPercent" label="RAM" [detail]="memDetail(u)" />
             </div>
 
-            <div class="node-foot muted flex align-items-center gap-2">
-              <i class="pi pi-box"></i>
-              {{ u.containerCount }} conteneur(s) mesuré(s)
+            <div class="node-foot muted">
+              <span class="flex align-items-center gap-2">
+                <i class="pi pi-box"></i>
+                {{ u.containerCount }} conteneur(s) · {{ containerDetail(u) }}
+              </span>
+              @if (!u.usingHost) {
+                <span
+                  class="hint"
+                  pTooltip="L'agent n'a pas encore remonté l'usage du nœud — jauges basées sur les conteneurs."
+                >
+                  · usage estimé (conteneurs)
+                </span>
+              }
             </div>
           </div>
         </div>
