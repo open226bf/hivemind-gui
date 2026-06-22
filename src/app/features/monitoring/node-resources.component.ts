@@ -64,18 +64,23 @@ export class NodeResourcesView implements OnInit {
       agg.count += 1;
       byNode.set(id, agg);
     }
-    return h.nodes.map((n) => {
-      const agg = byNode.get(n.node_id) ?? { cpu: 0, mem: 0, count: 0 };
-      return {
-        node: n,
-        // cpu_percent is "100% = one core"; divide by the node's cores to get
-        // utilisation against capacity (0..100).
-        cpuPercent: n.cpus > 0 ? Math.min(100, agg.cpu / n.cpus) : 0,
-        memPercent: n.memory_bytes > 0 ? Math.min(100, (agg.mem / n.memory_bytes) * 100) : 0,
-        memUsedBytes: agg.mem,
-        containerCount: agg.count,
-      };
-    });
+    // Skip the synthetic "unscheduled tasks" bucket (empty node_id): it has no
+    // capacity, so a gauge against it is meaningless. Those tasks surface on the
+    // Santé view and in alerts.
+    return h.nodes
+      .filter((n) => n.node_id !== '')
+      .map((n) => {
+        const agg = byNode.get(n.node_id) ?? { cpu: 0, mem: 0, count: 0 };
+        return {
+          node: n,
+          // cpu_percent is "100% = one core"; divide by the node's cores to get
+          // utilisation against capacity (0..100).
+          cpuPercent: n.cpus > 0 ? Math.min(100, agg.cpu / n.cpus) : 0,
+          memPercent: n.memory_bytes > 0 ? Math.min(100, (agg.mem / n.memory_bytes) * 100) : 0,
+          memUsedBytes: agg.mem,
+          containerCount: agg.count,
+        };
+      });
   });
 
   /** Cluster-wide rollup: total used cores / total cores, total used mem / total. */
