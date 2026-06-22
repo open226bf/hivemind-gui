@@ -15,6 +15,12 @@
   margin-bottom: 1rem;
 }
 
+// The global .card is a bare surface (no padding by design); give every card on
+// this screen the standard inner padding (matches the other monitoring views).
+.card {
+  padding: 16px 18px;
+}
+
 .overview {
   .ov-title {
     font-size: 0.75rem;
