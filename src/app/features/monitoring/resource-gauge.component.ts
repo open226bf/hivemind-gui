@@ -13,6 +13,8 @@ import { DecimalPipe } from '@angular/common';
       <svg
         viewBox="0 0 120 120"
         role="img"
+        [style.width.px]="size()"
+        [style.height.px]="size()"
         [attr.aria-label]="label() + ' ' + (value() | number: '1.0-0') + ' %'"
       >
         <circle
@@ -48,8 +50,6 @@ import { DecimalPipe } from '@angular/common';
         gap: 0.25rem;
       }
       svg {
-        width: 138px;
-        height: 138px;
         max-width: 100%;
       }
       .track {
@@ -95,6 +95,8 @@ export class ResourceGauge {
   readonly value = input<number>(0);
   readonly label = input<string>('');
   readonly detail = input<string>('');
+  /** Rendered SVG size in px (the cluster overview uses larger gauges). */
+  readonly size = input<number>(120);
 
   readonly radius = 48;
   private readonly circ = 2 * Math.PI * this.radius;

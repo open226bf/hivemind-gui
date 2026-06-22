@@ -42,66 +42,102 @@
     }
 
     <div class="card overview">
-      <div class="ov-title muted">Vue d'ensemble du cluster</div>
-      <div class="gauges">
-        <hm-resource-gauge
-          [value]="clusterUsage().cpuPercent"
-          label="CPU"
-          [detail]="clusterCpuDetail()"
-        />
-        <hm-resource-gauge
-          [value]="clusterUsage().memPercent"
-          label="RAM"
-          [detail]="clusterMemDetail()"
-        />
+      <div class="ov-title">Vue d'ensemble du cluster</div>
+      <div class="ov-body">
+        <div class="ov-stats">
+          <div class="stat">
+            <span class="v">{{ clusterStats().nodes }}</span
+            ><span class="l">Nœuds</span>
+          </div>
+          <div class="stat">
+            <span class="v">{{ formatCpus(clusterStats().cores) }}</span
+            ><span class="l">vCPU</span>
+          </div>
+          <div class="stat">
+            <span class="v">{{ formatMem(clusterStats().memTotal) }}</span
+            ><span class="l">RAM totale</span>
+          </div>
+          <div class="stat">
+            <span class="v">{{ clusterStats().containers }}</span
+            ><span class="l">Conteneurs</span>
+          </div>
+          @if (clusterStats().tunnelsKnown) {
+            <div class="stat">
+              <span class="v">{{ clusterStats().tunnelsUp }}/{{ clusterStats().tunnelsKnown }}</span
+              ><span class="l">Tunnels</span>
+            </div>
+          }
+        </div>
+        <div class="ov-gauges">
+          <hm-resource-gauge
+            [value]="clusterUsage().cpuPercent"
+            label="CPU"
+            [detail]="clusterCpuDetail()"
+            [size]="148"
+          />
+          <hm-resource-gauge
+            [value]="clusterUsage().memPercent"
+            label="RAM"
+            [detail]="clusterMemDetail()"
+            [size]="148"
+          />
+        </div>
       </div>
     </div>
 
-    <div class="grid">
+    <div class="node-grid">
       @for (u of nodeUsages(); track u.node.node_id) {
-        <div class="col-12 md:col-6 lg:col-4">
-          <div class="card node-card" [class.down]="!u.node.reachable">
-            <div class="node-head flex align-items-center justify-content-between gap-2">
-              <div class="flex align-items-center gap-2 ellipsis">
-                <i class="pi pi-server"></i>
-                <span class="node-name ellipsis" [pTooltip]="u.node.hostname || u.node.node_id">{{
-                  u.node.hostname || u.node.node_id
-                }}</span>
-                @if (u.node.role) {
-                  <p-tag [value]="u.node.role" severity="secondary" />
-                }
-              </div>
-              <div class="flex align-items-center gap-2">
-                @if (!u.node.reachable) {
-                  <p-tag value="injoignable" severity="danger" />
-                }
-                @if (u.node.tunnel_up === false) {
-                  <p-tag value="tunnel down" severity="danger" />
-                } @else if (u.node.tunnel_up === true) {
-                  <p-tag value="tunnel" severity="success" />
-                }
-              </div>
-            </div>
-
-            <div class="gauges">
-              <hm-resource-gauge [value]="u.cpuPercent" label="CPU" [detail]="cpuDetail(u)" />
-              <hm-resource-gauge [value]="u.memPercent" label="RAM" [detail]="memDetail(u)" />
-            </div>
-
-            <div class="node-foot muted">
-              <span class="flex align-items-center gap-2">
-                <i class="pi pi-box"></i>
-                {{ u.containerCount }} conteneur(s) · {{ containerDetail(u) }}
-              </span>
-              @if (!u.usingHost) {
-                <span
-                  class="hint"
-                  pTooltip="L'agent n'a pas encore remonté l'usage du nœud — jauges basées sur les conteneurs."
-                >
-                  · usage estimé (conteneurs)
-                </span>
+        <div class="card node-card" [class.down]="!u.node.reachable">
+          <div class="node-head flex align-items-center justify-content-between gap-2">
+            <div class="flex align-items-center gap-2 ellipsis">
+              <i class="pi pi-server"></i>
+              <span class="node-name ellipsis" [pTooltip]="u.node.hostname || u.node.node_id">{{
+                u.node.hostname || u.node.node_id
+              }}</span>
+              @if (u.node.role) {
+                <p-tag [value]="u.node.role" severity="secondary" />
               }
             </div>
+            <div class="flex align-items-center gap-2">
+              @if (!u.node.reachable) {
+                <p-tag value="injoignable" severity="danger" />
+              }
+              @if (u.node.tunnel_up === false) {
+                <p-tag value="tunnel down" severity="danger" />
+              } @else if (u.node.tunnel_up === true) {
+                <p-tag value="tunnel" severity="success" />
+              }
+            </div>
+          </div>
+
+          <div class="gauges">
+            <hm-resource-gauge
+              [value]="u.cpuPercent"
+              label="CPU"
+              [detail]="cpuDetail(u)"
+              [size]="118"
+            />
+            <hm-resource-gauge
+              [value]="u.memPercent"
+              label="RAM"
+              [detail]="memDetail(u)"
+              [size]="118"
+            />
+          </div>
+
+          <div class="node-foot muted">
+            <span class="flex align-items-center gap-2">
+              <i class="pi pi-box"></i>
+              {{ u.containerCount }} conteneur(s) · {{ containerDetail(u) }}
+            </span>
+            @if (!u.usingHost) {
+              <span
+                class="hint"
+                pTooltip="L'agent n'a pas encore remonté l'usage du nœud — jauges basées sur les conteneurs."
+              >
+                · usage estimé (conteneurs)
+              </span>
+            }
           </div>
         </div>
       }
