@@ -18,9 +18,13 @@ const REFRESH_MS = 8000;
  *  normalising against the node's advertised capacity. */
 interface NodeUsage {
   node: NodeHealth;
-  cpuPercent: number; // 0..100 of the node's cores
-  memPercent: number; // 0..100 of the node's RAM
+  cpuPercent: number; // primary gauge: real whole-node usage when available, else container-sum
+  memPercent: number;
   memUsedBytes: number;
+  memTotalBytes: number;
+  usingHost: boolean; // true when the gauge reflects the whole node (not just its containers)
+  containerCpuPercent: number; // secondary: this node's containers only
+  containerMemBytes: number;
   containerCount: number;
 }
 
@@ -71,13 +75,22 @@ export class NodeResourcesView implements OnInit {
       .filter((n) => n.node_id !== '')
       .map((n) => {
         const agg = byNode.get(n.node_id) ?? { cpu: 0, mem: 0, count: 0 };
+        // Container-sum (secondary): cpu_percent is "100% = one core".
+        const ctnCpu = n.cpus > 0 ? Math.min(100, agg.cpu / n.cpus) : 0;
+        // Prefer real whole-node usage (agent /proc); fall back to the container
+        // sum when it isn't reported (direct mode, or before the first heartbeat).
+        const hu = n.host_usage;
+        const memTotal = hu?.mem_total_bytes || n.memory_bytes;
+        const memUsed = hu ? hu.mem_used_bytes : agg.mem;
         return {
           node: n,
-          // cpu_percent is "100% = one core"; divide by the node's cores to get
-          // utilisation against capacity (0..100).
-          cpuPercent: n.cpus > 0 ? Math.min(100, agg.cpu / n.cpus) : 0,
-          memPercent: n.memory_bytes > 0 ? Math.min(100, (agg.mem / n.memory_bytes) * 100) : 0,
-          memUsedBytes: agg.mem,
+          cpuPercent: hu ? Math.min(100, hu.cpu_percent) : ctnCpu,
+          memPercent: memTotal > 0 ? Math.min(100, (memUsed / memTotal) * 100) : 0,
+          memUsedBytes: memUsed,
+          memTotalBytes: memTotal,
+          usingHost: !!hu,
+          containerCpuPercent: ctnCpu,
+          containerMemBytes: agg.mem,
           containerCount: agg.count,
         };
       });
@@ -92,7 +105,7 @@ export class NodeResourcesView implements OnInit {
     for (const u of this.nodeUsages()) {
       cores += u.node.cpus;
       coresUsed += (u.cpuPercent / 100) * u.node.cpus;
-      mem += u.node.memory_bytes;
+      mem += u.memTotalBytes;
       memUsed += u.memUsedBytes;
     }
     return {
@@ -158,7 +171,11 @@ export class NodeResourcesView implements OnInit {
     return `${this.formatCpus((u.cpuPercent / 100) * u.node.cpus)} / ${this.formatCpus(u.node.cpus)} cœurs`;
   }
   memDetail(u: NodeUsage): string {
-    return `${this.formatMem(u.memUsedBytes)} / ${this.formatMem(u.node.memory_bytes)}`;
+    return `${this.formatMem(u.memUsedBytes)} / ${this.formatMem(u.memTotalBytes)}`;
+  }
+  /** Secondary readout: the share of the node taken by this agent's containers. */
+  containerDetail(u: NodeUsage): string {
+    return `CPU ${Math.round(u.containerCpuPercent)} % · ${this.formatMem(u.containerMemBytes)}`;
   }
   clusterCpuDetail(): string {
     const c = this.clusterUsage();
