@@ -13,6 +13,7 @@ import { HiveResponse, ServiceResponse } from '../../core/models';
 import { HiveFormComponent } from './hive-form.component';
 import { ServiceFormComponent } from '../service/service-form.component';
 import { Services } from '../service/services.component';
+import { AccessGrantsComponent } from '../acl/access-grants.component';
 
 @Component({
   selector: 'hm-hive-detail',
@@ -25,6 +26,7 @@ import { Services } from '../service/services.component';
     HiveFormComponent,
     ServiceFormComponent,
     Services,
+    AccessGrantsComponent,
   ],
   templateUrl: './hive-detail.component.html',
   styleUrl: './hive-detail.component.scss',

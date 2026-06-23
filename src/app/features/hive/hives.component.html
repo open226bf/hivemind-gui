@@ -12,7 +12,7 @@
         (onClick)="load()"
         [loading]="loading()"
       />
-      @if (canManage()) {
+      @if (canCreate()) {
         <p-button label="Créer une ruche" icon="pi pi-plus" (onClick)="openCreate()" />
       }
     </div>
@@ -27,7 +27,7 @@
       <p>
         Créez une ruche pour regrouper vos services par projet. Chaque service devient une alvéole.
       </p>
-      @if (canManage()) {
+      @if (canCreate()) {
         <p-button label="Créer ma première ruche" icon="pi pi-plus" (onClick)="openCreate()" />
       }
     </div>
@@ -43,22 +43,26 @@
         (click)="open(h)"
         (keydown.enter)="open(h)"
       >
-        @if (canManage()) {
+        @if (canEdit(h) || canDelete(h)) {
           <div class="card-actions" (click)="$event.stopPropagation()">
-            <p-button
-              icon="pi pi-pencil"
-              severity="secondary"
-              [text]="true"
-              size="small"
-              (onClick)="openEdit(h)"
-            />
-            <p-button
-              icon="pi pi-trash"
-              severity="danger"
-              [text]="true"
-              size="small"
-              (onClick)="remove(h)"
-            />
+            @if (canEdit(h)) {
+              <p-button
+                icon="pi pi-pencil"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                (onClick)="openEdit(h)"
+              />
+            }
+            @if (canDelete(h)) {
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [text]="true"
+                size="small"
+                (onClick)="remove(h)"
+              />
+            }
           </div>
         }
         <div class="card-body">

@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ClusterApi } from './api';
+import { AuthService } from './auth.service';
 import { ClusterResponse } from './models';
 
 const STORAGE_KEY = 'hm.selected-cluster';
@@ -19,20 +20,31 @@ const ALL = '__all__';
 @Injectable({ providedIn: 'root' })
 export class ClusterContextService {
   private readonly api = inject(ClusterApi);
+  private readonly auth = inject(AuthService);
 
   readonly clusters = signal<ClusterResponse[]>([]);
   readonly selectedId = signal<string | null>(this.storedSelection());
   /** The selector is only worth showing once more than one cluster exists. */
   readonly multiCluster = computed(() => this.clusters().length > 1);
 
-  /** Loads the cluster list once (called from the shell on startup). */
+  /** Loads the cluster list once (called from the shell on startup), keeping
+   *  only the clusters the user may reach (admins see all; ADR 0003). */
   load(): void {
     this.api.list(1, 200).subscribe({
       next: (res) => {
-        this.clusters.set(res.items);
-        this.reconcileSelection(res.items);
+        const visible = this.filterReachable(res.items);
+        this.clusters.set(visible);
+        this.reconcileSelection(visible);
       },
     });
+  }
+
+  /** Restricts the cluster list to those granted to the user. A null reachable
+   *  set means "no restriction" (admin). */
+  private filterReachable(clusters: ClusterResponse[]): ClusterResponse[] {
+    const reachable = this.auth.reachableClusterIds();
+    if (reachable === null) return clusters;
+    return clusters.filter((c) => reachable.has(c.id));
   }
 
   select(id: string | null): void {

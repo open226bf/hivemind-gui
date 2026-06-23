@@ -11,9 +11,49 @@ export interface MeResponse {
   id: string;
   email: string;
   role: 'admin' | 'operator' | 'viewer';
+  /** Admins bypass ACL grants entirely (full access). */
+  is_admin: boolean;
+  /** Effective ACL grants used to gate per-resource actions (ADR 0003). */
+  scopes: Scope[];
 }
 
 export type Role = 'admin' | 'operator' | 'viewer';
+
+// ─── Fine-grained ACL (ADR 0003) ─────────────────────────────────────────────
+
+/** Ordered access level a grant carries. */
+export type Verb = 'read' | 'write' | 'manage';
+
+export type AclResourceType = 'cluster' | 'hive';
+
+/** One effective grant the user holds on a cluster or hive. */
+export interface Scope {
+  type: AclResourceType;
+  id: string;
+  verb: Verb;
+}
+
+/** A persisted access grant (management view). */
+export interface GrantResponse {
+  id: string;
+  subject_id: string;
+  resource_type: AclResourceType;
+  resource_id: string;
+  verb: Verb;
+  created_by?: string;
+  created_at: string;
+  expires_at?: string;
+}
+
+export interface GrantListResponse {
+  items: GrantResponse[];
+}
+
+export interface CreateGrantRequest {
+  subject_id: string;
+  verb: Verb;
+  expires_at?: string | null;
+}
 
 export interface UserResponse {
   id: string;
@@ -394,6 +434,8 @@ export interface PortsResponse {
 
 export interface HiveResponse {
   id: string;
+  /** Cluster the hive belongs to; empty for the default cluster. */
+  cluster_id?: string;
   name: string;
   description: string;
   color: string;

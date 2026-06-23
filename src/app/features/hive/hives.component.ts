@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
@@ -21,9 +21,22 @@ export class Hives {
   private readonly toast = inject(MessageService);
   private readonly router = inject(Router);
   private readonly ctx = inject(ClusterContextService);
+  private readonly auth = inject(AuthService);
 
-  /** Operators manage hives and assignments (F — ruches). */
-  readonly canManage = inject(AuthService).isOperator;
+  /** Whether the user may create a hive on the active cluster (write on it). */
+  readonly canCreate = computed(() => {
+    if (this.auth.isAdmin()) return true;
+    const cid = this.ctx.selectedId();
+    return cid ? this.auth.canWriteCluster(cid) : this.auth.isOperator();
+  });
+
+  /** Per-hive gates (cluster grants cascade down). */
+  canEdit(h: HiveResponse): boolean {
+    return this.auth.canWriteHive(h.cluster_id, h.id);
+  }
+  canDelete(h: HiveResponse): boolean {
+    return this.auth.canManageHive(h.cluster_id, h.id);
+  }
 
   readonly formRef = viewChild.required(HiveFormComponent);
 
