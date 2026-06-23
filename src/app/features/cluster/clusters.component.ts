@@ -7,12 +7,14 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
+import { DialogModule } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
 
 import { ClusterApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
 import { ClusterResponse } from '../../core/models';
 import { ClusterFormComponent } from './cluster-form.component';
+import { AccessGrantsComponent } from '../acl/access-grants.component';
 
 @Component({
   selector: 'hm-clusters',
@@ -23,7 +25,9 @@ import { ClusterFormComponent } from './cluster-form.component';
     ButtonModule,
     TagModule,
     TooltipModule,
+    DialogModule,
     ClusterFormComponent,
+    AccessGrantsComponent,
   ],
   templateUrl: './clusters.component.html',
   styleUrl: './clusters.component.scss',
@@ -36,6 +40,10 @@ export class Clusters {
   readonly canManage = inject(AuthService).isAdmin;
 
   readonly formRef = viewChild.required(ClusterFormComponent);
+
+  /** Cluster whose ACL grants ("Habilitations") are open in the dialog (ADR 0003). */
+  readonly grantsCluster = signal<ClusterResponse | null>(null);
+  grantsVisible = false;
 
   readonly clusters = signal<ClusterResponse[]>([]);
   readonly loading = signal(false);
@@ -73,6 +81,11 @@ export class Clusters {
 
   openEdit(c: ClusterResponse): void {
     this.formRef().open(c);
+  }
+
+  openGrants(c: ClusterResponse): void {
+    this.grantsCluster.set(c);
+    this.grantsVisible = true;
   }
 
   onSaved(): void {

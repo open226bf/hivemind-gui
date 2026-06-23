@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 
 import {
   DeploymentResponse,
@@ -7,6 +7,7 @@ import {
   ServiceResponse,
   TaskState,
 } from '../../core/models';
+import { AuthService } from '../../core/auth.service';
 
 /**
  * Scoped state for the service-detail shell + its child tabs.
@@ -31,4 +32,10 @@ export class ServiceDetailStore {
     const d = this.deployments()[0];
     return d?.status === 'failed' ? (d.error_message ?? 'Échec du déploiement') : null;
   });
+
+  private readonly auth = inject(AuthService);
+
+  /** Write gate for this service from its hive/cluster grant (ADR 0003); shared
+   *  by the detail shell and every editable tab. Operator role in shadow mode. */
+  readonly canManage = computed(() => this.auth.canWriteService(this.service()));
 }

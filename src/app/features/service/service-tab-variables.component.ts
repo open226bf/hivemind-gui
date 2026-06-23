@@ -8,7 +8,6 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { MessageService } from 'primeng/api';
 
 import { ServicesApi } from '../../core/api';
-import { AuthService } from '../../core/auth.service';
 import { EnvVar } from '../../core/models';
 import { ServiceDetailStore } from '../service/service-detail.store';
 
@@ -32,8 +31,7 @@ export class ServiceTabVariables implements OnInit {
   private readonly api = inject(ServicesApi);
   private readonly toast = inject(MessageService);
 
-  /** Operator or Admin may edit env vars (F-V1-01). */
-  readonly canManage = inject(AuthService).isOperator;
+  readonly canManage = this.store.canManage;
 
   readonly vars = signal<EnvVar[]>([]);
   readonly rows = signal<EditRow[]>([]);

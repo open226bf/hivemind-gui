@@ -8,7 +8,6 @@ import { SelectModule } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 
 import { ServicesApi } from '../../core/api';
-import { AuthService } from '../../core/auth.service';
 import { PortDTO, PortProtocol, PublishMode } from '../../core/models';
 import { ServiceDetailStore } from '../service/service-detail.store';
 
@@ -31,7 +30,7 @@ export class ServiceTabPorts implements OnInit {
   private readonly toast = inject(MessageService);
 
   /** Operator or Admin may edit published ports. */
-  readonly canManage = inject(AuthService).isOperator;
+  readonly canManage = this.store.canManage;
 
   readonly ports = signal<PortDTO[]>([]);
   readonly rows = signal<PortRow[]>([]);

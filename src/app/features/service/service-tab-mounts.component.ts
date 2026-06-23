@@ -41,8 +41,9 @@ export class ServiceTabMounts implements OnInit {
   private readonly toast = inject(MessageService);
   private readonly auth = inject(AuthService);
 
-  /** Operator or Admin may edit mounts; bind mounts are Admin-only (F-V2-06). */
-  readonly canManage = this.auth.isOperator;
+  /** Write gate from this service's hive/cluster grant (ADR 0003); bind mounts
+   *  stay Admin-only (F-V2-06). */
+  readonly canManage = this.store.canManage;
   readonly isAdmin = this.auth.isAdmin;
 
   readonly mounts = signal<MountDTO[]>([]);

@@ -109,6 +109,14 @@
                 (onClick)="openEdit(c)"
               />
               <p-button
+                icon="pi pi-lock"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                pTooltip="Habilitations"
+                (onClick)="openGrants(c)"
+              />
+              <p-button
                 icon="pi pi-trash"
                 severity="danger"
                 [text]="true"
@@ -133,3 +141,16 @@
 </div>
 
 <hm-cluster-form (saved)="onSaved()" />
+
+<p-dialog
+  [header]="'Habilitations — ' + (grantsCluster()?.name ?? '')"
+  [(visible)]="grantsVisible"
+  [modal]="true"
+  [style]="{ width: '42rem' }"
+  [dismissableMask]="true"
+  (onHide)="grantsCluster.set(null)"
+>
+  @if (grantsCluster(); as gc) {
+    <hm-access-grants resourceType="cluster" [resourceId]="gc.id" />
+  }
+</p-dialog>
