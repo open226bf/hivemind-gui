@@ -7,7 +7,6 @@ import { MessageService } from 'primeng/api';
 import { finalize } from 'rxjs/operators';
 
 import { ClusterApi, ServicesApi } from '../../core/api';
-import { AuthService } from '../../core/auth.service';
 import { PlacementDTO, ResourcesDTO, ServiceResponse } from '../../core/models';
 import { ServiceDetailStore } from '../service/service-detail.store';
 
@@ -27,8 +26,7 @@ export class ServiceTabResources {
   private readonly clusterApi = inject(ClusterApi);
   private readonly toast = inject(MessageService);
 
-  /** Operator or Admin may edit (F-V1-01). */
-  readonly canManage = inject(AuthService).isOperator;
+  readonly canManage = this.store.canManage;
 
   readonly service = this.store.service;
 

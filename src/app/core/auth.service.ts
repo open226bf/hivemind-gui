@@ -26,6 +26,11 @@ export class AuthService {
   /** Effective ACL grants from /auth/me (empty for admins, who bypass). */
   readonly scopes = computed<Scope[]>(() => this.user()?.scopes ?? []);
 
+  /** True when the server enforces ACLs (HIVEMIND_ACL_ENFORCED). In shadow mode
+   *  the server neither filters lists nor blocks, so the UI keeps its pre-ACL
+   *  gates to avoid any behavioural change / lock-out (ADR 0003). */
+  readonly enforced = computed(() => this.user()?.acl_enforced ?? false);
+
   /**
    * Effective verb on a resource, applying the cluster→hive cascade (ADR 0003):
    * the highest of the matching cluster grant and the matching hive grant.
@@ -49,32 +54,55 @@ export class AuthService {
     return verb !== null && VERB_RANK[verb] >= VERB_RANK[min];
   }
 
+  // In shadow mode (enforcement off) the server neither filters nor blocks, so
+  // each gate falls back to the PRE-ACL global-role behaviour — read for any
+  // authenticated user, write for operators, manage for admins — keeping zero
+  // behavioural change. The grant verbs apply only once enforcement is live.
+
   /** Per-hive gates (cluster grants cascade down). */
   canReadHive(clusterId: string | null | undefined, hiveId: string): boolean {
+    if (!this.enforced()) return true;
     return this.atLeast(this.effectiveVerb(clusterId, hiveId), 'read');
   }
   canWriteHive(clusterId: string | null | undefined, hiveId: string): boolean {
+    if (!this.enforced()) return this.isOperator();
     return this.atLeast(this.effectiveVerb(clusterId, hiveId), 'write');
   }
   canManageHive(clusterId: string | null | undefined, hiveId: string): boolean {
+    if (!this.enforced()) return this.isAdmin();
     return this.atLeast(this.effectiveVerb(clusterId, hiveId), 'manage');
   }
 
   /** Per-cluster gates. */
   canReadCluster(clusterId: string): boolean {
+    if (!this.enforced()) return true;
     return this.atLeast(this.effectiveVerb(clusterId, null), 'read');
   }
   canWriteCluster(clusterId: string): boolean {
+    if (!this.enforced()) return this.isOperator();
     return this.atLeast(this.effectiveVerb(clusterId, null), 'write');
   }
   canManageCluster(clusterId: string): boolean {
+    if (!this.enforced()) return this.isAdmin();
     return this.atLeast(this.effectiveVerb(clusterId, null), 'manage');
+  }
+
+  /** Write gate for a service: a service inherits max(cluster, hive) grant
+   *  (ADR 0003). Covers edit / deploy / delete on the service screens. */
+  canWriteService(
+    s: { cluster_id?: string | null; hive_id?: string | null } | null | undefined,
+  ): boolean {
+    if (!this.enforced()) return this.isOperator();
+    if (!s) return false;
+    return this.atLeast(this.effectiveVerb(s.cluster_id ?? null, s.hive_id ?? null), 'write');
   }
 
   /** Clusters the user can reach: those granted directly (admin = unbounded,
    *  signalled by null). Used to filter the cluster selector. */
   readonly reachableClusterIds = computed<Set<string> | null>(() => {
-    if (this.isAdmin()) return null; // null = no restriction
+    // Shadow mode: the server lists every cluster, so never hide any client-side
+    // (avoids locking a grant-less user out of the selector before rollout).
+    if (!this.enforced() || this.isAdmin()) return null; // null = no restriction
     const ids = new Set<string>();
     for (const s of this.scopes()) {
       if (s.type === 'cluster') ids.add(s.id);

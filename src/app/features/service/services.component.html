@@ -65,7 +65,7 @@
           </td>
           <td class="muted">{{ svc.updated_at | date: 'short' }}</td>
           <td class="flex gap-2 justify-content-end">
-            @if (canManage()) {
+            @if (canWriteService(svc)) {
               <p-button
                 icon="pi pi-pencil"
                 severity="secondary"

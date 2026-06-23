@@ -15,6 +15,9 @@ export interface MeResponse {
   is_admin: boolean;
   /** Effective ACL grants used to gate per-resource actions (ADR 0003). */
   scopes: Scope[];
+  /** Mirrors the server's HIVEMIND_ACL_ENFORCED. When false (shadow mode) the
+   *  UI keeps its pre-ACL gating so there is no behavioural change. */
+  acl_enforced?: boolean;
 }
 
 export type Role = 'admin' | 'operator' | 'viewer';

@@ -9,7 +9,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { ServicesApi, SnapshotsApi } from '../../core/api';
-import { AuthService } from '../../core/auth.service';
 import { SnapshotResponse } from '../../core/models';
 import { ServiceDetailStore } from '../service/service-detail.store';
 
@@ -34,7 +33,7 @@ export class ServiceTabSnapshots implements OnInit {
   private readonly toast = inject(MessageService);
   private readonly confirmer = inject(ConfirmationService);
 
-  readonly canManage = inject(AuthService).isOperator;
+  readonly canManage = this.store.canManage;
 
   readonly snapshots = signal<SnapshotResponse[]>([]);
   readonly loading = signal(false);

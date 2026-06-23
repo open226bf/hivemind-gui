@@ -19,7 +19,6 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { finalize } from 'rxjs/operators';
 
 import { DeploymentsApi, ServicesApi } from '../../core/api';
-import { AuthService } from '../../core/auth.service';
 import { ServiceResponse } from '../../core/models';
 import { ServiceDetailStore } from '../service/service-detail.store';
 import { ServiceFormComponent } from './service-form.component';
@@ -68,8 +67,8 @@ export class ServiceDetail implements OnInit {
 
   private readonly redeployDialog = viewChild.required(RedeployConfirm);
 
-  /** Operator or Admin may edit and deploy services (F-V1-01). */
-  readonly canManage = inject(AuthService).isOperator;
+  /** Edit/deploy/delete gate from this service's hive/cluster grant (ADR 0003). */
+  protected readonly canManage = this.store.canManage;
 
   readonly tabs: Tab[] = [
     { label: 'Général', path: 'general', icon: 'pi-info-circle' },

@@ -39,7 +39,12 @@ export class HiveDetail {
   private readonly toast = inject(MessageService);
   private readonly router = inject(Router);
 
-  readonly canManage = inject(AuthService).isOperator;
+  private readonly auth = inject(AuthService);
+  /** Write gate on this hive (manage services / edit / delete), from the grant
+   *  on the hive or its cluster (ADR 0003); operator role in shadow mode. */
+  readonly canManage = computed(() =>
+    this.auth.canWriteHive(this.hive()?.cluster_id ?? null, this.id()),
+  );
   readonly formRef = viewChild.required(HiveFormComponent);
 
   readonly isUnassigned = computed(() => this.id() === 'unassigned');

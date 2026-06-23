@@ -58,8 +58,13 @@ export class Services {
   private readonly destroyRef = inject(DestroyRef);
   private alive = true;
 
-  /** Operator or Admin may create, edit, deploy and delete services (F-V1-01). */
-  readonly canManage = inject(AuthService).isOperator;
+  private readonly auth = inject(AuthService);
+
+  /** Per-row write gate: a service inherits its hive/cluster grant (ADR 0003);
+   *  falls back to the operator role in shadow mode. */
+  canWriteService(s: ServiceResponse): boolean {
+    return this.auth.canWriteService(s);
+  }
 
   readonly services = signal<ServiceResponse[]>([]);
   readonly loading = signal(false);
