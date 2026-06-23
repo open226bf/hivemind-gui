@@ -187,46 +187,92 @@
         }
       </div>
     } @else {
-      <div class="card task-list">
-        @for (row of rows(); track row.container.task_id) {
-          <div class="ctn flex align-items-center gap-2">
-            <p-tag
-              [value]="verdictLabel(row.container.verdict)"
-              [severity]="tagSeverity(row.container.verdict)"
-            />
-            <span class="svc">{{ row.container.service_name || '—' }}</span>
-            <span class="slot muted">slot {{ row.container.slot }}</span>
-            <span class="node-col muted"><i class="pi pi-server"></i> {{ row.node }}</span>
-            <span class="state muted">{{ row.container.state }}</span>
-            @if (row.container.restarts > 0) {
-              <span class="restarts" pTooltip="redémarrages récents"
-                >↻ {{ row.container.restarts }}</span
-              >
-            }
-            @if (row.container.reason) {
-              <span class="reason muted" [pTooltip]="row.container.reason">{{
-                row.container.reason
-              }}</span>
-            }
-            @if (metric(row.container.container_id); as m) {
-              <span class="usage ml-auto flex align-items-center gap-3">
-                <span class="u-cpu" [pTooltip]="(m.cpu_percent | number: '1.0-1') + ' %'">
-                  CPU {{ m.cpu_percent | number: '1.0-0' }}%
-                </span>
-                <span
-                  class="u-mem"
-                  [pTooltip]="formatMem(m.mem_used_bytes) + ' / ' + formatMem(m.mem_limit_bytes)"
-                >
-                  <i class="pi pi-database"></i> {{ formatMem(m.mem_used_bytes) }}
-                </span>
-              </span>
-            }
-          </div>
-        } @empty {
-          <div class="all-ok muted">
-            <i class="pi pi-check-circle"></i> Aucune tâche à afficher.
-          </div>
-        }
+      <div class="card task-table">
+        <p-table [value]="rows()" dataKey="container.task_id" [scrollable]="true">
+          <ng-template #header>
+            <tr>
+              <th style="width: 110px">État</th>
+              <th>Service</th>
+              <th style="width: 70px">Slot</th>
+              <th>Nœud</th>
+              <th>Statut</th>
+              <th style="width: 110px">CPU</th>
+              <th style="width: 240px">Mémoire</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-row>
+            <tr>
+              <td>
+                <p-tag
+                  [value]="verdictLabel(row.container.verdict)"
+                  [severity]="tagSeverity(row.container.verdict)"
+                />
+              </td>
+              <td>
+                <span class="svc">{{ row.container.service_name || '—' }}</span>
+              </td>
+              <td class="muted">{{ row.container.slot }}</td>
+              <td class="muted node-col"><i class="pi pi-server"></i> {{ row.node }}</td>
+              <td>
+                <div class="flex align-items-center gap-2">
+                  <span class="state muted">{{ row.container.state }}</span>
+                  @if (row.container.restarts > 0) {
+                    <span class="restarts" pTooltip="redémarrages récents"
+                      >↻ {{ row.container.restarts }}</span
+                    >
+                  }
+                  @if (row.container.reason) {
+                    <span class="reason muted" [pTooltip]="row.container.reason">{{
+                      row.container.reason
+                    }}</span>
+                  }
+                </div>
+              </td>
+              <td>
+                @if (metric(row.container.container_id); as m) {
+                  <span class="u-cpu" [pTooltip]="(m.cpu_percent | number: '1.0-1') + ' %'">
+                    {{ m.cpu_percent | number: '1.0-0' }}%
+                  </span>
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td>
+                @if (metric(row.container.container_id); as m) {
+                  <div
+                    class="mem-cell"
+                    [pTooltip]="formatMem(m.mem_used_bytes) + ' / ' + formatMem(m.mem_limit_bytes)"
+                  >
+                    <p-progressbar
+                      [class]="'mem-bar ' + memSeverity(m)"
+                      [value]="memPercent(m)"
+                      [showValue]="false"
+                      [style]="{ height: '8px' }"
+                    />
+                    <div class="mem-label muted">
+                      <span
+                        >{{ formatMem(m.mem_used_bytes) }} /
+                        {{ formatMem(m.mem_limit_bytes) }}</span
+                      >
+                      <span class="mem-pct">{{ memPercent(m) }}%</span>
+                    </div>
+                  </div>
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="7">
+                <div class="all-ok muted">
+                  <i class="pi pi-check-circle"></i> Aucune tâche à afficher.
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
       </div>
     }
   }
