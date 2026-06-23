@@ -50,6 +50,11 @@
     <hm-services [unassigned]="true" [embedded]="true" />
   } @else {
     <hm-services [hiveId]="id()" [embedded]="true" />
+    <hm-access-grants
+      resourceType="hive"
+      [resourceId]="id()"
+      [clusterId]="hive()?.cluster_id ?? null"
+    />
   }
 </div>
 

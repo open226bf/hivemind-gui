@@ -8,6 +8,9 @@ import {
   AlertListResponse,
   ClusterHealth,
   ClusterListResponse,
+  CreateGrantRequest,
+  GrantListResponse,
+  GrantResponse,
   MetricsResponse,
   ClusterOverview,
   ClusterResponse,
@@ -240,6 +243,32 @@ export class HivesApi {
 
   services(id: string): Observable<ServiceResponse[]> {
     return this.http.get<ServiceResponse[]>(`${API_BASE}/hives/${id}/services`);
+  }
+}
+
+/** Fine-grained access grants on clusters and hives (ADR 0003). */
+@Injectable({ providedIn: 'root' })
+export class AclApi {
+  private readonly http = inject(HttpClient);
+
+  listClusterGrants(clusterId: string): Observable<GrantListResponse> {
+    return this.http.get<GrantListResponse>(`${API_BASE}/clusters/${clusterId}/grants`);
+  }
+
+  listHiveGrants(hiveId: string): Observable<GrantListResponse> {
+    return this.http.get<GrantListResponse>(`${API_BASE}/hives/${hiveId}/grants`);
+  }
+
+  grantCluster(clusterId: string, body: CreateGrantRequest): Observable<GrantResponse> {
+    return this.http.post<GrantResponse>(`${API_BASE}/clusters/${clusterId}/grants`, body);
+  }
+
+  grantHive(hiveId: string, body: CreateGrantRequest): Observable<GrantResponse> {
+    return this.http.post<GrantResponse>(`${API_BASE}/hives/${hiveId}/grants`, body);
+  }
+
+  revoke(grantId: string): Observable<void> {
+    return this.http.delete<void>(`${API_BASE}/grants/${grantId}`);
   }
 }
 
