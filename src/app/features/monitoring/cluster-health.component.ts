@@ -7,8 +7,10 @@ import { TagModule } from 'primeng/tag';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { TooltipModule } from 'primeng/tooltip';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { TableModule } from 'primeng/table';
 import { EMPTY, interval } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -41,8 +43,10 @@ type TagSeverity = 'success' | 'warn' | 'danger' | 'secondary' | 'info';
     ToggleSwitchModule,
     TooltipModule,
     ProgressSpinnerModule,
+    ProgressBarModule,
     SelectModule,
     SelectButtonModule,
+    TableModule,
   ],
   templateUrl: './cluster-health.component.html',
   styleUrl: './cluster-health.component.scss',
@@ -247,5 +251,21 @@ export class ClusterHealthView implements OnInit {
     const gib = bytes / 1024 ** 3;
     if (gib >= 1) return `${gib.toFixed(gib < 10 ? 1 : 0)} GiB`;
     return `${Math.round(bytes / 1024 ** 2)} MiB`;
+  }
+
+  /** Memory usage % for a sample, clamped to 0..100. Falls back to a
+   *  used/limit ratio when the backend didn't pre-compute mem_percent. */
+  memPercent(m: MetricSample): number {
+    const pct =
+      m.mem_percent || (m.mem_limit_bytes ? (m.mem_used_bytes / m.mem_limit_bytes) * 100 : 0);
+    return Math.max(0, Math.min(100, Math.round(pct)));
+  }
+
+  /** Threshold severity for the memory bar, mirroring the gauge palette. */
+  memSeverity(m: MetricSample): 'ok' | 'warn' | 'crit' {
+    const pct = this.memPercent(m);
+    if (pct >= 85) return 'crit';
+    if (pct >= 70) return 'warn';
+    return 'ok';
   }
 }

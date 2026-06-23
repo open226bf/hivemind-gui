@@ -205,15 +205,65 @@
 }
 
 /* ─── List (flat task table) ────────────────────────────────────────────────── */
-.task-list {
-  padding: 6px 18px;
+.task-table {
+  padding: 0;
+  overflow: hidden;
 }
-.task-list .ctn {
-  border-bottom: 1px solid var(--hm-border);
+.task-table .svc {
+  font-weight: 600;
 }
-.task-list .ctn:last-child {
-  border-bottom: 0;
+.task-table .state {
+  font-size: 13px;
 }
+.task-table .restarts {
+  color: #b54747;
+  font-weight: 600;
+  font-size: 13px;
+}
+.task-table .reason {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+  font-size: 13px;
+}
+.task-table .node-col {
+  white-space: nowrap;
+}
+.task-table .node-col .pi {
+  font-size: 11px;
+}
+.task-table .u-cpu {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Memory progress cell: a thin bar with a used/limit + percentage caption. */
+.mem-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 180px;
+}
+.mem-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.mem-label .mem-pct {
+  font-weight: 600;
+}
+/* Threshold colours for the bar fill, mirroring the radial gauge palette. */
+.mem-bar.ok ::ng-deep .p-progressbar-value {
+  background: #22c55e;
+}
+.mem-bar.warn ::ng-deep .p-progressbar-value {
+  background: #f59e0b;
+}
+.mem-bar.crit ::ng-deep .p-progressbar-value {
+  background: #ef4444;
+}
+
 .node-filter {
   min-width: 190px;
 }
