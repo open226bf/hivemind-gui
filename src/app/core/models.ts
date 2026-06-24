@@ -368,6 +368,24 @@ export interface SwarmNetworkInfo {
   subnet?: string;
 }
 
+// ─── Brownfield discovery (ADR 0004) ─────────────────────────────────────────
+
+/** Ownership class of a service running on the cluster. */
+export type DiscoveredServiceClass = 'managed' | 'foreign' | 'orphan';
+
+/** A live Swarm service surfaced by discovery, annotated with its ownership
+ *  class. service_id / hive_id are present only for managed services. */
+export interface DiscoveredService {
+  swarm_service_id: string;
+  name: string;
+  image: string;
+  replicas: number;
+  class: DiscoveredServiceClass;
+  service_id?: string;
+  hive_id?: string;
+  created_at: string;
+}
+
 // ─── Volumes & mounts (F-V2-06) ──────────────────────────────────────────────
 
 export interface VolumeResponse {

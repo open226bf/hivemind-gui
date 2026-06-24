@@ -28,6 +28,7 @@ import {
   CreateHiveRequest,
   CreateServiceRequest,
   CreateTemplateRequest,
+  DiscoveredService,
   CreateVolumeRequest,
   HiveListResponse,
   HiveResponse,
@@ -295,6 +296,17 @@ export class NetworksApi {
 
   swarm(): Observable<SwarmNetworkInfo[]> {
     return this.http.get<SwarmNetworkInfo[]>(`${API_BASE}/networks/swarm`);
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class DiscoveryApi {
+  private readonly http = inject(HttpClient);
+
+  /** Lists every service running on the active cluster, classified as
+   *  managed / foreign / orphan (ADR 0004). */
+  list(): Observable<DiscoveredService[]> {
+    return this.http.get<DiscoveredService[]>(`${API_BASE}/discovered-services`);
   }
 }
 
