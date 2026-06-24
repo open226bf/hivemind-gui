@@ -386,6 +386,13 @@ export interface DiscoveredService {
   created_at: string;
 }
 
+/** Result of adopting a foreign service: the created Hivemind service id and
+ *  any fidelity warnings raised while reconstructing its spec. */
+export interface AdoptServiceResponse {
+  service_id: string;
+  warnings: string[];
+}
+
 // ─── Volumes & mounts (F-V2-06) ──────────────────────────────────────────────
 
 export interface VolumeResponse {

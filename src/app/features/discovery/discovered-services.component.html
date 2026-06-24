@@ -50,6 +50,24 @@
                 pTooltip="Ouvrir le service"
                 [routerLink]="['/services', s.service_id]"
               />
+              @if (canWrite()) {
+                <p-button
+                  icon="pi pi-link"
+                  severity="warn"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Libérer (ne plus gérer)"
+                  (onClick)="release(s)"
+                />
+              }
+            }
+            @if (s.class === 'foreign' && canWrite()) {
+              <p-button
+                label="Adopter"
+                icon="pi pi-download"
+                size="small"
+                (onClick)="openAdopt(s)"
+              />
             }
           </td>
         </tr>
@@ -66,3 +84,33 @@
     </p-table>
   </div>
 </div>
+
+<p-dialog
+  header="Adopter le service"
+  [(visible)]="adoptVisible"
+  [modal]="true"
+  [style]="{ width: '460px' }"
+>
+  @if (target(); as t) {
+    <p class="dialog-intro">
+      Adopter <code>{{ t.name }}</code> en fait un service géré par Hivemind
+      (historique, snapshots, ACL). Le service continue de tourner ; seul son
+      label de propriété est posé.
+    </p>
+    <label class="field-label" for="adopt-hive">Ruche (optionnel)</label>
+    <p-select
+      inputId="adopt-hive"
+      [options]="hives()"
+      [(ngModel)]="selectedHive"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Aucune ruche"
+      styleClass="w-full"
+      appendTo="body"
+    />
+  }
+  <ng-template #footer>
+    <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="adoptVisible.set(false)" />
+    <p-button label="Adopter" icon="pi pi-download" [loading]="adopting()" (onClick)="confirmAdopt()" />
+  </ng-template>
+</p-dialog>

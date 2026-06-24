@@ -27,3 +27,17 @@ code {
   justify-content: center;
   align-items: center;
 }
+
+.dialog-intro {
+  margin: 0 0 16px;
+  color: var(--hm-text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}

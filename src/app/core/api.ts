@@ -28,6 +28,7 @@ import {
   CreateHiveRequest,
   CreateServiceRequest,
   CreateTemplateRequest,
+  AdoptServiceResponse,
   DiscoveredService,
   CreateVolumeRequest,
   HiveListResponse,
@@ -307,6 +308,19 @@ export class DiscoveryApi {
    *  managed / foreign / orphan (ADR 0004). */
   list(): Observable<DiscoveredService[]> {
     return this.http.get<DiscoveredService[]>(`${API_BASE}/discovered-services`);
+  }
+
+  /** Adopts a foreign Swarm service, optionally into a hive. */
+  adopt(swarmId: string, hiveId?: string): Observable<AdoptServiceResponse> {
+    return this.http.post<AdoptServiceResponse>(
+      `${API_BASE}/discovered-services/${swarmId}/adopt`,
+      hiveId ? { hive_id: hiveId } : {},
+    );
+  }
+
+  /** Releases an adopted service back to unmanaged (the live service stays up). */
+  release(swarmId: string): Observable<void> {
+    return this.http.post<void>(`${API_BASE}/discovered-services/${swarmId}/release`, {});
   }
 }
 
