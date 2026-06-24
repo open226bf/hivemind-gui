@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { TabsModule } from 'primeng/tabs';
 import { MessageService } from 'primeng/api';
 import { forkJoin } from 'rxjs';
 
@@ -23,6 +24,7 @@ import { AccessGrantsComponent } from '../acl/access-grants.component';
     ButtonModule,
     DialogModule,
     MultiSelectModule,
+    TabsModule,
     HiveFormComponent,
     ServiceFormComponent,
     Services,
@@ -45,7 +47,13 @@ export class HiveDetail {
   readonly canManage = computed(() =>
     this.auth.canWriteHive(this.hive()?.cluster_id ?? null, this.id()),
   );
+  /** Grant management (the "Habilitations" tab) needs the manage verb. */
+  readonly canManageGrants = computed(() =>
+    this.auth.canManageHive(this.hive()?.cluster_id ?? null, this.id()),
+  );
   readonly formRef = viewChild.required(HiveFormComponent);
+
+  activeTab = 'services';
 
   readonly isUnassigned = computed(() => this.id() === 'unassigned');
   protected readonly hive = signal<HiveResponse | null>(null);
