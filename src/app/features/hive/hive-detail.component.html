@@ -49,12 +49,28 @@
   @if (isUnassigned()) {
     <hm-services [unassigned]="true" [embedded]="true" />
   } @else {
-    <hm-services [hiveId]="id()" [embedded]="true" />
-    <hm-access-grants
-      resourceType="hive"
-      [resourceId]="id()"
-      [clusterId]="hive()?.cluster_id ?? null"
-    />
+    <p-tabs [(value)]="activeTab">
+      <p-tablist>
+        <p-tab value="services">Services ({{ services().length }})</p-tab>
+        @if (canManageGrants()) {
+          <p-tab value="grants"><i class="pi pi-lock mr-2"></i>Habilitations</p-tab>
+        }
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="services">
+          <hm-services [hiveId]="id()" [embedded]="true" />
+        </p-tabpanel>
+        @if (canManageGrants()) {
+          <p-tabpanel value="grants">
+            <hm-access-grants
+              resourceType="hive"
+              [resourceId]="id()"
+              [clusterId]="hive()?.cluster_id ?? null"
+            />
+          </p-tabpanel>
+        }
+      </p-tabpanels>
+    </p-tabs>
   }
 </div>
 
