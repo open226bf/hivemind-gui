@@ -52,7 +52,7 @@
                 pTooltip="Ouvrir le service"
                 [routerLink]="['/services', s.service_id]"
               />
-              @if (canWrite()) {
+              @if (canRelease(s)) {
                 <p-button
                   icon="pi pi-link"
                   severity="warn"
@@ -63,7 +63,7 @@
                 />
               }
             }
-            @if (s.class === 'foreign' && canWrite()) {
+            @if (s.class === 'foreign' && canAdopt()) {
               <p-button
                 label="Adopter"
                 icon="pi pi-download"
@@ -99,7 +99,7 @@
     <label class="field-label" for="adopt-hive">Ruche (optionnel)</label>
     <p-select
       inputId="adopt-hive"
-      [options]="hives()"
+      [options]="adoptHives()"
       [(ngModel)]="selectedHive"
       optionLabel="label"
       optionValue="value"
@@ -121,5 +121,39 @@
       [loading]="adopting()"
       (onClick)="confirmAdopt()"
     />
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="Service adopté — avertissements"
+  [(visible)]="warningsVisible"
+  [modal]="true"
+  [style]="{ width: '520px' }"
+  [dismissableMask]="true"
+>
+  @if (warningsService(); as ws) {
+    <p class="dialog-intro">
+      <code>{{ ws.name }}</code> a été adopté, mais sa reconstruction est partielle. Les éléments
+      suivants n'ont pas pu être importés (le service continue de tourner ; l'état brut est conservé
+      dans le snapshot initial) :
+    </p>
+    <ul class="warnings-list">
+      @for (w of warnings(); track w) {
+        <li>{{ w }}</li>
+      }
+    </ul>
+  }
+  <ng-template #footer>
+    @if (warningsService(); as ws) {
+      <p-button
+        label="Voir le service"
+        icon="pi pi-arrow-up-right"
+        severity="secondary"
+        [text]="true"
+        [routerLink]="['/services', ws.id]"
+        (onClick)="warningsVisible.set(false)"
+      />
+    }
+    <p-button label="Compris" icon="pi pi-check" (onClick)="warningsVisible.set(false)" />
   </ng-template>
 </p-dialog>
