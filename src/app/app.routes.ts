@@ -43,6 +43,13 @@ export const routes: Routes = [
           import('./features/service/services.component').then((m) => m.Services),
       },
       {
+        path: 'discovered-services',
+        loadComponent: () =>
+          import('./features/discovery/discovered-services.component').then(
+            (m) => m.DiscoveredServices,
+          ),
+      },
+      {
         path: 'services/:id',
         loadComponent: () =>
           import('./features/service/service-detail.component').then((m) => m.ServiceDetail),
