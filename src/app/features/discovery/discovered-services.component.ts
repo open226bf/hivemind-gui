@@ -45,8 +45,7 @@ export class DiscoveredServices {
   private readonly toast = inject(MessageService);
   private readonly ctx = inject(ClusterContextService);
 
-  /** Adoption/release are writes (Operator). */
-  readonly canWrite = inject(AuthService).isOperator;
+  private readonly auth = inject(AuthService);
 
   readonly services = signal<DiscoveredService[]>([]);
   readonly loading = signal(false);
@@ -55,12 +54,51 @@ export class DiscoveredServices {
     () => this.services().filter((s) => s.class === 'foreign').length,
   );
 
+  /** Active cluster (discovery is cluster-scoped); null in the aggregated view. */
+  private clusterId(): string | null {
+    return this.ctx.selectedId();
+  }
+
+  /** Adoption targets the chosen hive (a cluster grant cascades); offer it when
+   *  the user can write at least one valid target on this cluster (ADR 0003/0004).
+   *  In shadow mode the verb helpers fall back to the operator role. */
+  readonly canAdopt = computed(() => {
+    const c = this.clusterId();
+    if (!c) return this.auth.isOperator();
+    return (
+      this.auth.canWriteCluster(c) ||
+      this.hives().some((h) => h.value !== null && this.auth.canWriteHive(c, h.value))
+    );
+  });
+
+  /** Hive options the user may adopt into — "Aucune ruche" needs cluster write. */
+  readonly adoptHives = computed<HiveOption[]>(() => {
+    const c = this.clusterId();
+    if (!c) return this.hives();
+    const clusterWrite = this.auth.canWriteCluster(c);
+    return this.hives().filter((h) =>
+      h.value === null ? clusterWrite : clusterWrite || this.auth.canWriteHive(c, h.value),
+    );
+  });
+
+  /** Release is a write on the adopted service's hive (a cluster grant cascades). */
+  canRelease(s: DiscoveredService): boolean {
+    const c = this.clusterId();
+    if (!c) return this.auth.isOperator();
+    return this.auth.canWriteService({ cluster_id: c, hive_id: s.hive_id });
+  }
+
   // Adopt dialog state.
   readonly adoptVisible = signal(false);
   readonly adopting = signal(false);
   readonly target = signal<DiscoveredService | null>(null);
   readonly hives = signal<HiveOption[]>([]);
   selectedHive: string | null = null;
+
+  // Post-adopt fidelity warnings (lossy spec reconstruction, ADR 0004).
+  readonly warningsVisible = signal(false);
+  readonly warnings = signal<string[]>([]);
+  readonly warningsService = signal<{ name: string; id: string } | null>(null);
 
   constructor() {
     effect(() => {
@@ -114,15 +152,16 @@ export class DiscoveredServices {
       next: (res) => {
         this.adopting.set(false);
         this.adoptVisible.set(false);
-        const detail = res.warnings.length
-          ? `${s.name} adopté avec ${res.warnings.length} avertissement(s) : ${res.warnings.join(' ; ')}`
-          : `${s.name} adopté`;
-        this.toast.add({
-          severity: res.warnings.length ? 'warn' : 'success',
-          summary: 'Adopté',
-          detail,
-          life: res.warnings.length ? 10000 : 3000,
-        });
+        if (res.warnings.length) {
+          // Surface the lossy-reconstruction warnings in a persistent dialog so
+          // the operator can actually read (and act on) each one, rather than a
+          // transient toast.
+          this.warnings.set(res.warnings);
+          this.warningsService.set({ name: s.name, id: res.service_id });
+          this.warningsVisible.set(true);
+        } else {
+          this.toast.add({ severity: 'success', summary: 'Adopté', detail: `${s.name} adopté` });
+        }
         this.load();
       },
       error: (err) => {
