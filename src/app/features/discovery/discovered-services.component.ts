@@ -130,14 +130,18 @@ export class DiscoveredServices {
         this.toast.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: err?.error?.message ?? "Adoption impossible",
+          detail: err?.error?.message ?? 'Adoption impossible',
         });
       },
     });
   }
 
   release(s: DiscoveredService): void {
-    if (!confirm(`Libérer "${s.name}" ? Le service continue de tourner mais ne sera plus géré par Hivemind.`))
+    if (
+      !confirm(
+        `Libérer "${s.name}" ? Le service continue de tourner mais ne sera plus géré par Hivemind.`,
+      )
+    )
       return;
     this.api.release(s.swarm_service_id).subscribe({
       next: () => {

@@ -32,7 +32,9 @@
       </ng-template>
       <ng-template #body let-s>
         <tr>
-          <td class="name-cell"><code>{{ s.name }}</code></td>
+          <td class="name-cell">
+            <code>{{ s.name }}</code>
+          </td>
           <td class="muted mono">{{ s.image || '—' }}</td>
           <td>{{ s.replicas }}</td>
           <td>
@@ -75,9 +77,7 @@
       <ng-template #emptymessage>
         <tr>
           <td colspan="7">
-            <div class="empty-state">
-              <i class="pi pi-server"></i>Aucun service sur le cluster.
-            </div>
+            <div class="empty-state"><i class="pi pi-server"></i>Aucun service sur le cluster.</div>
           </td>
         </tr>
       </ng-template>
@@ -93,9 +93,8 @@
 >
   @if (target(); as t) {
     <p class="dialog-intro">
-      Adopter <code>{{ t.name }}</code> en fait un service géré par Hivemind
-      (historique, snapshots, ACL). Le service continue de tourner ; seul son
-      label de propriété est posé.
+      Adopter <code>{{ t.name }}</code> en fait un service géré par Hivemind (historique, snapshots,
+      ACL). Le service continue de tourner ; seul son label de propriété est posé.
     </p>
     <label class="field-label" for="adopt-hive">Ruche (optionnel)</label>
     <p-select
@@ -110,7 +109,17 @@
     />
   }
   <ng-template #footer>
-    <p-button label="Annuler" severity="secondary" [text]="true" (onClick)="adoptVisible.set(false)" />
-    <p-button label="Adopter" icon="pi pi-download" [loading]="adopting()" (onClick)="confirmAdopt()" />
+    <p-button
+      label="Annuler"
+      severity="secondary"
+      [text]="true"
+      (onClick)="adoptVisible.set(false)"
+    />
+    <p-button
+      label="Adopter"
+      icon="pi pi-download"
+      [loading]="adopting()"
+      (onClick)="confirmAdopt()"
+    />
   </ng-template>
 </p-dialog>
