@@ -10,6 +10,15 @@
   font-weight: 600;
 }
 
+// Cap the image column so long refs (registry/path:tag@sha256:…) don't push the
+// action column off-screen; truncate with an ellipsis (full ref on hover).
+.img-cell {
+  max-width: clamp(160px, 24vw, 380px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 code {
   font-size: 12px;
   background: var(--hm-bg);

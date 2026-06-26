@@ -35,7 +35,9 @@
           <td class="name-cell">
             <code>{{ s.name }}</code>
           </td>
-          <td class="muted mono">{{ s.image || '—' }}</td>
+          <td class="muted mono img-cell" [pTooltip]="s.image" tooltipPosition="top">
+            {{ s.image || '—' }}
+          </td>
           <td>{{ s.replicas }}</td>
           <td>
             <p-tag [value]="classLabel(s.class)" [severity]="classSeverity(s.class)" />
