@@ -52,6 +52,7 @@
     <p-tabs [(value)]="activeTab">
       <p-tablist>
         <p-tab value="services">Services ({{ services().length }})</p-tab>
+        <p-tab value="variables"><i class="pi pi-sliders-h mr-2"></i>Variables</p-tab>
         @if (canManageGrants()) {
           <p-tab value="grants"><i class="pi pi-lock mr-2"></i>Habilitations</p-tab>
         }
@@ -59,6 +60,9 @@
       <p-tabpanels>
         <p-tabpanel value="services">
           <hm-services [hiveId]="id()" [embedded]="true" />
+        </p-tabpanel>
+        <p-tabpanel value="variables">
+          <hm-hive-tab-variables [hiveId]="id()" [canManage]="canManage()" />
         </p-tabpanel>
         @if (canManageGrants()) {
           <p-tabpanel value="grants">

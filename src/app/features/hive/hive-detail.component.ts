@@ -12,6 +12,7 @@ import { HivesApi, ServicesApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
 import { HiveResponse, ServiceResponse } from '../../core/models';
 import { HiveFormComponent } from './hive-form.component';
+import { HiveTabVariables } from './hive-tab-variables.component';
 import { ServiceFormComponent } from '../service/service-form.component';
 import { Services } from '../service/services.component';
 import { AccessGrantsComponent } from '../acl/access-grants.component';
@@ -26,6 +27,7 @@ import { AccessGrantsComponent } from '../acl/access-grants.component';
     MultiSelectModule,
     TabsModule,
     HiveFormComponent,
+    HiveTabVariables,
     ServiceFormComponent,
     Services,
     AccessGrantsComponent,
