@@ -246,6 +246,14 @@ export class HivesApi {
   services(id: string): Observable<ServiceResponse[]> {
     return this.http.get<ServiceResponse[]>(`${API_BASE}/hives/${id}/services`);
   }
+
+  env(id: string): Observable<EnvVarsResponse> {
+    return this.http.get<EnvVarsResponse>(`${API_BASE}/hives/${id}/env`);
+  }
+
+  setEnv(id: string, body: SetEnvVarsRequest): Observable<EnvVarsResponse> {
+    return this.http.put<EnvVarsResponse>(`${API_BASE}/hives/${id}/env`, body);
+  }
 }
 
 /** Fine-grained access grants on clusters and hives (ADR 0003). */
