@@ -79,8 +79,8 @@
       <i class="pi pi-info-circle"></i>
       <div>
         L'enregistrement <strong>remplace l'intégralité</strong> des variables. Les valeurs secrètes
-        ne sont jamais relues : laisser un champ secret vide <strong>effacera</strong> sa valeur.
-        Re-saisissez-la pour la conserver.
+        ne sont jamais relues : laisser un champ secret vide <strong>conserve</strong> sa valeur
+        actuelle. Saisissez une nouvelle valeur pour la remplacer.
       </div>
     </div>
 
@@ -103,7 +103,7 @@
             [type]="row.is_secret ? 'password' : 'text'"
             [(ngModel)]="row.value"
             [placeholder]="
-              row.wasSecretFromServer ? 'valeur masquée — saisir pour conserver' : 'valeur'
+              row.wasSecretFromServer ? 'valeur masquée — laisser vide pour conserver' : 'valeur'
             "
           />
           <label class="secret-toggle inline-flex align-items-center gap-2">
