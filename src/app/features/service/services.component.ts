@@ -1,10 +1,23 @@
-import { Component, DestroyRef, effect, inject, input, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { DialogModule } from 'primeng/dialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -12,7 +25,7 @@ import { forkJoin, interval } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
-import { DeploymentsApi, ServicesApi } from '../../core/api';
+import { DeploymentsApi, HivesApi, ServicesApi } from '../../core/api';
 import { ClusterContextService } from '../../core/cluster-context.service';
 import { AuthService } from '../../core/auth.service';
 import {
@@ -30,10 +43,14 @@ const LIVE_REFRESH_MS = 8000;
   selector: 'hm-services',
   imports: [
     DatePipe,
+    FormsModule,
     RouterLink,
     TableModule,
     ButtonModule,
     TagModule,
+    InputTextModule,
+    SelectModule,
+    DialogModule,
     ProgressSpinnerModule,
     TooltipModule,
     ServiceFormComponent,
@@ -51,6 +68,7 @@ export class Services {
   readonly embedded = input(false);
 
   private readonly api = inject(ServicesApi);
+  private readonly hivesApi = inject(HivesApi);
   private readonly deployApi = inject(DeploymentsApi);
   private readonly ctx = inject(ClusterContextService);
   private readonly toast = inject(MessageService);
@@ -66,6 +84,11 @@ export class Services {
     return this.auth.canWriteService(s);
   }
 
+  /** Whether the user can write at least one listed service. The per-service
+   *  write grant is uniform within a hive view, so this gates the whole bulk
+   *  selection UI (checkboxes + bulk bar) the same way per-row actions are gated. */
+  readonly canWriteAny = computed(() => this.services().some((s) => this.canWriteService(s)));
+
   readonly services = signal<ServiceResponse[]>([]);
   readonly loading = signal(false);
 
@@ -77,6 +100,21 @@ export class Services {
   readonly formVisible = signal(false);
   readonly formMode = signal<'create' | 'edit'>('create');
   readonly editingService = signal<ServiceResponse | undefined>(undefined);
+
+  // ─── Bulk selection ──────────────────────────────────────────────────────────
+  readonly selected = signal<ServiceResponse[]>([]);
+  statusFilter: ServiceStatus | null = null;
+  readonly statusOptions = [
+    { label: 'Brouillon', value: 'draft' },
+    { label: 'Déployé', value: 'deployed' },
+    { label: 'Retiré', value: 'removed' },
+  ];
+
+  // ─── Move-to-hive dialog (replaces the removed "Gérer les services") ──────────
+  readonly moveVisible = signal(false);
+  readonly moving = signal(false);
+  readonly hiveOptions = signal<{ label: string; value: string | null }[]>([]);
+  moveTargetHiveId: string | null = null;
 
   private readonly redeployDialog = viewChild.required(RedeployConfirm);
   private pendingRedeploy: ServiceResponse | undefined;
@@ -137,10 +175,13 @@ export class Services {
 
   load(): void {
     this.loading.set(true);
+    this.selected.set([]); // drop stale selection (rows are about to be replaced)
     const opts: { hive_id?: string; unassigned?: boolean } = {};
     if (this.unassigned()) opts.unassigned = true;
     else if (this.hiveId()) opts.hive_id = this.hiveId();
-    this.api.list(1, 50, opts).subscribe({
+    // Client-side paginate/sort/filter over a generous page (a project's service
+    // count is modest); the table handles the rest without extra round-trips.
+    this.api.list(1, 1000, opts).subscribe({
       next: (res) => {
         this.services.set(res.items);
         this.loading.set(false);
@@ -350,6 +391,114 @@ export class Services {
               detail: err?.error?.message ?? 'Retrait impossible',
             });
           },
+        });
+      },
+    });
+  }
+
+  // ─── Bulk actions ─────────────────────────────────────────────────────────────
+
+  clearSelection(): void {
+    this.selected.set([]);
+  }
+
+  /** Deploy (or redeploy, forced) every selected service after one confirmation. */
+  bulkDeploy(): void {
+    const items = this.selected();
+    if (items.length === 0) return;
+    this.confirmer.confirm({
+      header: 'Déployer la sélection',
+      message: `Déployer ${items.length} service(s) ? Les services déjà déployés seront redéployés.`,
+      icon: 'pi pi-cloud-upload',
+      acceptLabel: 'Déployer',
+      rejectLabel: 'Annuler',
+      rejectButtonProps: { severity: 'secondary', text: true },
+      accept: () => {
+        for (const svc of items) {
+          this.runDeploy(svc, svc.status === 'deployed' ? { force: true } : {});
+        }
+        this.clearSelection();
+      },
+    });
+  }
+
+  /** Undeploy every selected service currently on the cluster. */
+  bulkUndeploy(): void {
+    const items = this.selected().filter((s) => s.status === 'deployed');
+    if (items.length === 0) {
+      this.toast.add({
+        severity: 'info',
+        summary: 'Rien à retirer',
+        detail: 'Aucun service déployé dans la sélection.',
+      });
+      return;
+    }
+    this.confirmer.confirm({
+      header: 'Retirer du cluster',
+      message: `Retirer ${items.length} service(s) du cluster ? Les définitions restent dans Hivemind.`,
+      icon: 'pi pi-stop-circle',
+      acceptLabel: 'Retirer',
+      rejectLabel: 'Annuler',
+      acceptButtonProps: { severity: 'warn' },
+      rejectButtonProps: { severity: 'secondary', text: true },
+      accept: () => {
+        forkJoin(items.map((s) => this.api.undeploy(s.id))).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Retirés',
+              detail: `${items.length} service(s) retiré(s) du cluster`,
+            });
+            this.clearSelection();
+            this.load();
+          },
+          error: (err) =>
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Retrait impossible',
+            }),
+        });
+      },
+    });
+  }
+
+  /** Open the move-to-hive picker for the current selection. */
+  openMove(): void {
+    this.moveTargetHiveId = null;
+    this.hivesApi.list(1, 1000).subscribe((res) => {
+      this.hiveOptions.set([
+        { label: 'Sans ruche', value: null },
+        ...res.items.map((h) => ({ label: h.name, value: h.id as string | null })),
+      ]);
+      this.moveVisible.set(true);
+    });
+  }
+
+  confirmMove(): void {
+    const items = this.selected();
+    if (items.length === 0) return;
+    this.moving.set(true);
+    forkJoin(items.map((s) => this.api.assignHive(s.id, this.moveTargetHiveId))).subscribe({
+      next: () => {
+        this.moving.set(false);
+        this.moveVisible.set(false);
+        const target =
+          this.hiveOptions().find((o) => o.value === this.moveTargetHiveId)?.label ?? 'la ruche';
+        this.toast.add({
+          severity: 'success',
+          summary: 'Déplacés',
+          detail: `${items.length} service(s) → ${target}`,
+        });
+        this.clearSelection();
+        this.load();
+      },
+      error: (err) => {
+        this.moving.set(false);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message ?? 'Déplacement impossible',
         });
       },
     });

@@ -32,7 +32,7 @@ export class Login {
       .subscribe({
         next: () => {
           this.loading.set(false);
-          this.router.navigate(['/services']);
+          this.router.navigate(['/hives']);
         },
         error: (err) => {
           this.loading.set(false);

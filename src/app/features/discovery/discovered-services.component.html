@@ -18,20 +18,84 @@
   </div>
 
   <div class="card mt-3">
-    <p-table [value]="services()" [loading]="loading()" dataKey="swarm_service_id">
+    <p-table
+      #dt
+      [value]="services()"
+      [loading]="loading()"
+      dataKey="swarm_service_id"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first}–{last} sur {totalRecords}"
+      [globalFilterFields]="['name', 'image', 'swarm_service_id']"
+      [selection]="selected()"
+      (selectionChange)="selected.set($event)"
+    >
+      <ng-template #caption>
+        <div class="table-toolbar">
+          <div class="table-filters">
+            <span class="table-search">
+              <i class="pi pi-search"></i>
+              <input
+                pInputText
+                type="text"
+                placeholder="Rechercher…"
+                (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+              />
+            </span>
+            <p-select
+              [options]="classOptions"
+              [(ngModel)]="classFilter"
+              (ngModelChange)="dt.filter($event, 'class', 'equals')"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Toutes les classes"
+              [showClear]="true"
+              styleClass="status-filter"
+            />
+          </div>
+          @if (canReleaseAny()) {
+            <div class="bulk-bar">
+              <span class="bulk-count">{{ selected().length }} sélectionné(s)</span>
+              <p-button
+                label="Libérer"
+                icon="pi pi-link"
+                size="small"
+                severity="warn"
+                (onClick)="bulkRelease()"
+              />
+              <p-button
+                icon="pi pi-times"
+                [text]="true"
+                size="small"
+                severity="secondary"
+                pTooltip="Effacer la sélection"
+                (onClick)="clearSelection()"
+              />
+            </div>
+          }
+        </div>
+      </ng-template>
       <ng-template #header>
         <tr>
-          <th>Nom</th>
-          <th>Image</th>
-          <th style="width: 90px">Réplicas</th>
-          <th style="width: 120px">État</th>
-          <th>Swarm ID</th>
-          <th>Créé le</th>
+          <th style="width: 3rem"><p-tableHeaderCheckbox /></th>
+          <th pSortableColumn="name">Nom <p-sortIcon field="name" /></th>
+          <th pSortableColumn="image">Image <p-sortIcon field="image" /></th>
+          <th style="width: 90px" pSortableColumn="replicas">
+            Réplicas <p-sortIcon field="replicas" />
+          </th>
+          <th style="width: 120px" pSortableColumn="class">État <p-sortIcon field="class" /></th>
+          <th pSortableColumn="swarm_service_id">
+            Swarm ID <p-sortIcon field="swarm_service_id" />
+          </th>
+          <th pSortableColumn="created_at">Créé le <p-sortIcon field="created_at" /></th>
           <th style="width: 80px"></th>
         </tr>
       </ng-template>
       <ng-template #body let-s>
         <tr>
+          <td><p-tableCheckbox [value]="s" /></td>
           <td class="name-cell">
             <code>{{ s.name }}</code>
           </td>
@@ -78,7 +142,7 @@
       </ng-template>
       <ng-template #emptymessage>
         <tr>
-          <td colspan="7">
+          <td colspan="8">
             <div class="empty-state"><i class="pi pi-server"></i>Aucun service sur le cluster.</div>
           </td>
         </tr>

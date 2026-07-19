@@ -23,12 +23,12 @@ export const authGuard: CanActivateFn = () => {
   return router.createUrlTree(['/login']);
 };
 
-/** Restricts a route to Admin users (F-V1-01). Redirects others to /services. */
+/** Restricts a route to Admin users (F-V1-01). Redirects others to /hives. */
 export const adminGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  const allow = () => (auth.isAdmin() ? true : router.createUrlTree(['/services']));
+  const allow = () => (auth.isAdmin() ? true : router.createUrlTree(['/hives']));
 
   if (auth.isAuthenticated() && !auth.user()) {
     return auth.loadMe().pipe(

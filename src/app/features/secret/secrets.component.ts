@@ -3,8 +3,10 @@ import { DatePipe } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
+import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { forkJoin } from 'rxjs';
 
 import { SecretsApi } from '../../core/api';
 import { ClusterContextService } from '../../core/cluster-context.service';
@@ -20,6 +22,7 @@ import { SecretRotateFormComponent } from './secret-rotate-form.component';
     TableModule,
     ButtonModule,
     TagModule,
+    InputTextModule,
     TooltipModule,
     SecretFormComponent,
     SecretRotateFormComponent,
@@ -30,6 +33,7 @@ import { SecretRotateFormComponent } from './secret-rotate-form.component';
 export class Secrets {
   private readonly api = inject(SecretsApi);
   private readonly toast = inject(MessageService);
+  private readonly confirmer = inject(ConfirmationService);
   private readonly ctx = inject(ClusterContextService);
 
   /** Secrets are Admin-only (F-V1-01). */
@@ -42,6 +46,9 @@ export class Secrets {
   readonly loading = signal(false);
   readonly rotateTarget = signal<SecretResponse | null>(null);
 
+  // ─── Bulk selection ──────────────────────────────────────────────────────────
+  readonly selected = signal<SecretResponse[]>([]);
+
   constructor() {
     effect(() => {
       this.ctx.selectedId();
@@ -51,7 +58,8 @@ export class Secrets {
 
   load(): void {
     this.loading.set(true);
-    this.api.list(1, 50).subscribe({
+    this.selected.set([]); // drop stale selection (rows are about to be replaced)
+    this.api.list(1, 1000).subscribe({
       next: (res) => {
         this.secrets.set(res.items);
         this.loading.set(false);
@@ -62,6 +70,43 @@ export class Secrets {
           severity: 'error',
           summary: 'Erreur',
           detail: 'Chargement des secrets impossible',
+        });
+      },
+    });
+  }
+
+  clearSelection(): void {
+    this.selected.set([]);
+  }
+
+  bulkDelete(): void {
+    const items = this.selected();
+    if (!items.length) return;
+    this.confirmer.confirm({
+      header: 'Supprimer la sélection',
+      message: `Supprimer ${items.length} élément(s) ? Action irréversible.`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      acceptButtonProps: { severity: 'danger' },
+      rejectButtonProps: { severity: 'secondary', text: true },
+      accept: () => {
+        forkJoin(items.map((x) => this.api.remove(x.id))).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimés',
+              detail: `${items.length} supprimé(s)`,
+            });
+            this.clearSelection();
+            this.load();
+          },
+          error: (err) =>
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible',
+            }),
         });
       },
     });

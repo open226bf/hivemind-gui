@@ -18,19 +18,98 @@
   }
 
   <div class="card">
-    <p-table [value]="services()" [loading]="loading()" dataKey="id">
+    <p-table
+      #dt
+      [value]="services()"
+      [loading]="loading()"
+      dataKey="id"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first}–{last} sur {totalRecords}"
+      [globalFilterFields]="['name', 'full_image', 'status']"
+      [selection]="selected()"
+      (selectionChange)="selected.set($event)"
+    >
+      <ng-template #caption>
+        <div class="table-toolbar">
+          <div class="table-filters">
+            <span class="table-search">
+              <i class="pi pi-search"></i>
+              <input
+                pInputText
+                type="text"
+                placeholder="Rechercher…"
+                (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+              />
+            </span>
+            <p-select
+              [options]="statusOptions"
+              [(ngModel)]="statusFilter"
+              (ngModelChange)="dt.filter($event, 'status', 'equals')"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Tous les statuts"
+              [showClear]="true"
+              styleClass="status-filter"
+            />
+          </div>
+          @if (canWriteAny() && selected().length) {
+            <div class="bulk-bar">
+              <span class="bulk-count">{{ selected().length }} sélectionné(s)</span>
+              <p-button
+                label="Déployer"
+                icon="pi pi-cloud-upload"
+                size="small"
+                severity="success"
+                (onClick)="bulkDeploy()"
+              />
+              <p-button
+                label="Retirer"
+                icon="pi pi-stop-circle"
+                size="small"
+                severity="warn"
+                [text]="true"
+                (onClick)="bulkUndeploy()"
+              />
+              <p-button
+                label="Déplacer"
+                icon="pi pi-arrow-right-arrow-left"
+                size="small"
+                severity="secondary"
+                (onClick)="openMove()"
+              />
+              <p-button
+                icon="pi pi-times"
+                [text]="true"
+                size="small"
+                severity="secondary"
+                pTooltip="Effacer la sélection"
+                (onClick)="clearSelection()"
+              />
+            </div>
+          }
+        </div>
+      </ng-template>
       <ng-template #header>
         <tr>
-          <th>Nom</th>
-          <th>Image</th>
-          <th>Replicas</th>
-          <th>Statut</th>
-          <th>Mis à jour</th>
+          @if (canWriteAny()) {
+            <th style="width: 3rem"><p-tableHeaderCheckbox /></th>
+          }
+          <th pSortableColumn="name">Nom <p-sortIcon field="name" /></th>
+          <th pSortableColumn="full_image">Image <p-sortIcon field="full_image" /></th>
+          <th pSortableColumn="replicas">Replicas <p-sortIcon field="replicas" /></th>
+          <th pSortableColumn="status">Statut <p-sortIcon field="status" /></th>
+          <th pSortableColumn="updated_at">Mis à jour <p-sortIcon field="updated_at" /></th>
           <th style="width: 280px"></th>
         </tr>
       </ng-template>
       <ng-template #body let-svc>
         <tr>
+          @if (canWriteAny()) {
+            <td><p-tableCheckbox [value]="svc" /></td>
+          }
           <td>
             <a [routerLink]="['/services', svc.id]" class="svc-name">{{ svc.name }}</a>
             @if (svc.description) {
@@ -111,7 +190,7 @@
       </ng-template>
       <ng-template #emptymessage>
         <tr>
-          <td colspan="6">
+          <td [attr.colspan]="canWriteAny() ? 7 : 6">
             <div class="empty-state">
               <i class="pi pi-server"></i>
               Aucun service. Crée ton premier service pour commencer.
@@ -131,3 +210,32 @@
 />
 
 <hm-redeploy-confirm (confirmed)="onRedeployConfirmed($event)" />
+
+<p-dialog
+  header="Déplacer vers une ruche"
+  [visible]="moveVisible()"
+  (visibleChange)="moveVisible.set($event)"
+  [modal]="true"
+  [style]="{ width: '420px' }"
+>
+  <p class="muted mb-2">{{ selected().length }} service(s) seront rattachés à :</p>
+  <p-select
+    [options]="hiveOptions()"
+    [(ngModel)]="moveTargetHiveId"
+    optionLabel="label"
+    optionValue="value"
+    placeholder="Choisir une ruche"
+    [filter]="true"
+    appendTo="body"
+    styleClass="w-full"
+  />
+  <ng-template #footer>
+    <p-button
+      label="Annuler"
+      severity="secondary"
+      [text]="true"
+      (onClick)="moveVisible.set(false)"
+    />
+    <p-button label="Déplacer" icon="pi pi-check" (onClick)="confirmMove()" [loading]="moving()" />
+  </ng-template>
+</p-dialog>

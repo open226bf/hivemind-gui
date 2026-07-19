@@ -27,20 +27,78 @@
     <p-tabpanels>
       <p-tabpanel value="registered">
         <div class="card mt-3">
-          <p-table [value]="networks()" [loading]="loading()" dataKey="id">
+          <p-table
+            #dt
+            [value]="networks()"
+            [loading]="loading()"
+            dataKey="id"
+            [paginator]="true"
+            [rows]="10"
+            [rowsPerPageOptions]="[10, 25, 50]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="{first}–{last} sur {totalRecords}"
+            [globalFilterFields]="['name', 'subnet', 'swarm_id']"
+            [selection]="selected()"
+            (selectionChange)="selected.set($event)"
+          >
+            <ng-template #caption>
+              <div class="table-toolbar">
+                <div class="table-filters">
+                  <span class="table-search">
+                    <i class="pi pi-search"></i>
+                    <input
+                      pInputText
+                      type="text"
+                      placeholder="Rechercher…"
+                      (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                    />
+                  </span>
+                </div>
+                @if (canManage() && selected().length) {
+                  <div class="bulk-bar">
+                    <span class="bulk-count">{{ selected().length }} sélectionné(s)</span>
+                    <p-button
+                      label="Supprimer"
+                      icon="pi pi-trash"
+                      size="small"
+                      severity="danger"
+                      (onClick)="bulkDelete()"
+                    />
+                    <p-button
+                      icon="pi pi-times"
+                      [text]="true"
+                      size="small"
+                      severity="secondary"
+                      pTooltip="Effacer la sélection"
+                      (onClick)="clearSelection()"
+                    />
+                  </div>
+                }
+              </div>
+            </ng-template>
             <ng-template #header>
               <tr>
-                <th>Nom</th>
-                <th>Subnet</th>
-                <th style="width: 100px">Attachable</th>
-                <th style="width: 80px">External</th>
-                <th>Swarm ID</th>
-                <th>Créé le</th>
+                @if (canManage()) {
+                  <th style="width: 3rem"><p-tableHeaderCheckbox /></th>
+                }
+                <th pSortableColumn="name">Nom <p-sortIcon field="name" /></th>
+                <th pSortableColumn="subnet">Subnet <p-sortIcon field="subnet" /></th>
+                <th style="width: 100px" pSortableColumn="attachable">
+                  Attachable <p-sortIcon field="attachable" />
+                </th>
+                <th style="width: 80px" pSortableColumn="external">
+                  External <p-sortIcon field="external" />
+                </th>
+                <th pSortableColumn="swarm_id">Swarm ID <p-sortIcon field="swarm_id" /></th>
+                <th pSortableColumn="created_at">Créé le <p-sortIcon field="created_at" /></th>
                 <th style="width: 80px"></th>
               </tr>
             </ng-template>
             <ng-template #body let-n>
               <tr>
+                @if (canManage()) {
+                  <td><p-tableCheckbox [value]="n" /></td>
+                }
                 <td class="name-cell">
                   <code>{{ n.name }}</code>
                 </td>
@@ -75,7 +133,7 @@
             </ng-template>
             <ng-template #emptymessage>
               <tr>
-                <td colspan="7">
+                <td [attr.colspan]="canManage() ? 8 : 7">
                   <div class="empty-state">
                     <i class="pi pi-sitemap"></i>Aucun réseau enregistré.
                   </div>
@@ -88,14 +146,40 @@
 
       <p-tabpanel value="swarm">
         <div class="card mt-3">
-          <p-table [value]="swarmNetworks()" [loading]="swarmLoading()" dataKey="id">
+          <p-table
+            #dt2
+            [value]="swarmNetworks()"
+            [loading]="swarmLoading()"
+            dataKey="id"
+            [paginator]="true"
+            [rows]="10"
+            [rowsPerPageOptions]="[10, 25, 50]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="{first}–{last} sur {totalRecords}"
+            [globalFilterFields]="['name', 'id', 'driver', 'scope', 'subnet']"
+          >
+            <ng-template #caption>
+              <div class="table-toolbar">
+                <div class="table-filters">
+                  <span class="table-search">
+                    <i class="pi pi-search"></i>
+                    <input
+                      pInputText
+                      type="text"
+                      placeholder="Rechercher…"
+                      (input)="dt2.filterGlobal($any($event.target).value, 'contains')"
+                    />
+                  </span>
+                </div>
+              </div>
+            </ng-template>
             <ng-template #header>
               <tr>
-                <th>Nom</th>
-                <th>ID</th>
-                <th>Driver</th>
-                <th>Scope</th>
-                <th>Subnet</th>
+                <th pSortableColumn="name">Nom <p-sortIcon field="name" /></th>
+                <th pSortableColumn="id">ID <p-sortIcon field="id" /></th>
+                <th pSortableColumn="driver">Driver <p-sortIcon field="driver" /></th>
+                <th pSortableColumn="scope">Scope <p-sortIcon field="scope" /></th>
+                <th pSortableColumn="subnet">Subnet <p-sortIcon field="subnet" /></th>
               </tr>
             </ng-template>
             <ng-template #body let-n>

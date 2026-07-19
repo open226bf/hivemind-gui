@@ -2,6 +2,7 @@ import {
   Component,
   DestroyRef,
   OnInit,
+  computed,
   effect,
   inject,
   input,
@@ -18,7 +19,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { finalize } from 'rxjs/operators';
 
-import { DeploymentsApi, ServicesApi } from '../../core/api';
+import { DeploymentsApi, HivesApi, ServicesApi } from '../../core/api';
 import { ServiceResponse } from '../../core/models';
 import { ServiceDetailStore } from '../service/service-detail.store';
 import { ServiceFormComponent } from './service-form.component';
@@ -53,7 +54,23 @@ export class ServiceDetail implements OnInit {
 
   protected readonly store = inject(ServiceDetailStore);
   private readonly api = inject(ServicesApi);
+  private readonly hivesApi = inject(HivesApi);
   private readonly deployApi = inject(DeploymentsApi);
+
+  /** Name of the service's hive, for the "back" link. Empty when unassigned. */
+  private readonly hiveName = signal<string | null>(null);
+
+  /** Back link returns to the service's hive (its services), or the "unassigned"
+   *  bucket when the service belongs to no hive. */
+  protected readonly backLink = computed<unknown[]>(() => {
+    const hid = this.store.service()?.hive_id;
+    return hid ? ['/hives', hid] : ['/hives', 'unassigned'];
+  });
+  protected readonly backLabel = computed(() => {
+    const svc = this.store.service();
+    if (!svc?.hive_id) return 'Sans ruche';
+    return this.hiveName() ?? 'Ruche';
+  });
   private readonly toast = inject(MessageService);
   private readonly confirmer = inject(ConfirmationService);
   private readonly destroyRef = inject(DestroyRef);
@@ -99,6 +116,15 @@ export class ServiceDetail implements OnInit {
     const id = this.id();
     this.api.get(id).subscribe((svc) => {
       this.store.service.set(svc);
+      // Resolve the hive name for the back link (services are browsed per hive).
+      if (svc.hive_id) {
+        this.hivesApi.get(svc.hive_id).subscribe({
+          next: (h) => this.hiveName.set(h.name),
+          error: () => this.hiveName.set(null),
+        });
+      } else {
+        this.hiveName.set(null);
+      }
       // Pull live status up front so the drift banner appears on the header
       // without having to navigate to the Supervision tab first.
       if (svc.status === 'deployed') {

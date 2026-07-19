@@ -3,9 +3,11 @@ import { DatePipe } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
+import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { TabsModule } from 'primeng/tabs';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { forkJoin } from 'rxjs';
 
 import { NetworksApi } from '../../core/api';
 import { ClusterContextService } from '../../core/cluster-context.service';
@@ -20,6 +22,7 @@ import { NetworkFormComponent } from './network-form.component';
     TableModule,
     ButtonModule,
     TagModule,
+    InputTextModule,
     TooltipModule,
     TabsModule,
     NetworkFormComponent,
@@ -30,6 +33,7 @@ import { NetworkFormComponent } from './network-form.component';
 export class Networks {
   private readonly api = inject(NetworksApi);
   private readonly toast = inject(MessageService);
+  private readonly confirmer = inject(ConfirmationService);
   private readonly ctx = inject(ClusterContextService);
 
   /** Networks are Admin-only (F-V1-01). */
@@ -43,6 +47,9 @@ export class Networks {
   readonly swarmLoading = signal(false);
   activeTab = 'registered';
 
+  /** Bulk selection for the registered-networks table. */
+  readonly selected = signal<NetworkResponse[]>([]);
+
   constructor() {
     effect(() => {
       this.ctx.selectedId(); // reload when the active cluster changes
@@ -53,7 +60,8 @@ export class Networks {
 
   load(): void {
     this.loading.set(true);
-    this.api.list(1, 50).subscribe({
+    this.selected.set([]); // drop stale selection (rows are about to be replaced)
+    this.api.list(1, 1000).subscribe({
       next: (res) => {
         this.networks.set(res.items);
         this.loading.set(false);
@@ -89,6 +97,44 @@ export class Networks {
   onSaved(): void {
     this.load();
     this.loadSwarm();
+  }
+
+  clearSelection(): void {
+    this.selected.set([]);
+  }
+
+  /** Delete every selected registered network after one confirmation. */
+  bulkDelete(): void {
+    const items = this.selected();
+    if (!items.length) return;
+    this.confirmer.confirm({
+      header: 'Supprimer la sélection',
+      message: `Supprimer ${items.length} réseau(x) ? Action irréversible.`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      acceptButtonProps: { severity: 'danger' },
+      rejectButtonProps: { severity: 'secondary', text: true },
+      accept: () => {
+        forkJoin(items.map((x) => this.api.remove(x.id))).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimés',
+              detail: `${items.length} supprimé(s)`,
+            });
+            this.clearSelection();
+            this.load();
+          },
+          error: (err) =>
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible',
+            }),
+        });
+      },
+    });
   }
 
   remove(n: NetworkResponse): void {

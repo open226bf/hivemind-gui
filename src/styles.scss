@@ -159,6 +159,55 @@ input {
   border-bottom: 0; /* last row flush with the card's bottom edge */
 }
 
+/* ─── Data-table toolbar: global search + categorical filters + bulk bar ──────
+   Shared across every resource table so search/filter/selection look identical.
+   Rendered inside the p-table `caption` template (the .p-datatable-header). */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.table-toolbar .table-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.table-search {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.table-search .pi-search {
+  position: absolute;
+  left: 10px;
+  font-size: 13px;
+  color: var(--hm-text-muted);
+  pointer-events: none;
+}
+.table-search input {
+  width: 260px;
+  max-width: 100%;
+  padding-left: 30px;
+}
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 4px 12px;
+  background: var(--hm-primary-weak);
+  border: 1px solid var(--hm-border);
+  border-radius: var(--hm-radius-control);
+}
+.bulk-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hm-primary);
+  white-space: nowrap;
+}
+
 /* Tooltips — size to content (cap width) and wrap on words, not per character. */
 .p-tooltip {
   max-width: 20rem;

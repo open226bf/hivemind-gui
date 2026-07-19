@@ -8,7 +8,9 @@ import { DrawerModule } from 'primeng/drawer';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { SelectModule } from 'primeng/select';
-import { MessageService } from 'primeng/api';
+import { InputTextModule } from 'primeng/inputtext';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { forkJoin } from 'rxjs';
 
 import { ConfigsApi } from '../../core/api';
 import { ClusterContextService } from '../../core/cluster-context.service';
@@ -34,6 +36,7 @@ import { ConfigVersionFormComponent } from './config-version-form.component';
     TagModule,
     TooltipModule,
     SelectModule,
+    InputTextModule,
     ConfigFormComponent,
     ConfigVersionFormComponent,
   ],
@@ -43,6 +46,7 @@ import { ConfigVersionFormComponent } from './config-version-form.component';
 export class Configs {
   private readonly api = inject(ConfigsApi);
   private readonly toast = inject(MessageService);
+  private readonly confirmer = inject(ConfirmationService);
   private readonly ctx = inject(ClusterContextService);
 
   /** Operator or Admin may create configs, add versions and restore (F-V1-01). */
@@ -53,6 +57,9 @@ export class Configs {
 
   readonly configs = signal<ConfigResponse[]>([]);
   readonly loading = signal(false);
+
+  // ─── Bulk selection ──────────────────────────────────────────────────────────
+  readonly selected = signal<ConfigResponse[]>([]);
 
   readonly versionTarget = signal<ConfigResponse | null>(null);
   drawerVisible = false;
@@ -80,7 +87,8 @@ export class Configs {
 
   load(): void {
     this.loading.set(true);
-    this.api.list(1, 50).subscribe({
+    this.selected.set([]); // drop stale selection (rows are about to be replaced)
+    this.api.list(1, 1000).subscribe({
       next: (res) => {
         this.configs.set(res.items);
         this.loading.set(false);
@@ -200,6 +208,45 @@ export class Configs {
     this.load();
     const c = this.versionTarget();
     if (c && this.drawerVisible) this.loadVersions(c.id);
+  }
+
+  // ─── Bulk actions ─────────────────────────────────────────────────────────────
+
+  clearSelection(): void {
+    this.selected.set([]);
+  }
+
+  bulkDelete(): void {
+    const items = this.selected();
+    if (!items.length) return;
+    this.confirmer.confirm({
+      header: 'Supprimer la sélection',
+      message: `Supprimer ${items.length} config(s) ? Action irréversible.`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      acceptButtonProps: { severity: 'danger' },
+      rejectButtonProps: { severity: 'secondary', text: true },
+      accept: () => {
+        forkJoin(items.map((x) => this.api.remove(x.id))).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimées',
+              detail: `${items.length} config(s) supprimée(s)`,
+            });
+            this.clearSelection();
+            this.load();
+          },
+          error: (err) =>
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible',
+            }),
+        });
+      },
+    });
   }
 
   remove(c: ConfigResponse): void {

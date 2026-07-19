@@ -1,8 +1,8 @@
 @let svc = store.service();
 
 <div class="page">
-  <a routerLink="/services" class="back inline-block mb-3"
-    ><i class="pi pi-arrow-left"></i> Services</a
+  <a [routerLink]="backLink()" class="back inline-block mb-3"
+    ><i class="pi pi-arrow-left"></i> {{ backLabel() }}</a
   >
 
   @if (svc) {

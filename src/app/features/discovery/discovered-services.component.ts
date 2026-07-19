@@ -8,7 +8,9 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
-import { MessageService } from 'primeng/api';
+import { InputTextModule } from 'primeng/inputtext';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { forkJoin } from 'rxjs';
 
 import { DiscoveryApi, HivesApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
@@ -35,6 +37,7 @@ interface HiveOption {
     TooltipModule,
     DialogModule,
     SelectModule,
+    InputTextModule,
   ],
   templateUrl: './discovered-services.component.html',
   styleUrl: './discovered-services.component.scss',
@@ -43,12 +46,26 @@ export class DiscoveredServices {
   private readonly api = inject(DiscoveryApi);
   private readonly hivesApi = inject(HivesApi);
   private readonly toast = inject(MessageService);
+  private readonly confirmer = inject(ConfirmationService);
   private readonly ctx = inject(ClusterContextService);
 
   private readonly auth = inject(AuthService);
 
   readonly services = signal<DiscoveredService[]>([]);
   readonly loading = signal(false);
+
+  // ─── Bulk selection ──────────────────────────────────────────────────────────
+  readonly selected = signal<DiscoveredService[]>([]);
+  classFilter: DiscoveredServiceClass | null = null;
+  readonly classOptions = [
+    { label: 'Géré', value: 'managed' },
+    { label: 'Non géré', value: 'foreign' },
+    { label: 'Orphelin', value: 'orphan' },
+  ];
+
+  clearSelection(): void {
+    this.selected.set([]);
+  }
 
   readonly foreignCount = computed(
     () => this.services().filter((s) => s.class === 'foreign').length,
@@ -88,6 +105,12 @@ export class DiscoveredServices {
     return this.auth.canWriteService({ cluster_id: c, hive_id: s.hive_id });
   }
 
+  /** True when the selection contains at least one managed service this user may
+   *  release — gates the bulk bar so it matches the per-row release gating. */
+  readonly canReleaseAny = computed(() =>
+    this.selected().some((s) => s.class === 'managed' && this.canRelease(s)),
+  );
+
   // Adopt dialog state.
   readonly adoptVisible = signal(false);
   readonly adopting = signal(false);
@@ -110,6 +133,7 @@ export class DiscoveredServices {
 
   load(): void {
     this.loading.set(true);
+    this.selected.set([]); // drop stale selection (rows are about to be replaced)
     this.api.list().subscribe({
       next: (items) => {
         this.services.set(items);
@@ -192,6 +216,48 @@ export class DiscoveredServices {
           severity: 'error',
           summary: 'Erreur',
           detail: err?.error?.message ?? 'Libération impossible',
+        });
+      },
+    });
+  }
+
+  /** Release every managed service in the selection the user may release; the
+   *  live services keep running, they just drop back to unmanaged (ADR 0004). */
+  bulkRelease(): void {
+    const items = this.selected().filter((s) => s.class === 'managed' && this.canRelease(s));
+    if (!items.length) {
+      this.toast.add({
+        severity: 'info',
+        summary: 'Rien à libérer',
+        detail: 'Aucun service géré libérable dans la sélection.',
+      });
+      return;
+    }
+    this.confirmer.confirm({
+      header: 'Libérer la sélection',
+      message: `Libérer ${items.length} service(s) ? Ils continuent de tourner mais ne seront plus gérés par Hivemind.`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Libérer',
+      rejectLabel: 'Annuler',
+      acceptButtonProps: { severity: 'warn' },
+      rejectButtonProps: { severity: 'secondary', text: true },
+      accept: () => {
+        forkJoin(items.map((x) => this.api.release(x.swarm_service_id))).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Libérés',
+              detail: `${items.length} service(s) libéré(s)`,
+            });
+            this.clearSelection();
+            this.load();
+          },
+          error: (err) =>
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Libération impossible',
+            }),
         });
       },
     });

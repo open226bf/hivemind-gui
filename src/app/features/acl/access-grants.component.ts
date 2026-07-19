@@ -5,7 +5,9 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
-import { MessageService } from 'primeng/api';
+import { InputTextModule } from 'primeng/inputtext';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { forkJoin } from 'rxjs';
 
 import { AclApi, UsersApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
@@ -19,7 +21,15 @@ import { AclResourceType, GrantResponse, Verb } from '../../core/models';
  */
 @Component({
   selector: 'hm-access-grants',
-  imports: [FormsModule, DatePipe, ButtonModule, TableModule, TagModule, SelectModule],
+  imports: [
+    FormsModule,
+    DatePipe,
+    ButtonModule,
+    TableModule,
+    TagModule,
+    SelectModule,
+    InputTextModule,
+  ],
   template: `
     @if (canManage()) {
       <div class="card access-grants">
@@ -54,17 +64,80 @@ import { AclResourceType, GrantResponse, Verb } from '../../core/models';
           />
         </div>
 
-        <p-table [value]="grants()" [loading]="loading()" dataKey="id" styleClass="mt-2">
+        <p-table
+          #dt
+          [value]="rows()"
+          [loading]="loading()"
+          dataKey="id"
+          [paginator]="true"
+          [rows]="10"
+          [rowsPerPageOptions]="[10, 25, 50]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="{first}–{last} sur {totalRecords}"
+          [globalFilterFields]="['_subject', '_verb']"
+          [selection]="selected()"
+          (selectionChange)="selected.set($event)"
+          styleClass="mt-2"
+        >
+          <ng-template #caption>
+            <div class="table-toolbar">
+              <div class="table-filters">
+                <span class="table-search">
+                  <i class="pi pi-search"></i>
+                  <input
+                    pInputText
+                    type="text"
+                    placeholder="Rechercher…"
+                    (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                  />
+                </span>
+                <p-select
+                  [options]="verbOptions"
+                  [(ngModel)]="verbFilter"
+                  (ngModelChange)="dt.filter($event, 'verb', 'equals')"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Tous les droits"
+                  [showClear]="true"
+                  styleClass="status-filter"
+                />
+              </div>
+              @if (selected().length) {
+                <div class="bulk-bar">
+                  <span class="bulk-count">{{ selected().length }} sélectionné(s)</span>
+                  <p-button
+                    label="Révoquer"
+                    icon="pi pi-trash"
+                    size="small"
+                    severity="danger"
+                    (onClick)="bulkRevoke()"
+                  />
+                  <p-button
+                    icon="pi pi-times"
+                    [text]="true"
+                    size="small"
+                    severity="secondary"
+                    pTooltip="Effacer la sélection"
+                    (onClick)="clearSelection()"
+                  />
+                </div>
+              }
+            </div>
+          </ng-template>
           <ng-template #header>
             <tr>
-              <th>Utilisateur</th>
-              <th style="width: 120px">Droit</th>
-              <th style="width: 160px">Expire</th>
+              <th style="width: 3rem"><p-tableHeaderCheckbox /></th>
+              <th pSortableColumn="_subject">Utilisateur <p-sortIcon field="_subject" /></th>
+              <th style="width: 120px" pSortableColumn="verb">Droit <p-sortIcon field="verb" /></th>
+              <th style="width: 160px" pSortableColumn="expires_at">
+                Expire <p-sortIcon field="expires_at" />
+              </th>
               <th style="width: 60px"></th>
             </tr>
           </ng-template>
           <ng-template #body let-g>
             <tr>
+              <td><p-tableCheckbox [value]="g" /></td>
               <td class="mono">{{ userLabel(g.subject_id) }}</td>
               <td><p-tag [value]="verbLabel(g.verb)" [severity]="verbSeverity(g.verb)" /></td>
               <td class="muted">{{ g.expires_at ? (g.expires_at | date: 'short') : '—' }}</td>
@@ -82,7 +155,7 @@ import { AclResourceType, GrantResponse, Verb } from '../../core/models';
           </ng-template>
           <ng-template #emptymessage>
             <tr>
-              <td colspan="4">
+              <td colspan="5">
                 <div class="muted ag-empty">
                   <i class="pi pi-users"></i> Aucune habilitation explicite.
                 </div>
@@ -125,6 +198,9 @@ import { AclResourceType, GrantResponse, Verb } from '../../core/models';
       .muted {
         color: var(--hm-text-muted);
       }
+      :host ::ng-deep .status-filter {
+        min-width: 180px;
+      }
     `,
   ],
 })
@@ -139,14 +215,31 @@ export class AccessGrantsComponent {
   private readonly usersApi = inject(UsersApi);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(MessageService);
+  private readonly confirmer = inject(ConfirmationService);
 
   readonly grants = signal<GrantResponse[]>([]);
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly users = signal<{ id: string; email: string }[]>([]);
 
+  /** Grants projected with the values actually shown in the table, so global
+   *  search and the "Utilisateur" sort work on the email and the French verb
+   *  label rather than the raw UUID / verb code (which are never typed). */
+  readonly rows = computed(() =>
+    this.grants().map((g) => ({
+      ...g,
+      _subject: this.userLabel(g.subject_id),
+      _verb: this.verbLabel(g.verb),
+    })),
+  );
+
+  /** Bulk selection over the grants table. */
+  readonly selected = signal<GrantResponse[]>([]);
+
   subjectId: string | null = null;
   verb: Verb = 'read';
+  /** Categorical column filter bound to the caption toolbar's verb select. */
+  verbFilter: Verb | null = null;
   readonly verbOptions = [
     { label: 'Lecture', value: 'read' },
     { label: 'Écriture', value: 'write' },
@@ -175,6 +268,7 @@ export class AccessGrantsComponent {
 
   private load(): void {
     this.loading.set(true);
+    this.selected.set([]); // drop stale selection (rows are about to be replaced)
     const req =
       this.resourceType() === 'cluster'
         ? this.acl.listClusterGrants(this.resourceId())
@@ -234,6 +328,44 @@ export class AccessGrantsComponent {
           summary: 'Erreur',
           detail: err?.error?.message ?? 'Révocation impossible',
         }),
+    });
+  }
+
+  clearSelection(): void {
+    this.selected.set([]);
+  }
+
+  /** Revoke every selected grant after one confirmation. */
+  bulkRevoke(): void {
+    const items = this.selected();
+    if (!items.length) return;
+    this.confirmer.confirm({
+      header: 'Révoquer la sélection',
+      message: `Révoquer ${items.length} habilitation(s) ? Action irréversible.`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Révoquer',
+      rejectLabel: 'Annuler',
+      acceptButtonProps: { severity: 'danger' },
+      rejectButtonProps: { severity: 'secondary', text: true },
+      accept: () => {
+        forkJoin(items.map((x) => this.acl.revoke(x.id))).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Révoqués',
+              detail: `${items.length} habilitation(s) révoquée(s)`,
+            });
+            this.clearSelection();
+            this.load();
+          },
+          error: (err) =>
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Révocation impossible',
+            }),
+        });
+      },
     });
   }
 

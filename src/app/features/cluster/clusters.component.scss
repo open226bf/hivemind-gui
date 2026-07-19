@@ -45,3 +45,7 @@ code {
 .card {
   margin-top: 0;
 }
+
+:host ::ng-deep .status-filter {
+  min-width: 180px;
+}

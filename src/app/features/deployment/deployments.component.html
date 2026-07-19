@@ -81,6 +81,7 @@
 
   <div class="card">
     <p-table
+      #dt
       [value]="deployments()"
       [loading]="loading()"
       [lazy]="true"
@@ -88,19 +89,40 @@
       [rows]="pageSize"
       [totalRecords]="total()"
       [first]="first()"
+      [resetPageOnSort]="false"
       (onLazyLoad)="onPage($event)"
       dataKey="id"
     >
+      <ng-template #caption>
+        <div class="table-toolbar">
+          <div class="table-filters">
+            <span class="table-search">
+              <i class="pi pi-search"></i>
+              <input
+                pInputText
+                type="text"
+                placeholder="Rechercher dans la page…"
+                [value]="searchTerm()"
+                (input)="onSearch($any($event.target).value)"
+              />
+            </span>
+          </div>
+        </div>
+      </ng-template>
       <ng-template #header>
         <tr>
-          <th style="width: 130px">Statut</th>
-          <th>Service</th>
-          <th>Image</th>
-          <th>Déclencheur</th>
-          <th>Démarré le</th>
-          <th>Terminé le</th>
-          <th style="width: 80px">Durée</th>
-          <th>Erreur</th>
+          <th style="width: 130px" pSortableColumn="status">
+            Statut <p-sortIcon field="status" />
+          </th>
+          <th pSortableColumn="service">Service <p-sortIcon field="service" /></th>
+          <th pSortableColumn="image_tag">Image <p-sortIcon field="image_tag" /></th>
+          <th pSortableColumn="trigger">Déclencheur <p-sortIcon field="trigger" /></th>
+          <th pSortableColumn="started_at">Démarré le <p-sortIcon field="started_at" /></th>
+          <th pSortableColumn="finished_at">Terminé le <p-sortIcon field="finished_at" /></th>
+          <th style="width: 80px" pSortableColumn="duration_ms">
+            Durée <p-sortIcon field="duration_ms" />
+          </th>
+          <th pSortableColumn="error_message">Erreur <p-sortIcon field="error_message" /></th>
         </tr>
       </ng-template>
       <ng-template #body let-d>
