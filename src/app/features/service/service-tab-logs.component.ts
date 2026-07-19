@@ -2,10 +2,12 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  HostListener,
   NgZone,
   OnDestroy,
   OnInit,
   ViewChild,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -37,6 +39,18 @@ export class ServiceTabLogs implements OnInit, AfterViewInit, OnDestroy {
   readonly connected = signal(false);
   readonly error = signal<string | null>(null);
 
+  /** Maximizes the logs panel to a full-viewport overlay (Escape to exit). */
+  readonly fullscreen = signal(false);
+
+  /** Case-insensitive keyword filter (grep-style): when set, only matching lines
+   *  are shown and the term is highlighted. Applies live to incoming lines. */
+  readonly filter = signal('');
+  readonly visibleLines = computed(() => {
+    const q = this.filter().trim().toLowerCase();
+    const all = this.lines();
+    return q ? all.filter((l) => l.toLowerCase().includes(q)) : all;
+  });
+
   follow = true;
   tail = 200;
   autoScroll = true;
@@ -62,6 +76,45 @@ export class ServiceTabLogs implements OnInit, AfterViewInit, OnDestroy {
 
   clear(): void {
     this.lines.set([]);
+  }
+
+  toggleFullscreen(): void {
+    const on = !this.fullscreen();
+    this.fullscreen.set(on);
+    if (on) requestAnimationFrame(() => this.scrollToBottom());
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.fullscreen()) this.fullscreen.set(false);
+  }
+
+  /** HTML for a line with the filter term wrapped in <mark>. All log text is
+   *  HTML-escaped first, so the only injected markup is the highlight tag —
+   *  Angular's [innerHTML] sanitizer keeps <mark> and treats the rest as literal
+   *  text (XSS-safe, and exact text is preserved unlike template whitespace). */
+  highlight(line: string): string {
+    const q = this.filter().trim();
+    if (!q) return this.escapeHtml(line);
+    const lower = line.toLowerCase();
+    const ql = q.toLowerCase();
+    let out = '';
+    let i = 0;
+    for (;;) {
+      const idx = lower.indexOf(ql, i);
+      if (idx < 0) {
+        out += this.escapeHtml(line.slice(i));
+        break;
+      }
+      out += this.escapeHtml(line.slice(i, idx));
+      out += '<mark>' + this.escapeHtml(line.slice(idx, idx + q.length)) + '</mark>';
+      i = idx + q.length;
+    }
+    return out;
+  }
+
+  private escapeHtml(s: string): string {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   onScroll(): void {

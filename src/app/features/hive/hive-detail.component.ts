@@ -2,11 +2,8 @@ import { Component, computed, effect, inject, input, signal, viewChild } from '@
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { MultiSelectModule } from 'primeng/multiselect';
 import { TabsModule } from 'primeng/tabs';
 import { MessageService } from 'primeng/api';
-import { forkJoin } from 'rxjs';
 
 import { HivesApi, ServicesApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
@@ -23,8 +20,6 @@ import { AccessGrantsComponent } from '../acl/access-grants.component';
     FormsModule,
     RouterLink,
     ButtonModule,
-    DialogModule,
-    MultiSelectModule,
     TabsModule,
     HiveFormComponent,
     HiveTabVariables,
@@ -61,12 +56,6 @@ export class HiveDetail {
   protected readonly hive = signal<HiveResponse | null>(null);
   readonly services = signal<ServiceResponse[]>([]);
   readonly loading = signal(false);
-
-  // ─── Manage dialog ──────────────────────────────────────────────────────────
-  manageVisible = false;
-  readonly serviceOptions = signal<{ label: string; value: string }[]>([]);
-  selectedIds: string[] = [];
-  readonly managing = signal(false);
   readonly formVisible = signal(false);
 
   constructor() {
@@ -131,63 +120,6 @@ export class HiveDetail {
           summary: 'Erreur',
           detail: err?.error?.message ?? 'Suppression impossible (ruche non vide ?)',
         }),
-    });
-  }
-
-  openManage(): void {
-    const h = this.hive();
-    if (!h) return;
-    this.managing.set(false);
-    this.servicesApi.list(1, 1000).subscribe((res) => {
-      this.serviceOptions.set(
-        res.items.map((s) => ({
-          label:
-            s.hive_id && s.hive_id !== h.id ? `${s.name}  (déjà dans une autre ruche)` : s.name,
-          value: s.id,
-        })),
-      );
-      this.selectedIds = res.items.filter((s) => s.hive_id === h.id).map((s) => s.id);
-      this.manageVisible = true;
-    });
-  }
-
-  saveManage(): void {
-    const h = this.hive();
-    if (!h) return;
-    const current = new Set(this.services().map((s) => s.id));
-    const selected = new Set(this.selectedIds);
-    const toAssign = this.selectedIds.filter((id) => !current.has(id));
-    const toUnassign = [...current].filter((id) => !selected.has(id));
-
-    const ops = [
-      ...toAssign.map((id) => this.servicesApi.assignHive(id, h.id)),
-      ...toUnassign.map((id) => this.servicesApi.assignHive(id, null)),
-    ];
-    if (ops.length === 0) {
-      this.manageVisible = false;
-      return;
-    }
-
-    this.managing.set(true);
-    forkJoin(ops).subscribe({
-      next: () => {
-        this.managing.set(false);
-        this.manageVisible = false;
-        this.toast.add({
-          severity: 'success',
-          summary: 'Mis à jour',
-          detail: `${toAssign.length} ajouté(s), ${toUnassign.length} retiré(s)`,
-        });
-        this.load();
-      },
-      error: (err) => {
-        this.managing.set(false);
-        this.toast.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: err?.error?.message ?? 'Mise à jour impossible',
-        });
-      },
     });
   }
 

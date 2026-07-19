@@ -1,54 +1,102 @@
-<div class="logctl flex align-items-center gap-3 mb-3 flex-wrap">
-  <span class="conn inline-flex align-items-center gap-2" [class.on]="connected()">
-    <span class="dot"></span>{{ connected() ? 'Connecté' : 'Déconnecté' }}
-  </span>
+<div class="logs" [class.fullscreen]="fullscreen()">
+  <div class="logctl flex align-items-center gap-3 mb-3 flex-wrap">
+    <span class="conn inline-flex align-items-center gap-2" [class.on]="connected()">
+      <span class="dot"></span>{{ connected() ? 'Connecté' : 'Déconnecté' }}
+    </span>
 
-  <label class="ctl inline-flex align-items-center gap-2">
-    <span>Suivre</span>
-    <p-toggleswitch [(ngModel)]="follow" (ngModelChange)="restart()" />
-  </label>
+    <label class="ctl inline-flex align-items-center gap-2">
+      <span>Suivre</span>
+      <p-toggleswitch [(ngModel)]="follow" (ngModelChange)="restart()" />
+    </label>
 
-  <label class="ctl inline-flex align-items-center gap-2">
-    <span>Lignes</span>
-    <input pInputText class="tail" type="number" min="1" [(ngModel)]="tail" (change)="restart()" />
-  </label>
+    <label class="ctl inline-flex align-items-center gap-2">
+      <span>Lignes</span>
+      <input
+        pInputText
+        class="tail"
+        type="number"
+        min="1"
+        [(ngModel)]="tail"
+        (change)="restart()"
+      />
+    </label>
 
-  <span class="flex-1"></span>
-
-  <label class="ctl inline-flex align-items-center gap-2">
-    <span>Auto-défilement</span>
-    <p-toggleswitch [(ngModel)]="autoScroll" />
-  </label>
-  <p-button
-    icon="pi pi-refresh"
-    label="Recharger"
-    severity="secondary"
-    size="small"
-    [text]="true"
-    (onClick)="restart()"
-  />
-  <p-button
-    icon="pi pi-trash"
-    label="Effacer"
-    severity="secondary"
-    size="small"
-    [text]="true"
-    (onClick)="clear()"
-  />
-</div>
-
-@if (error(); as e) {
-  <div class="banner error flex gap-2 align-items-center">
-    <i class="pi pi-exclamation-triangle"></i> {{ e }}
-  </div>
-}
-
-<div #console class="console" (scroll)="onScroll()">
-  @if (lines().length === 0) {
-    <div class="empty">{{ connected() ? 'En attente de logs…' : 'Aucun log.' }}</div>
-  } @else {
-    @for (line of lines(); track $index) {
-      <div class="line">{{ line }}</div>
+    <span class="table-search logs-search">
+      <i class="pi pi-search"></i>
+      <input
+        pInputText
+        type="text"
+        [ngModel]="filter()"
+        (ngModelChange)="filter.set($event)"
+        placeholder="Filtrer les logs…"
+      />
+      @if (filter()) {
+        <button
+          type="button"
+          class="clear-filter"
+          title="Effacer le filtre"
+          aria-label="Effacer le filtre"
+          (click)="filter.set('')"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      }
+    </span>
+    @if (filter().trim()) {
+      <span class="match-count">{{ visibleLines().length }} / {{ lines().length }}</span>
     }
+
+    <span class="flex-1"></span>
+
+    <label class="ctl inline-flex align-items-center gap-2">
+      <span>Auto-défilement</span>
+      <p-toggleswitch [(ngModel)]="autoScroll" />
+    </label>
+    <p-button
+      icon="pi pi-refresh"
+      label="Recharger"
+      severity="secondary"
+      size="small"
+      [text]="true"
+      (onClick)="restart()"
+    />
+    <p-button
+      icon="pi pi-trash"
+      label="Effacer"
+      severity="secondary"
+      size="small"
+      [text]="true"
+      (onClick)="clear()"
+    />
+    <p-button
+      [icon]="fullscreen() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'"
+      [label]="fullscreen() ? 'Réduire' : 'Plein écran'"
+      severity="secondary"
+      size="small"
+      [text]="true"
+      (onClick)="toggleFullscreen()"
+    />
+  </div>
+
+  @if (error(); as e) {
+    <div class="banner error flex gap-2 align-items-center">
+      <i class="pi pi-exclamation-triangle"></i> {{ e }}
+    </div>
   }
+
+  <div #console class="console" (scroll)="onScroll()">
+    @if (lines().length === 0) {
+      <div class="empty">{{ connected() ? 'En attente de logs…' : 'Aucun log.' }}</div>
+    } @else if (visibleLines().length === 0) {
+      <div class="empty">Aucune ligne ne contient « {{ filter().trim() }} ».</div>
+    } @else {
+      @for (line of visibleLines(); track $index) {
+        @if (filter().trim()) {
+          <div class="line" [innerHTML]="highlight(line)"></div>
+        } @else {
+          <div class="line">{{ line }}</div>
+        }
+      }
+    }
+  </div>
 </div>

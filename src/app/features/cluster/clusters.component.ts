@@ -1,18 +1,21 @@
 import { Component, DestroyRef, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { interval } from 'rxjs';
+import { forkJoin, interval } from 'rxjs';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
-import { MessageService } from 'primeng/api';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { ClusterApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
-import { ClusterResponse } from '../../core/models';
+import { ClusterResponse, ClusterStatus } from '../../core/models';
 import { ClusterFormComponent } from './cluster-form.component';
 import { AccessGrantsComponent } from '../acl/access-grants.component';
 
@@ -20,12 +23,15 @@ import { AccessGrantsComponent } from '../acl/access-grants.component';
   selector: 'hm-clusters',
   imports: [
     DatePipe,
+    FormsModule,
     RouterLink,
     TableModule,
     ButtonModule,
     TagModule,
     TooltipModule,
     DialogModule,
+    InputTextModule,
+    SelectModule,
     ClusterFormComponent,
     AccessGrantsComponent,
   ],
@@ -35,9 +41,19 @@ import { AccessGrantsComponent } from '../acl/access-grants.component';
 export class Clusters {
   private readonly api = inject(ClusterApi);
   private readonly toast = inject(MessageService);
+  private readonly confirmer = inject(ConfirmationService);
 
   /** Cluster management is Admin-only (F-V1-01). */
   readonly canManage = inject(AuthService).isAdmin;
+
+  // ─── Bulk selection ──────────────────────────────────────────────────────────
+  readonly selected = signal<ClusterResponse[]>([]);
+  statusFilter: ClusterStatus | null = null;
+  readonly statusOptions = [
+    { label: 'Joignable', value: 'reachable' },
+    { label: 'Injoignable', value: 'unreachable' },
+    { label: 'Inconnu', value: 'unknown' },
+  ];
 
   readonly formRef = viewChild.required(ClusterFormComponent);
 
@@ -60,8 +76,15 @@ export class Clusters {
   }
 
   load(silent = false): void {
-    if (!silent) this.loading.set(true);
-    this.api.list().subscribe({
+    if (!silent) {
+      this.loading.set(true);
+      // Drop stale selection on an explicit (re)load; preserve it across the
+      // 8s background poll so a user's checkboxes don't clear underneath them.
+      this.selected.set([]);
+    }
+    // Client-side paginate/sort/filter over a generous page — the table handles
+    // the rest without extra round-trips.
+    this.api.list(1, 1000).subscribe({
       next: (res) => {
         this.clusters.set(res.items);
         this.loading.set(false);
@@ -149,6 +172,58 @@ export class Clusters {
           severity: 'error',
           summary: 'Erreur',
           detail: err?.error?.message ?? 'Suppression impossible',
+        });
+      },
+    });
+  }
+
+  // ─── Bulk actions ─────────────────────────────────────────────────────────────
+
+  clearSelection(): void {
+    this.selected.set([]);
+  }
+
+  /** Delete every selected cluster after one confirmation. Mirrors the per-row
+   *  guard: the default cluster can't be deleted and is skipped. */
+  bulkDelete(): void {
+    const items = this.selected().filter((c) => !c.is_default);
+    const skipped = this.selected().length - items.length;
+    if (items.length === 0) {
+      this.toast.add({
+        severity: 'info',
+        summary: 'Rien à supprimer',
+        detail: 'Le cluster par défaut ne peut pas être supprimé.',
+      });
+      return;
+    }
+    this.confirmer.confirm({
+      header: 'Supprimer la sélection',
+      message:
+        skipped > 0
+          ? `Supprimer ${items.length} cluster(s) ? Le cluster par défaut sera ignoré. Action irréversible.`
+          : `Supprimer ${items.length} cluster(s) ? Action irréversible.`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      acceptButtonProps: { severity: 'danger' },
+      rejectButtonProps: { severity: 'secondary', text: true },
+      accept: () => {
+        forkJoin(items.map((c) => this.api.remove(c.id))).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimés',
+              detail: `${items.length} cluster(s) supprimé(s)`,
+            });
+            this.clearSelection();
+            this.load();
+          },
+          error: (err) =>
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible',
+            }),
         });
       },
     });

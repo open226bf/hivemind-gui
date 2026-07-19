@@ -58,3 +58,7 @@ code {
   justify-content: center;
   align-items: center;
 }
+
+:host ::ng-deep .status-filter {
+  min-width: 180px;
+}

@@ -37,11 +37,10 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/hive/hive-detail.component').then((m) => m.HiveDetail),
       },
-      {
-        path: 'services',
-        loadComponent: () =>
-          import('./features/service/services.component').then((m) => m.Services),
-      },
+      // The global service list was removed: services are browsed per hive
+      // (project). Keep the path as a redirect so old links/bookmarks land on
+      // the hives overview.
+      { path: 'services', pathMatch: 'full', redirectTo: 'hives' },
       {
         path: 'discovered-services',
         loadComponent: () =>

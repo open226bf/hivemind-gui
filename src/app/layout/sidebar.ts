@@ -23,7 +23,6 @@ export class Sidebar {
 
   readonly nav: NavItem[] = [
     { label: 'Ruches', icon: 'pi-box', path: '/hives' },
-    { label: 'Services', icon: 'pi-server', path: '/services' },
     { label: 'Découverte', icon: 'pi-search', path: '/discovered-services' },
     { label: 'Santé', icon: 'pi-heart', path: '/monitoring' },
     { label: 'Métriques', icon: 'pi-chart-line', path: '/metrics' },

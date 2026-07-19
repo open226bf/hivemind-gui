@@ -50,6 +50,56 @@
   font-size: 13px;
 }
 
+.logs-search {
+  input {
+    width: 200px;
+    padding-right: 26px;
+  }
+  .clear-filter {
+    position: absolute;
+    right: 6px;
+    display: inline-flex;
+    align-items: center;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: var(--hm-text-muted);
+    padding: 2px;
+
+    .pi {
+      font-size: 12px;
+    }
+    &:hover {
+      color: var(--hm-text);
+    }
+  }
+}
+
+.match-count {
+  font-size: 12px;
+  color: var(--hm-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Maximized: the whole logs panel becomes a full-viewport overlay above the
+   app chrome; the console flexes to fill the remaining height. */
+.logs.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--hm-bg);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+
+  .console {
+    height: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
 .console {
   background: #0f1117;
   color: #d6dae3;
@@ -68,5 +118,12 @@
   .empty {
     color: #6b7280;
     font-style: italic;
+  }
+
+  mark {
+    background: var(--hm-accent);
+    color: #0f1117;
+    border-radius: 2px;
+    padding: 0 1px;
   }
 }

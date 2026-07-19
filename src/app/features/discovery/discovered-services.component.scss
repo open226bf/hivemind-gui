@@ -50,3 +50,7 @@ code {
   font-size: 13px;
   font-weight: 600;
 }
+
+:host ::ng-deep .status-filter {
+  min-width: 180px;
+}

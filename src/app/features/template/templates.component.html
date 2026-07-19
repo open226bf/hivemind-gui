@@ -19,19 +19,77 @@
   </div>
 
   <div class="card">
-    <p-table [value]="templates()" [loading]="loading()" dataKey="id">
+    <p-table
+      #dt
+      [value]="templates()"
+      [loading]="loading()"
+      dataKey="id"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first}–{last} sur {totalRecords}"
+      [globalFilterFields]="['name', 'description', 'spec.image']"
+      [selection]="selected()"
+      (selectionChange)="selected.set($event)"
+    >
+      <ng-template #caption>
+        <div class="table-toolbar">
+          <div class="table-filters">
+            <span class="table-search">
+              <i class="pi pi-search"></i>
+              <input
+                pInputText
+                type="text"
+                placeholder="Rechercher…"
+                (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+              />
+            </span>
+          </div>
+          @if (isAdmin() && selected().length) {
+            <div class="bulk-bar">
+              <span class="bulk-count">{{ selected().length }} sélectionné(s)</span>
+              <p-button
+                label="Supprimer"
+                icon="pi pi-trash"
+                size="small"
+                severity="danger"
+                (onClick)="bulkDelete()"
+              />
+              <p-button
+                icon="pi pi-times"
+                [text]="true"
+                size="small"
+                severity="secondary"
+                pTooltip="Effacer la sélection"
+                (onClick)="clearSelection()"
+              />
+            </div>
+          }
+        </div>
+      </ng-template>
       <ng-template #header>
         <tr>
-          <th>Nom</th>
-          <th>Image</th>
-          <th style="width: 70px">Répl.</th>
-          <th style="width: 70px">Version</th>
+          @if (isAdmin()) {
+            <th style="width: 3rem"><p-tableHeaderCheckbox /></th>
+          }
+          <th pSortableColumn="name">Nom <p-sortIcon field="name" /></th>
+          <th pSortableColumn="spec.image">Image <p-sortIcon field="spec.image" /></th>
+          <th pSortableColumn="spec.replicas" style="width: 70px">
+            Répl. <p-sortIcon field="spec.replicas" />
+          </th>
+          <th pSortableColumn="version" style="width: 70px">
+            Version <p-sortIcon field="version" />
+          </th>
           <th>Champs verrouillés</th>
           <th style="width: 170px"></th>
         </tr>
       </ng-template>
       <ng-template #body let-t>
         <tr>
+          @if (isAdmin()) {
+            <td><p-tableCheckbox [value]="t" /></td>
+          }
           <td class="name-cell">
             <code>{{ t.name }}</code>
             @if (t.description) {
@@ -83,7 +141,7 @@
       </ng-template>
       <ng-template #emptymessage>
         <tr>
-          <td colspan="6">
+          <td [attr.colspan]="isAdmin() ? 7 : 6">
             <div class="empty-state"><i class="pi pi-clone"></i>Aucun template.</div>
           </td>
         </tr>

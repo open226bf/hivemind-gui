@@ -18,12 +18,6 @@
     <div class="flex align-items-center gap-2">
       @if (canManage() && !isUnassigned()) {
         <p-button
-          label="Gérer les services"
-          icon="pi pi-sitemap"
-          severity="secondary"
-          (onClick)="openManage()"
-        />
-        <p-button
           icon="pi pi-pencil"
           severity="secondary"
           [text]="true"
@@ -77,43 +71,6 @@
     </p-tabs>
   }
 </div>
-
-<p-dialog
-  [header]="'Gérer les services — ' + (hive()?.name ?? '')"
-  [(visible)]="manageVisible"
-  [modal]="true"
-  [style]="{ width: '520px' }"
->
-  <p class="dialog-hint">
-    Sélectionnez les services rattachés à cette ruche. Retirer un service le replace « sans ruche »
-    ; ajouter un service appartenant à une autre ruche le déplace ici.
-  </p>
-  <p-multiSelect
-    [options]="serviceOptions()"
-    [(ngModel)]="selectedIds"
-    optionLabel="label"
-    optionValue="value"
-    [filter]="true"
-    display="chip"
-    appendTo="body"
-    placeholder="Choisir des services"
-    styleClass="w-full mt-2"
-  />
-  <ng-template #footer>
-    <p-button
-      label="Annuler"
-      severity="secondary"
-      [text]="true"
-      (onClick)="manageVisible = false"
-    />
-    <p-button
-      label="Enregistrer"
-      icon="pi pi-check"
-      (onClick)="saveManage()"
-      [loading]="managing()"
-    />
-  </ng-template>
-</p-dialog>
 
 <hm-hive-form (saved)="load()" />
 

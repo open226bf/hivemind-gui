@@ -2,8 +2,10 @@ import { Component, inject, signal, viewChild } from '@angular/core';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
+import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { forkJoin } from 'rxjs';
 
 import { TemplatesApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
@@ -17,6 +19,7 @@ import { TemplateInstantiateComponent } from './template-instantiate.component';
     TableModule,
     ButtonModule,
     TagModule,
+    InputTextModule,
     TooltipModule,
     TemplateFormComponent,
     TemplateInstantiateComponent,
@@ -27,6 +30,7 @@ import { TemplateInstantiateComponent } from './template-instantiate.component';
 export class Templates {
   private readonly api = inject(TemplatesApi);
   private readonly toast = inject(MessageService);
+  private readonly confirmer = inject(ConfirmationService);
   private readonly auth = inject(AuthService);
 
   /** Admins manage templates; any Operator may instantiate (F-V2-07). */
@@ -39,13 +43,19 @@ export class Templates {
   readonly templates = signal<TemplateResponse[]>([]);
   readonly loading = signal(false);
 
+  // ─── Bulk selection ──────────────────────────────────────────────────────────
+  readonly selected = signal<TemplateResponse[]>([]);
+
   constructor() {
     this.load();
   }
 
   load(): void {
     this.loading.set(true);
-    this.api.list().subscribe({
+    this.selected.set([]); // drop stale selection (rows are about to be replaced)
+    // Client-side paginate/sort/filter over a generous page; the table handles
+    // the rest without extra round-trips.
+    this.api.list(1, 1000).subscribe({
       next: (res) => {
         this.templates.set(res.items);
         this.loading.set(false);
@@ -85,6 +95,45 @@ export class Templates {
           severity: 'error',
           summary: 'Erreur',
           detail: err?.error?.message ?? 'Suppression impossible',
+        });
+      },
+    });
+  }
+
+  // ─── Bulk actions ─────────────────────────────────────────────────────────────
+
+  clearSelection(): void {
+    this.selected.set([]);
+  }
+
+  bulkDelete(): void {
+    const items = this.selected();
+    if (!items.length) return;
+    this.confirmer.confirm({
+      header: 'Supprimer la sélection',
+      message: `Supprimer ${items.length} élément(s) ? Action irréversible.`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      acceptButtonProps: { severity: 'danger' },
+      rejectButtonProps: { severity: 'secondary', text: true },
+      accept: () => {
+        forkJoin(items.map((x) => this.api.remove(x.id))).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimés',
+              detail: `${items.length} supprimé(s)`,
+            });
+            this.clearSelection();
+            this.load();
+          },
+          error: (err) =>
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible',
+            }),
         });
       },
     });
