@@ -16,6 +16,7 @@ import { DiscoveryApi, HivesApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
 import { ClusterContextService } from '../../core/cluster-context.service';
 import { DiscoveredService, DiscoveredServiceClass } from '../../core/models';
+import { LogViewer } from '../service/log-viewer.component';
 
 interface HiveOption {
   label: string;
@@ -38,6 +39,7 @@ interface HiveOption {
     DialogModule,
     SelectModule,
     InputTextModule,
+    LogViewer,
   ],
   templateUrl: './discovered-services.component.html',
   styleUrl: './discovered-services.component.scss',
@@ -110,6 +112,58 @@ export class DiscoveredServices {
   readonly canReleaseAny = computed(() =>
     this.selected().some((s) => s.class === 'managed' && this.canRelease(s)),
   );
+
+  // ─── Supervision of unmanaged services ───────────────────────────────────────
+  // Services Hivemind does not manage have no service page, so their logs are
+  // read and their tasks restarted straight from here, by Swarm id.
+
+  readonly logsVisible = signal(false);
+  readonly logsTarget = signal<DiscoveredService | null>(null);
+  readonly logsPath = computed(() => {
+    const s = this.logsTarget();
+    return s ? this.api.logsPath(s.swarm_service_id) : '';
+  });
+
+  /** Restarting is a write on the cluster — an unmanaged service has no hive. */
+  readonly canRestart = computed(() => {
+    const c = this.clusterId();
+    return c ? this.auth.canWriteCluster(c) : this.auth.isOperator();
+  });
+
+  openLogs(s: DiscoveredService): void {
+    this.logsTarget.set(s);
+    this.logsVisible.set(true);
+  }
+
+  restart(s: DiscoveredService): void {
+    this.confirmer.confirm({
+      header: 'Redémarrer le service',
+      message:
+        `Redémarrer « ${s.name} » ? Ses tâches sont recréées et l'image re-téléchargée ` +
+        `(dernière version du tag). Sa définition n'est pas modifiée : secrets, configs, ` +
+        `montages, réseaux et variables restent exactement les mêmes.`,
+      icon: 'pi pi-refresh',
+      acceptLabel: 'Redémarrer',
+      rejectLabel: 'Annuler',
+      rejectButtonProps: { severity: 'secondary', text: true },
+      accept: () => {
+        this.api.restart(s.swarm_service_id).subscribe({
+          next: () =>
+            this.toast.add({
+              severity: 'success',
+              summary: 'Redémarrage lancé',
+              detail: `${s.name} — tâches recréées avec la dernière image`,
+            }),
+          error: (err) =>
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Redémarrage impossible',
+            }),
+        });
+      },
+    });
+  }
 
   // Adopt dialog state.
   readonly adoptVisible = signal(false);
