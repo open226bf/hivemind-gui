@@ -330,6 +330,21 @@ export class DiscoveryApi {
   release(swarmId: string): Observable<void> {
     return this.http.post<void>(`${API_BASE}/discovered-services/${swarmId}/release`, {});
   }
+
+  /** Force-restarts a live Swarm service (rolls its tasks and re-pulls the
+   *  image) without touching its spec — everything it already uses (secrets,
+   *  configs, mounts, env) keeps working. */
+  restart(swarmId: string): Observable<{ status: string }> {
+    return this.http.post<{ status: string }>(
+      `${API_BASE}/discovered-services/${swarmId}/restart`,
+      {},
+    );
+  }
+
+  /** API path of a discovered service's log stream, for the shared log viewer. */
+  logsPath(swarmId: string): string {
+    return `/discovered-services/${swarmId}/logs`;
+  }
 }
 
 @Injectable({ providedIn: 'root' })

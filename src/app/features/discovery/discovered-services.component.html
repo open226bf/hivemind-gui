@@ -129,6 +129,27 @@
                 />
               }
             }
+            @if (s.class !== 'managed') {
+              <!-- Not managed by Hivemind: no service page, so supervise here. -->
+              <p-button
+                icon="pi pi-align-left"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                pTooltip="Voir les logs"
+                (onClick)="openLogs(s)"
+              />
+              @if (canRestart()) {
+                <p-button
+                  icon="pi pi-refresh"
+                  severity="secondary"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Redémarrer (re-pull de l'image, définition inchangée)"
+                  (onClick)="restart(s)"
+                />
+              }
+            }
             @if (s.class === 'foreign' && canAdopt()) {
               <p-button
                 label="Adopter"
@@ -222,4 +243,22 @@
     }
     <p-button label="Compris" icon="pi pi-check" (onClick)="warningsVisible.set(false)" />
   </ng-template>
+</p-dialog>
+
+<!-- Logs of a service Hivemind does not manage: the shared viewer (filter,
+     fullscreen, follow) pointed at the discovery log stream, by Swarm id. -->
+<p-dialog
+  [header]="'Logs — ' + (logsTarget()?.name ?? '')"
+  [visible]="logsVisible()"
+  (visibleChange)="logsVisible.set($event)"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '1100px' }"
+  [dismissableMask]="true"
+>
+  @if (logsVisible() && logsTarget(); as target) {
+    <p class="muted mb-2">
+      Service non géré par Hivemind — <code>{{ target.image }}</code>
+    </p>
+    <hm-log-viewer [path]="logsPath()" />
+  }
 </p-dialog>
