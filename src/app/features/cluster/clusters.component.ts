@@ -1,6 +1,6 @@
 import { Component, DestroyRef, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin, interval } from 'rxjs';
+import { interval } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -15,7 +15,10 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { ClusterApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
+import { firstErrorMessage, settleAll } from '../../core/bulk';
+import { confirmDestructive } from '../../core/confirm';
 import { ClusterResponse, ClusterStatus } from '../../core/models';
+import { collectAll } from '../../core/paging';
 import { ClusterFormComponent } from './cluster-form.component';
 import { AccessGrantsComponent } from '../acl/access-grants.component';
 
@@ -82,11 +85,11 @@ export class Clusters {
       // 8s background poll so a user's checkboxes don't clear underneath them.
       this.selected.set([]);
     }
-    // Client-side paginate/sort/filter over a generous page — the table handles
-    // the rest without extra round-trips.
-    this.api.list(1, 1000).subscribe({
-      next: (res) => {
-        this.clusters.set(res.items);
+    // The whole catalog is pulled page by page, then the table paginates,
+    // sorts and filters client-side without extra round-trips.
+    collectAll((page, size) => this.api.list(page, size)).subscribe({
+      next: (items) => {
+        this.clusters.set(items);
         this.loading.set(false);
       },
       error: () => {
@@ -161,20 +164,32 @@ export class Clusters {
       });
       return;
     }
-    if (!confirm(`Supprimer le cluster "${c.name}" ?`)) return;
-    this.api.remove(c.id).subscribe({
-      next: () => {
-        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${c.name} supprimé` });
-        this.load();
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Supprimer le cluster',
+        message: `Supprimer le cluster "${c.name}" ?`,
       },
-      error: (err) => {
-        this.toast.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: err?.error?.message ?? 'Suppression impossible',
+      () => {
+        this.api.remove(c.id).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimé',
+              detail: `${c.name} supprimé`,
+            });
+            this.load();
+          },
+          error: (err) => {
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible',
+            });
+          },
         });
       },
-    });
+    );
   }
 
   // ─── Bulk actions ─────────────────────────────────────────────────────────────
@@ -196,37 +211,35 @@ export class Clusters {
       });
       return;
     }
-    this.confirmer.confirm({
-      header: 'Supprimer la sélection',
-      message:
-        skipped > 0
-          ? `Supprimer ${items.length} cluster(s) ? Le cluster par défaut sera ignoré. Action irréversible.`
-          : `Supprimer ${items.length} cluster(s) ? Action irréversible.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Supprimer',
-      rejectLabel: 'Annuler',
-      acceptButtonProps: { severity: 'danger' },
-      rejectButtonProps: { severity: 'secondary', text: true },
-      accept: () => {
-        forkJoin(items.map((c) => this.api.remove(c.id))).subscribe({
-          next: () => {
-            this.toast.add({
-              severity: 'success',
-              summary: 'Supprimés',
-              detail: `${items.length} cluster(s) supprimé(s)`,
-            });
-            this.clearSelection();
-            this.load();
-          },
-          error: (err) =>
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Supprimer la sélection',
+        message:
+          skipped > 0
+            ? `Supprimer ${items.length} cluster(s) ? Le cluster par défaut sera ignoré. Action irréversible.`
+            : `Supprimer ${items.length} cluster(s) ? Action irréversible.`,
+      },
+      () =>
+        settleAll(items, (c) => this.api.remove(c.id)).subscribe((res) => {
+          // Refresh whatever the outcome: a partial failure still changed rows.
+          this.clearSelection();
+          this.load();
+          if (res.failed.length) {
             this.toast.add({
               severity: 'error',
-              summary: 'Erreur',
-              detail: err?.error?.message ?? 'Suppression impossible',
-            }),
-        });
-      },
-    });
+              summary: 'Suppression partielle',
+              detail: `${res.succeeded.length}/${items.length} supprimé(s) — ${firstErrorMessage(res.failed, 'Suppression impossible')}`,
+            });
+            return;
+          }
+          this.toast.add({
+            severity: 'success',
+            summary: 'Supprimés',
+            detail: `${items.length} cluster(s) supprimé(s)`,
+          });
+        }),
+    );
   }
 
   statusSeverity(status: string): 'success' | 'danger' | 'secondary' {

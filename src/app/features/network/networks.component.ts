@@ -7,11 +7,13 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { TabsModule } from 'primeng/tabs';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { forkJoin } from 'rxjs';
 
 import { NetworksApi } from '../../core/api';
 import { ClusterContextService } from '../../core/cluster-context.service';
 import { AuthService } from '../../core/auth.service';
+import { firstErrorMessage, settleAll } from '../../core/bulk';
+import { confirmDestructive } from '../../core/confirm';
+import { collectAll } from '../../core/paging';
 import { NetworkResponse, SwarmNetworkInfo } from '../../core/models';
 import { NetworkFormComponent } from './network-form.component';
 
@@ -61,9 +63,9 @@ export class Networks {
   load(): void {
     this.loading.set(true);
     this.selected.set([]); // drop stale selection (rows are about to be replaced)
-    this.api.list(1, 1000).subscribe({
-      next: (res) => {
-        this.networks.set(res.items);
+    collectAll((page, size) => this.api.list(page, size)).subscribe({
+      next: (items) => {
+        this.networks.set(items);
         this.loading.set(false);
       },
       error: () => {
@@ -107,50 +109,59 @@ export class Networks {
   bulkDelete(): void {
     const items = this.selected();
     if (!items.length) return;
-    this.confirmer.confirm({
-      header: 'Supprimer la sélection',
-      message: `Supprimer ${items.length} réseau(x) ? Action irréversible.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Supprimer',
-      rejectLabel: 'Annuler',
-      acceptButtonProps: { severity: 'danger' },
-      rejectButtonProps: { severity: 'secondary', text: true },
-      accept: () => {
-        forkJoin(items.map((x) => this.api.remove(x.id))).subscribe({
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Supprimer la sélection',
+        message: `Supprimer ${items.length} réseau(x) ? Action irréversible.`,
+      },
+      () =>
+        settleAll(items, (x) => this.api.remove(x.id)).subscribe((res) => {
+          // Refresh whatever the outcome: a partial failure still removed rows.
+          this.clearSelection();
+          this.onSaved();
+          if (res.failed.length) {
+            this.toast.add({
+              severity: 'error',
+              summary: 'Suppression partielle',
+              detail: `${res.succeeded.length}/${items.length} supprimé(s) — ${firstErrorMessage(
+                res.failed,
+                'suppression impossible',
+              )}`,
+            });
+            return;
+          }
+          this.toast.add({
+            severity: 'success',
+            summary: 'Supprimés',
+            detail: `${items.length} supprimé(s)`,
+          });
+        }),
+    );
+  }
+
+  remove(n: NetworkResponse): void {
+    confirmDestructive(
+      this.confirmer,
+      { header: 'Supprimer le réseau', message: `Supprimer le réseau "${n.name}" ?` },
+      () =>
+        this.api.remove(n.id).subscribe({
           next: () => {
             this.toast.add({
               severity: 'success',
-              summary: 'Supprimés',
-              detail: `${items.length} supprimé(s)`,
+              summary: 'Supprimé',
+              detail: `${n.name} supprimé`,
             });
-            this.clearSelection();
-            this.load();
+            this.onSaved();
           },
-          error: (err) =>
+          error: (err) => {
             this.toast.add({
               severity: 'error',
               summary: 'Erreur',
               detail: err?.error?.message ?? 'Suppression impossible',
-            }),
-        });
-      },
-    });
-  }
-
-  remove(n: NetworkResponse): void {
-    if (!confirm(`Supprimer le réseau "${n.name}" ?`)) return;
-    this.api.remove(n.id).subscribe({
-      next: () => {
-        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${n.name} supprimé` });
-        this.load();
-      },
-      error: (err) => {
-        this.toast.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: err?.error?.message ?? 'Suppression impossible',
-        });
-      },
-    });
+            });
+          },
+        }),
+    );
   }
 }

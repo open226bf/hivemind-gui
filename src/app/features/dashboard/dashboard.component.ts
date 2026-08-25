@@ -75,12 +75,23 @@ export class Dashboard implements OnInit {
     if (!id) return; // no cluster selected yet (pre-load); wait for the resolution
     this.refreshing.set(true);
     const req: Observable<ClusterOverview> = this.api.overviewFor(id);
-    req.pipe(catchError(() => EMPTY)).subscribe((ov) => {
-      this.overview.set(ov);
-      this.loading.set(false);
-      this.refreshing.set(false);
-      this.lastUpdated.set(new Date());
-    });
+    req
+      .pipe(
+        // Clear the busy flags on failure too: swallowing the error without
+        // them left the page on its loading spinner forever whenever the very
+        // first overview call failed.
+        catchError(() => {
+          this.loading.set(false);
+          this.refreshing.set(false);
+          return EMPTY;
+        }),
+      )
+      .subscribe((ov) => {
+        this.overview.set(ov);
+        this.loading.set(false);
+        this.refreshing.set(false);
+        this.lastUpdated.set(new Date());
+      });
   }
 
   setAutoRefresh(on: boolean): void {

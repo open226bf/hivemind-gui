@@ -13,6 +13,7 @@ import { MessageService } from 'primeng/api';
 
 import { DeploymentsApi, ServicesApi } from '../../core/api';
 import { DeploymentResponse, DeploymentStatus, ServiceResponse } from '../../core/models';
+import { collectAll } from '../../core/paging';
 
 const PAGE_SIZE = 20;
 
@@ -98,13 +99,11 @@ export class Deployments {
   }
 
   private loadServices(): void {
-    this.svcApi.list(1, 200).subscribe({
-      next: (res) => {
-        this.serviceOptions.set(
-          res.items.map((s: ServiceResponse) => ({ label: s.name, value: s.id })),
-        );
+    collectAll((page, size) => this.svcApi.list(page, size)).subscribe({
+      next: (services) => {
+        this.serviceOptions.set(services.map((s) => ({ label: s.name, value: s.id })));
         const map: Record<string, string> = {};
-        for (const s of res.items) map[s.id] = s.name;
+        for (const s of services) map[s.id] = s.name;
         this.serviceMap.set(map);
       },
     });

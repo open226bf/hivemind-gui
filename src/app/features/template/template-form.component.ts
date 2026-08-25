@@ -8,6 +8,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { MessageService } from 'primeng/api';
 
 import { NetworksApi, TemplatesApi } from '../../core/api';
+import { collectAll } from '../../core/paging';
 import {
   DEFAULT_UPDATE_CONFIG,
   LockableField,
@@ -54,9 +55,9 @@ export class TemplateFormComponent {
   form = this.empty();
 
   constructor() {
-    this.networksApi.list(1, 200).subscribe({
-      next: (res) =>
-        this.networkOptions.set(res.items.map((n) => ({ label: n.name, value: n.id }))),
+    collectAll((page, size) => this.networksApi.list(page, size)).subscribe({
+      next: (networks) =>
+        this.networkOptions.set(networks.map((n) => ({ label: n.name, value: n.id }))),
     });
   }
 

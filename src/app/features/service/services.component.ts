@@ -28,6 +28,9 @@ import { of } from 'rxjs';
 import { DeploymentsApi, HivesApi, ServicesApi } from '../../core/api';
 import { ClusterContextService } from '../../core/cluster-context.service';
 import { AuthService } from '../../core/auth.service';
+import { confirmDestructive } from '../../core/confirm';
+import { firstErrorMessage, settleAll } from '../../core/bulk';
+import { collectAll } from '../../core/paging';
 import {
   DeploymentStatus,
   ServiceLiveStatus,
@@ -179,14 +182,14 @@ export class Services {
     const opts: { hive_id?: string; unassigned?: boolean } = {};
     if (this.unassigned()) opts.unassigned = true;
     else if (this.hiveId()) opts.hive_id = this.hiveId();
-    // Client-side paginate/sort/filter over a generous page (a project's service
-    // count is modest); the table handles the rest without extra round-trips.
-    this.api.list(1, 1000, opts).subscribe({
-      next: (res) => {
-        this.services.set(res.items);
+    // The whole catalog is pulled page by page, then the table paginates,
+    // sorts and filters client-side without extra round-trips.
+    collectAll((page, size) => this.api.list(page, size, opts)).subscribe({
+      next: (services) => {
+        this.services.set(services);
         this.loading.set(false);
-        this.refreshDeployStatuses(res.items);
-        this.refreshLiveStatus(res.items);
+        this.refreshDeployStatuses(services);
+        this.refreshLiveStatus(services);
       },
       error: () => {
         this.loading.set(false);
@@ -433,43 +436,44 @@ export class Services {
       });
       return;
     }
-    this.confirmer.confirm({
-      header: 'Retirer du cluster',
-      message: `Retirer ${items.length} service(s) du cluster ? Les définitions restent dans Hivemind.`,
-      icon: 'pi pi-stop-circle',
-      acceptLabel: 'Retirer',
-      rejectLabel: 'Annuler',
-      acceptButtonProps: { severity: 'warn' },
-      rejectButtonProps: { severity: 'secondary', text: true },
-      accept: () => {
-        forkJoin(items.map((s) => this.api.undeploy(s.id))).subscribe({
-          next: () => {
-            this.toast.add({
-              severity: 'success',
-              summary: 'Retirés',
-              detail: `${items.length} service(s) retiré(s) du cluster`,
-            });
-            this.clearSelection();
-            this.load();
-          },
-          error: (err) =>
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Retirer du cluster',
+        message: `Retirer ${items.length} service(s) du cluster ? Les définitions restent dans Hivemind.`,
+        acceptLabel: 'Retirer',
+        acceptSeverity: 'warn',
+        icon: 'pi pi-stop-circle',
+      },
+      () =>
+        settleAll(items, (s) => this.api.undeploy(s.id)).subscribe((res) => {
+          // Refresh whatever the outcome: a partial failure still changed rows.
+          this.clearSelection();
+          this.load();
+          if (res.failed.length) {
             this.toast.add({
               severity: 'error',
-              summary: 'Erreur',
-              detail: err?.error?.message ?? 'Retrait impossible',
-            }),
-        });
-      },
-    });
+              summary: 'Retrait partiel',
+              detail: `${res.succeeded.length}/${items.length} retiré(s) — ${firstErrorMessage(res.failed, 'Retrait impossible')}`,
+            });
+            return;
+          }
+          this.toast.add({
+            severity: 'success',
+            summary: 'Retirés',
+            detail: `${items.length} service(s) retiré(s) du cluster`,
+          });
+        }),
+    );
   }
 
   /** Open the move-to-hive picker for the current selection. */
   openMove(): void {
     this.moveTargetHiveId = null;
-    this.hivesApi.list(1, 1000).subscribe((res) => {
+    collectAll((page, size) => this.hivesApi.list(page, size)).subscribe((hives) => {
       this.hiveOptions.set([
         { label: 'Sans ruche', value: null },
-        ...res.items.map((h) => ({ label: h.name, value: h.id as string | null })),
+        ...hives.map((h) => ({ label: h.name, value: h.id as string | null })),
       ]);
       this.moveVisible.set(true);
     });
@@ -479,28 +483,30 @@ export class Services {
     const items = this.selected();
     if (items.length === 0) return;
     this.moving.set(true);
-    forkJoin(items.map((s) => this.api.assignHive(s.id, this.moveTargetHiveId))).subscribe({
-      next: () => {
-        this.moving.set(false);
-        this.moveVisible.set(false);
-        const target =
-          this.hiveOptions().find((o) => o.value === this.moveTargetHiveId)?.label ?? 'la ruche';
-        this.toast.add({
-          severity: 'success',
-          summary: 'Déplacés',
-          detail: `${items.length} service(s) → ${target}`,
-        });
-        this.clearSelection();
-        this.load();
-      },
-      error: (err) => {
-        this.moving.set(false);
+    settleAll(items, (s) => this.api.assignHive(s.id, this.moveTargetHiveId)).subscribe((res) => {
+      this.moving.set(false);
+      this.moveVisible.set(false);
+      // Refresh whatever the outcome: a partial failure still moved services.
+      this.clearSelection();
+      this.load();
+      if (res.failed.length) {
         this.toast.add({
           severity: 'error',
-          summary: 'Erreur',
-          detail: err?.error?.message ?? 'Déplacement impossible',
+          summary: 'Déplacement partiel',
+          detail: `${res.succeeded.length}/${items.length} déplacé(s) — ${firstErrorMessage(
+            res.failed,
+            'déplacement impossible',
+          )}`,
         });
-      },
+        return;
+      }
+      const target =
+        this.hiveOptions().find((o) => o.value === this.moveTargetHiveId)?.label ?? 'la ruche';
+      this.toast.add({
+        severity: 'success',
+        summary: 'Déplacés',
+        detail: `${items.length} service(s) → ${target}`,
+      });
     });
   }
 

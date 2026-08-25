@@ -1,8 +1,9 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 
 import { ClusterApi } from './api';
 import { AuthService } from './auth.service';
 import { ClusterResponse } from './models';
+import { collectAll } from './paging';
 
 const STORAGE_KEY = 'hm.selected-cluster';
 /** Sentinel persisted when the user explicitly picks the aggregated view. */
@@ -24,15 +25,13 @@ export class ClusterContextService {
 
   readonly clusters = signal<ClusterResponse[]>([]);
   readonly selectedId = signal<string | null>(this.storedSelection());
-  /** The selector is only worth showing once more than one cluster exists. */
-  readonly multiCluster = computed(() => this.clusters().length > 1);
 
   /** Loads the cluster list once (called from the shell on startup), keeping
    *  only the clusters the user may reach (admins see all; ADR 0003). */
   load(): void {
-    this.api.list(1, 200).subscribe({
-      next: (res) => {
-        const visible = this.filterReachable(res.items);
+    collectAll((page, size) => this.api.list(page, size)).subscribe({
+      next: (all) => {
+        const visible = this.filterReachable(all);
         this.clusters.set(visible);
         this.reconcileSelection(visible);
       },

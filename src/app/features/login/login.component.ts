@@ -18,7 +18,7 @@ export class Login {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  email = 'admin@hivemind.local';
+  email = '';
   password = '';
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);

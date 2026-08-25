@@ -12,6 +12,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { SelectModule } from 'primeng/select';
 
 import { ConfigsApi, NetworksApi, SecretsApi, ServicesApi } from '../../core/api';
+import { collectAll } from '../../core/paging';
 import {
   DEFAULT_UPDATE_CONFIG,
   SecretResponse,
@@ -75,20 +76,20 @@ export class ServiceFormComponent {
   constructor() {
     // Catalog lists and the create call are scoped to the active cluster by the
     // X-Hivemind-Cluster header (clusterInterceptor) — no per-form picker.
-    this.networkApi.list(1, 200).subscribe({
-      next: (res) =>
-        this.networkOptions.set(res.items.map((n) => ({ label: n.name, value: n.id }))),
+    collectAll((page, size) => this.networkApi.list(page, size)).subscribe({
+      next: (networks) =>
+        this.networkOptions.set(networks.map((n) => ({ label: n.name, value: n.id }))),
     });
-    this.secretsApi.list(1, 200).subscribe({
-      next: (res) => {
-        this.allSecrets = res.items;
-        this.secretOptions.set(this.toPathOptions(res.items));
+    collectAll((page, size) => this.secretsApi.list(page, size)).subscribe({
+      next: (secrets) => {
+        this.allSecrets = secrets;
+        this.secretOptions.set(this.toPathOptions(secrets));
       },
     });
-    this.configsApi.list(1, 200).subscribe({
-      next: (res) => {
-        this.allConfigs = res.items;
-        this.configOptions.set(this.toPathOptions(res.items));
+    collectAll((page, size) => this.configsApi.list(page, size)).subscribe({
+      next: (configs) => {
+        this.allConfigs = configs;
+        this.configOptions.set(this.toPathOptions(configs));
       },
     });
 

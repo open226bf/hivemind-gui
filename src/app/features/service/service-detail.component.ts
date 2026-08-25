@@ -1,7 +1,6 @@
 import {
   Component,
   DestroyRef,
-  OnInit,
   computed,
   effect,
   inject,
@@ -49,7 +48,7 @@ interface Tab {
   templateUrl: './service-detail.component.html',
   styleUrl: './service-detail.component.scss',
 })
-export class ServiceDetail implements OnInit {
+export class ServiceDetail {
   readonly id = input.required<string>();
 
   protected readonly store = inject(ServiceDetailStore);
@@ -105,15 +104,21 @@ export class ServiceDetail implements OnInit {
       const svc = this.store.service();
       if (svc) this.scaleValue.set(svc.replicas);
     });
-  }
-
-  ngOnInit(): void {
-    this.store.serviceId.set(this.id());
-    this.reload();
+    // Track the routed id rather than reading it once on init: the router
+    // reuses this component when the id changes under the same route, and an
+    // init-only read would leave the page showing the previous service.
+    effect(() => {
+      const id = this.id();
+      this.store.serviceId.set(id);
+      this.load(id);
+    });
   }
 
   reload(): void {
-    const id = this.id();
+    this.load(this.id());
+  }
+
+  private load(id: string): void {
     this.api.get(id).subscribe((svc) => {
       this.store.service.set(svc);
       // Resolve the hive name for the back link (services are browsed per hive).

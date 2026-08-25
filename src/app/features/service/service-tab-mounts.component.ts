@@ -11,6 +11,7 @@ import { MessageService } from 'primeng/api';
 import { ServicesApi, VolumesApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
 import { MountDTO, MountType } from '../../core/models';
+import { collectAll } from '../../core/paging';
 import { ServiceDetailStore } from '../service/service-detail.store';
 
 interface MountRow {
@@ -80,9 +81,9 @@ export class ServiceTabMounts implements OnInit {
 
   ngOnInit(): void {
     this.reload();
-    this.volumesApi.list(1, 200).subscribe({
-      next: (res) =>
-        this.volumeOptions.set(res.items.map((v) => ({ label: v.name, value: v.name }))),
+    collectAll((page, size) => this.volumesApi.list(page, size)).subscribe({
+      next: (volumes) =>
+        this.volumeOptions.set(volumes.map((v) => ({ label: v.name, value: v.name }))),
     });
   }
 
