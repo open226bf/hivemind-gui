@@ -6,6 +6,7 @@ import { API_BASE } from './config';
 import {
   AddConfigVersionRequest,
   AlertListResponse,
+  FileMount,
   ClusterHealth,
   ClusterListResponse,
   CreateGrantRequest,
@@ -166,11 +167,21 @@ export class ServicesApi {
     return this.http.get<ServiceSecretResponse[]>(`${API_BASE}/services/${id}/secrets`);
   }
 
-  attachSecret(id: string, secretId: string, targetPath: string): Observable<void> {
+  /** Attaches a secret, optionally with the file mount to expose it under.
+   *  Without one the catalog's own path, the orchestrator's owner and the
+   *  default permission bits apply. */
+  attachSecret(id: string, secretId: string, mount: FileMount): Observable<void> {
     return this.http.post<void>(`${API_BASE}/services/${id}/secrets`, {
       secret_id: secretId,
-      target_path: targetPath,
+      ...mount,
     });
+  }
+
+  /** Replaces the file mount of an already-attached secret. The body describes
+   *  the mount in full, so an omitted field reads as "default", not "unchanged";
+   *  applied on the service's next deployment. */
+  updateSecretAttachment(id: string, secretId: string, mount: FileMount): Observable<void> {
+    return this.http.put<void>(`${API_BASE}/services/${id}/secrets/${secretId}`, mount);
   }
 
   detachSecret(id: string, secretId: string): Observable<void> {
@@ -197,11 +208,17 @@ export class ServicesApi {
     return this.http.put<PortsResponse>(`${API_BASE}/services/${id}/ports`, body);
   }
 
-  attachConfig(id: string, configId: string, targetPath: string): Observable<void> {
+  /** See attachSecret: same contract for the config catalog. */
+  attachConfig(id: string, configId: string, mount: FileMount): Observable<void> {
     return this.http.post<void>(`${API_BASE}/services/${id}/configs`, {
       config_id: configId,
-      target_path: targetPath,
+      ...mount,
     });
+  }
+
+  /** See updateSecretAttachment: same contract for the config catalog. */
+  updateConfigAttachment(id: string, configId: string, mount: FileMount): Observable<void> {
+    return this.http.put<void>(`${API_BASE}/services/${id}/configs/${configId}`, mount);
   }
 
   detachConfig(id: string, configId: string): Observable<void> {

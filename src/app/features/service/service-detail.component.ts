@@ -95,6 +95,7 @@ export class ServiceDetail {
     { label: 'Ressources', path: 'resources', icon: 'pi-microchip' },
     { label: 'Montages', path: 'mounts', icon: 'pi-database' },
     { label: 'Ports', path: 'ports', icon: 'pi-arrow-right-arrow-left' },
+    { label: 'Secrets & configs', path: 'secrets', icon: 'pi-key' },
     { label: 'Snapshots', path: 'snapshots', icon: 'pi-camera' },
   ];
 

@@ -15,6 +15,7 @@ import { ConfigsApi, NetworksApi, SecretsApi, ServicesApi } from '../../core/api
 import { collectAll } from '../../core/paging';
 import {
   DEFAULT_UPDATE_CONFIG,
+  FileMount,
   SecretResponse,
   ConfigResponse,
   ServiceResponse,
@@ -217,13 +218,13 @@ export class ServiceFormComponent {
       ...this.diffSync(
         this.editingSecretIds,
         this.form.secretIds,
-        (sid) => this.svcApi.attachSecret(serviceId, sid, this.targetPath(this.allSecrets, sid)),
+        (sid) => this.svcApi.attachSecret(serviceId, sid, this.defaultMount(this.allSecrets, sid)),
         (sid) => this.svcApi.detachSecret(serviceId, sid),
       ),
       ...this.diffSync(
         this.editingConfigIds,
         this.form.configIds,
-        (cid) => this.svcApi.attachConfig(serviceId, cid, this.targetPath(this.allConfigs, cid)),
+        (cid) => this.svcApi.attachConfig(serviceId, cid, this.defaultMount(this.allConfigs, cid)),
         (cid) => this.svcApi.detachConfig(serviceId, cid),
       ),
     ];
@@ -243,8 +244,17 @@ export class ServiceFormComponent {
     ];
   }
 
-  private targetPath(items: { id: string; target_path: string }[], id: string): string {
-    return items.find((i) => i.id === id)?.target_path ?? '';
+  /**
+   * The mount a freshly-attached secret or config starts from: the catalog's own
+   * path, the orchestrator's owner and the default permission bits.
+   *
+   * Owner and mode are deliberately left out rather than guessed here — they are
+   * per-service settings, edited afterwards in the service's Secrets & configs
+   * tab, and this form only ever attaches ids it did not have before (see
+   * diffSync), so reopening it never resets a mount someone tuned there.
+   */
+  private defaultMount(items: { id: string; target_path: string }[], id: string): FileMount {
+    return { target_path: items.find((i) => i.id === id)?.target_path ?? '' };
   }
 
   private onSuccess(isCreate: boolean, deployed: boolean): void {
