@@ -106,21 +106,26 @@
           <input
             pInputText
             class="k"
-            [(ngModel)]="row.key"
+            [ngModel]="row.key"
             placeholder="DATABASE_URL"
-            (ngModelChange)="row.key = $event.toUpperCase()"
+            (ngModelChange)="patchRow($index, { key: $event.toUpperCase() })"
           />
           <input
             pInputText
             class="v"
             [type]="row.is_secret ? 'password' : 'text'"
-            [(ngModel)]="row.value"
+            [ngModel]="row.value"
+            (ngModelChange)="patchRow($index, { value: $event })"
             [placeholder]="
               row.wasSecretFromServer ? 'valeur masquée — laisser vide pour conserver' : 'valeur'
             "
           />
           <label class="secret-toggle inline-flex align-items-center gap-2">
-            <p-checkbox [(ngModel)]="row.is_secret" [binary]="true" />
+            <p-checkbox
+              [ngModel]="row.is_secret"
+              (ngModelChange)="patchRow($index, { is_secret: $event })"
+              [binary]="true"
+            />
             secret
           </label>
           <p-button
