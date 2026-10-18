@@ -120,9 +120,22 @@ export class ServiceTabMounts implements OnInit {
     this.rows.update((rs) => rs.filter((_, i) => i !== index));
   }
 
+  /**
+   * Replaces the edited row rather than writing through it.
+   *
+   * This is why the template binds [ngModel] + (ngModelChange) instead of the
+   * shorter [(ngModel)]="row.target": mutating an object the rows signal holds
+   * leaves the signal's own value identical, so `valid` never re-runs. A row
+   * added by addRow starts invalid, and filling it in would then leave Save
+   * disabled for good.
+   */
+  patchRow(index: number, change: Partial<MountRow>): void {
+    this.rows.update((rs) => rs.map((r, i) => (i === index ? { ...r, ...change } : r)));
+  }
+
   /** tmpfs has no source; clear it when switching to tmpfs. */
-  onTypeChange(row: MountRow): void {
-    if (row.type === 'tmpfs') row.source = '';
+  onTypeChange(index: number, type: MountType): void {
+    this.patchRow(index, type === 'tmpfs' ? { type, source: '' } : { type });
   }
 
   save(): void {

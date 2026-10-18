@@ -89,19 +89,20 @@
           <p-select
             class="type"
             [options]="typeOptions()"
-            [(ngModel)]="row.type"
+            [ngModel]="row.type"
             optionLabel="label"
             optionValue="value"
             optionDisabled="disabled"
             appendTo="body"
-            (ngModelChange)="onTypeChange(row)"
+            (ngModelChange)="onTypeChange($index, $event)"
           />
 
           @if (row.type === 'volume') {
             <p-select
               class="src"
               [options]="volumeOptions()"
-              [(ngModel)]="row.source"
+              [ngModel]="row.source"
+              (ngModelChange)="patchRow($index, { source: $event })"
               optionLabel="label"
               optionValue="value"
               [editable]="true"
@@ -109,16 +110,29 @@
               appendTo="body"
             />
           } @else if (row.type === 'bind') {
-            <input pInputText class="src" [(ngModel)]="row.source" placeholder="/chemin/hote" />
+            <input
+              pInputText
+              class="src"
+              [ngModel]="row.source"
+              (ngModelChange)="patchRow($index, { source: $event })"
+              placeholder="/chemin/hote"
+            />
           } @else {
             <input pInputText class="src" disabled placeholder="(aucune source)" />
           }
 
-          <input pInputText class="tgt" [(ngModel)]="row.target" placeholder="/chemin/conteneur" />
+          <input
+            pInputText
+            class="tgt"
+            [ngModel]="row.target"
+            (ngModelChange)="patchRow($index, { target: $event })"
+            placeholder="/chemin/conteneur"
+          />
 
           <label class="ro-toggle inline-flex align-items-center gap-2">
             <p-checkbox
-              [(ngModel)]="row.read_only"
+              [ngModel]="row.read_only"
+              (ngModelChange)="patchRow($index, { read_only: $event })"
               [binary]="true"
               [disabled]="row.type === 'tmpfs'"
             />
