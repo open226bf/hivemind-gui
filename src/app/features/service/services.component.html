@@ -98,7 +98,7 @@
             <th style="width: 3rem"><p-tableHeaderCheckbox /></th>
           }
           <th pSortableColumn="name">Nom <p-sortIcon field="name" /></th>
-          <th pSortableColumn="full_image">Image <p-sortIcon field="full_image" /></th>
+          <th>Ports</th>
           <th pSortableColumn="replicas">Replicas <p-sortIcon field="replicas" /></th>
           <th pSortableColumn="status">Statut <p-sortIcon field="status" /></th>
           <th pSortableColumn="updated_at">Mis à jour <p-sortIcon field="updated_at" /></th>
@@ -111,13 +111,29 @@
             <td><p-tableCheckbox [value]="svc" /></td>
           }
           <td>
-            <a [routerLink]="['/services', svc.id]" class="svc-name">{{ svc.name }}</a>
+            <a [routerLink]="['/services', svc.id]" class="svc-name" [title]="svc.full_image">{{
+              svc.name
+            }}</a>
             @if (svc.description) {
               <div class="muted">{{ svc.description }}</div>
             }
           </td>
           <td>
-            <code>{{ svc.full_image }}</code>
+            @let ports = portSummary(svc);
+            @if (ports.shown.length) {
+              <div class="ports">
+                @for (p of ports.shown; track $index) {
+                  <code class="port" [title]="p.title">{{ p.label }}</code>
+                }
+                @if (ports.hidden.length) {
+                  <code class="port more" [title]="ports.hiddenTitle"
+                    >+{{ ports.hidden.length }}</code
+                  >
+                }
+              </div>
+            } @else {
+              <span class="muted">—</span>
+            }
           </td>
           <td>
             @if (live(svc.id); as ls) {

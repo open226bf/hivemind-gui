@@ -132,8 +132,18 @@ export interface ServiceResponse {
   updated_at: string;
 }
 
+/**
+ * A service as listed: the service plus the ports it publishes, joined by the
+ * server so a table need not ask once per row. Only list responses carry
+ * `ports` — every other endpoint returns a plain ServiceResponse, where a
+ * missing list would not mean "no port published".
+ */
+export interface ServiceListItem extends ServiceResponse {
+  ports: PortDTO[];
+}
+
 export interface ServiceListResponse {
-  items: ServiceResponse[];
+  items: ServiceListItem[];
   total: number;
   page: number;
   size: number;

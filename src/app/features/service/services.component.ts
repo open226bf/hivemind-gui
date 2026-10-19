@@ -31,9 +31,11 @@ import { AuthService } from '../../core/auth.service';
 import { confirmDestructive } from '../../core/confirm';
 import { firstErrorMessage, settleAll } from '../../core/bulk';
 import { collectAll } from '../../core/paging';
+import { PortSummary, summarizePorts } from '../../core/ports';
 import {
   DeploymentStatus,
   ServiceLiveStatus,
+  ServiceListItem,
   ServiceResponse,
   ServiceStatus,
 } from '../../core/models';
@@ -92,7 +94,7 @@ export class Services {
    *  selection UI (checkboxes + bulk bar) the same way per-row actions are gated. */
   readonly canWriteAny = computed(() => this.services().some((s) => this.canWriteService(s)));
 
-  readonly services = signal<ServiceResponse[]>([]);
+  readonly services = signal<ServiceListItem[]>([]);
   readonly loading = signal(false);
 
   readonly deployStatus = signal<Record<string, DeploymentStatus | undefined>>({});
@@ -311,9 +313,20 @@ export class Services {
 
   private refreshService(id: string): void {
     this.api.get(id).subscribe((svc) => {
-      this.services.update((list) => list.map((s) => (s.id === id ? svc : s)));
+      this.mergeRow(svc);
       this.refreshLiveStatus([svc]);
     });
+  }
+
+  /**
+   * Folds a freshly fetched service into its row instead of replacing the row.
+   * Only the list endpoint carries `ports`; a single-service response does not,
+   * so replacing would blank the ports cell and claim nothing is published.
+   */
+  private mergeRow(updated: ServiceResponse): void {
+    this.services.update((list) =>
+      list.map((s) => (s.id === updated.id ? { ...s, ...updated } : s)),
+    );
   }
 
   private setStatus(serviceId: string, status: DeploymentStatus | undefined): void {
@@ -380,7 +393,7 @@ export class Services {
               summary: 'Retiré',
               detail: `${svc.name} retiré du cluster`,
             });
-            this.services.update((list) => list.map((s) => (s.id === updated.id ? updated : s)));
+            this.mergeRow(updated);
             this.liveStatus.update((m) => {
               const next = { ...m };
               delete next[svc.id];
@@ -512,6 +525,10 @@ export class Services {
 
   isExternallyRemoved(serviceId: string): boolean {
     return this.liveStatus()[serviceId]?.externally_removed === true;
+  }
+
+  portSummary(svc: ServiceListItem): PortSummary {
+    return summarizePorts(svc.ports);
   }
 
   statusSeverity(status: ServiceStatus): 'success' | 'info' | 'secondary' | 'danger' {
