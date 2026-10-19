@@ -14,6 +14,24 @@ code {
   border-radius: 3px;
 }
 
+/* Wraps rather than stretches the column: a service with several ports must not
+   push the status and actions off a narrow card. */
+.ports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.port {
+  font-family: monospace;
+  white-space: nowrap;
+  cursor: help;
+
+  &.more {
+    color: var(--hm-text-muted);
+  }
+}
+
 .deploying {
   display: inline-flex;
   align-items: center;

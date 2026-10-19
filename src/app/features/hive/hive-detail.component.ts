@@ -3,11 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TabsModule } from 'primeng/tabs';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { HivesApi, ServicesApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
+import { confirmDestructive } from '../../core/confirm';
 import { HiveResponse, ServiceResponse } from '../../core/models';
+import { collectAll } from '../../core/paging';
 import { HiveFormComponent } from './hive-form.component';
 import { HiveTabVariables } from './hive-tab-variables.component';
 import { ServiceFormComponent } from '../service/service-form.component';
@@ -37,6 +39,7 @@ export class HiveDetail {
   private readonly servicesApi = inject(ServicesApi);
   private readonly toast = inject(MessageService);
   private readonly router = inject(Router);
+  private readonly confirmer = inject(ConfirmationService);
 
   private readonly auth = inject(AuthService);
   /** Write gate on this hive (manage services / edit / delete), from the grant
@@ -69,13 +72,15 @@ export class HiveDetail {
     this.loading.set(true);
     if (this.isUnassigned()) {
       this.hive.set(null);
-      this.servicesApi.list(1, 1000, { unassigned: true }).subscribe({
-        next: (r) => {
-          this.services.set(r.items);
-          this.loading.set(false);
+      collectAll((page, size) => this.servicesApi.list(page, size, { unassigned: true })).subscribe(
+        {
+          next: (services) => {
+            this.services.set(services);
+            this.loading.set(false);
+          },
+          error: () => this.loading.set(false),
         },
-        error: () => this.loading.set(false),
-      });
+      );
       return;
     }
     this.api.get(this.id()).subscribe({
@@ -104,23 +109,31 @@ export class HiveDetail {
   remove(): void {
     const h = this.hive();
     if (!h) return;
-    if (!confirm(`Supprimer la ruche "${h.name}" ?`)) return;
-    this.api.remove(h.id).subscribe({
-      next: () => {
-        this.toast.add({
-          severity: 'success',
-          summary: 'Supprimée',
-          detail: `${h.name} supprimée`,
-        });
-        this.router.navigate(['/hives']);
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Supprimer la ruche',
+        message: `Supprimer la ruche "${h.name}" ?`,
       },
-      error: (err) =>
-        this.toast.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: err?.error?.message ?? 'Suppression impossible (ruche non vide ?)',
-        }),
-    });
+      () => {
+        this.api.remove(h.id).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimée',
+              detail: `${h.name} supprimée`,
+            });
+            this.router.navigate(['/hives']);
+          },
+          error: (err) =>
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible (ruche non vide ?)',
+            }),
+        });
+      },
+    );
   }
 
   protected openCreate() {

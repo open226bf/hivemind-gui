@@ -10,11 +10,13 @@ import { TooltipModule } from 'primeng/tooltip';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { forkJoin } from 'rxjs';
 
 import { ConfigsApi } from '../../core/api';
 import { ClusterContextService } from '../../core/cluster-context.service';
 import { AuthService } from '../../core/auth.service';
+import { firstErrorMessage, settleAll } from '../../core/bulk';
+import { confirmDestructive } from '../../core/confirm';
+import { collectAll } from '../../core/paging';
 import {
   ConfigResponse,
   ConfigVersionResponse,
@@ -88,9 +90,9 @@ export class Configs {
   load(): void {
     this.loading.set(true);
     this.selected.set([]); // drop stale selection (rows are about to be replaced)
-    this.api.list(1, 1000).subscribe({
-      next: (res) => {
-        this.configs.set(res.items);
+    collectAll((page, size) => this.api.list(page, size)).subscribe({
+      next: (items) => {
+        this.configs.set(items);
         this.loading.set(false);
       },
       error: () => {
@@ -175,15 +177,23 @@ export class Configs {
   restore(v: ConfigVersionResponse): void {
     const c = this.versionTarget();
     if (!c) return;
-    if (
-      !confirm(
-        `Restaurer la version v${v.version} ? Une nouvelle version au contenu identique sera créée.`,
-      )
-    )
-      return;
-    this.api.restore(c.id, v.version, '').subscribe({
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: `Restaurer v${v.version}`,
+        message: `Restaurer la version v${v.version} ? Une nouvelle version au contenu identique sera créée.`,
+        acceptLabel: 'Restaurer',
+        acceptSeverity: 'warn',
+        icon: 'pi pi-history',
+      },
+      () => this.runRestore(c.id, v.version),
+    );
+  }
+
+  private runRestore(configId: string, version: number): void {
+    this.api.restore(configId, version, '').subscribe({
       next: () => {
-        this.loadVersions(c.id);
+        this.loadVersions(configId);
         this.load();
         const n = this.impacted().length;
         this.toast.add({
@@ -191,8 +201,8 @@ export class Configs {
           summary: 'Restaurée',
           detail:
             n > 0
-              ? `v${v.version} restaurée. ${n} service(s) impacté(s) — pensez à les redéployer.`
-              : `v${v.version} restaurée.`,
+              ? `v${version} restaurée. ${n} service(s) impacté(s) — pensez à les redéployer.`
+              : `v${version} restaurée.`,
         });
       },
       error: (err) =>
@@ -219,54 +229,59 @@ export class Configs {
   bulkDelete(): void {
     const items = this.selected();
     if (!items.length) return;
-    this.confirmer.confirm({
-      header: 'Supprimer la sélection',
-      message: `Supprimer ${items.length} config(s) ? Action irréversible.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Supprimer',
-      rejectLabel: 'Annuler',
-      acceptButtonProps: { severity: 'danger' },
-      rejectButtonProps: { severity: 'secondary', text: true },
-      accept: () => {
-        forkJoin(items.map((x) => this.api.remove(x.id))).subscribe({
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Supprimer la sélection',
+        message: `Supprimer ${items.length} config(s) ? Action irréversible.`,
+      },
+      () =>
+        settleAll(items, (x) => this.api.remove(x.id)).subscribe((res) => {
+          // Refresh whatever the outcome: a partial failure still removed rows.
+          this.clearSelection();
+          this.load();
+          if (res.failed.length) {
+            this.toast.add({
+              severity: 'error',
+              summary: 'Suppression partielle',
+              detail: `${res.succeeded.length}/${items.length} supprimée(s) — ${firstErrorMessage(
+                res.failed,
+                'suppression impossible',
+              )}`,
+            });
+            return;
+          }
+          this.toast.add({
+            severity: 'success',
+            summary: 'Supprimées',
+            detail: `${items.length} config(s) supprimée(s)`,
+          });
+        }),
+    );
+  }
+
+  remove(c: ConfigResponse): void {
+    confirmDestructive(
+      this.confirmer,
+      { header: 'Supprimer la config', message: `Supprimer la config "${c.name}" ?` },
+      () =>
+        this.api.remove(c.id).subscribe({
           next: () => {
             this.toast.add({
               severity: 'success',
-              summary: 'Supprimées',
-              detail: `${items.length} config(s) supprimée(s)`,
+              summary: 'Supprimée',
+              detail: `${c.name} supprimée`,
             });
-            this.clearSelection();
             this.load();
           },
-          error: (err) =>
+          error: (err) => {
             this.toast.add({
               severity: 'error',
               summary: 'Erreur',
               detail: err?.error?.message ?? 'Suppression impossible',
-            }),
-        });
-      },
-    });
-  }
-
-  remove(c: ConfigResponse): void {
-    if (!confirm(`Supprimer la config "${c.name}" ?`)) return;
-    this.api.remove(c.id).subscribe({
-      next: () => {
-        this.toast.add({
-          severity: 'success',
-          summary: 'Supprimée',
-          detail: `${c.name} supprimée`,
-        });
-        this.load();
-      },
-      error: (err) => {
-        this.toast.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: err?.error?.message ?? 'Suppression impossible',
-        });
-      },
-    });
+            });
+          },
+        }),
+    );
   }
 }

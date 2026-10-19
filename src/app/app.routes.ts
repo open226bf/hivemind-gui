@@ -109,6 +109,13 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'secrets',
+            loadComponent: () =>
+              import('./features/service/service-tab-secrets.component').then(
+                (m) => m.ServiceTabSecrets,
+              ),
+          },
+          {
             path: 'snapshots',
             loadComponent: () =>
               import('./features/service/service-tab-snapshots.component').then(

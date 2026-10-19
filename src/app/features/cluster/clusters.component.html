@@ -144,56 +144,58 @@
             }
           </td>
           <td class="muted">{{ c.created_at | date: 'short' }}</td>
-          <td class="flex gap-1 justify-content-end align-items-center">
-            <p-button
-              icon="pi pi-bolt"
-              severity="secondary"
-              [text]="true"
-              size="small"
-              pTooltip="Tester la connexion"
-              [loading]="testingId() === c.id"
-              (onClick)="test(c)"
-            />
-            @if (canManage()) {
-              <a [routerLink]="['/clusters', c.id, 'enroll']">
+          <td>
+            <div class="flex gap-1 justify-content-end align-items-center">
+              <p-button
+                icon="pi pi-bolt"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                pTooltip="Tester la connexion"
+                [loading]="testingId() === c.id"
+                (onClick)="test(c)"
+              />
+              @if (canManage()) {
+                <a [routerLink]="['/clusters', c.id, 'enroll']">
+                  <p-button
+                    icon="pi pi-key"
+                    severity="secondary"
+                    [text]="true"
+                    size="small"
+                    [pTooltip]="
+                      c.connection_mode === 'agent'
+                        ? 'Régénérer le token agent'
+                        : 'Passer en mode agent'
+                    "
+                  />
+                </a>
                 <p-button
-                  icon="pi pi-key"
+                  icon="pi pi-pencil"
                   severity="secondary"
                   [text]="true"
                   size="small"
-                  [pTooltip]="
-                    c.connection_mode === 'agent'
-                      ? 'Régénérer le token agent'
-                      : 'Passer en mode agent'
-                  "
+                  pTooltip="Modifier"
+                  (onClick)="openEdit(c)"
                 />
-              </a>
-              <p-button
-                icon="pi pi-pencil"
-                severity="secondary"
-                [text]="true"
-                size="small"
-                pTooltip="Modifier"
-                (onClick)="openEdit(c)"
-              />
-              <p-button
-                icon="pi pi-lock"
-                severity="secondary"
-                [text]="true"
-                size="small"
-                pTooltip="Habilitations"
-                (onClick)="openGrants(c)"
-              />
-              <p-button
-                icon="pi pi-trash"
-                severity="danger"
-                [text]="true"
-                size="small"
-                pTooltip="Supprimer"
-                [disabled]="c.is_default"
-                (onClick)="remove(c)"
-              />
-            }
+                <p-button
+                  icon="pi pi-lock"
+                  severity="secondary"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Habilitations"
+                  (onClick)="openGrants(c)"
+                />
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Supprimer"
+                  [disabled]="c.is_default"
+                  (onClick)="remove(c)"
+                />
+              }
+            </div>
           </td>
         </tr>
       </ng-template>

@@ -11,6 +11,7 @@ import { MessageService } from 'primeng/api';
 import { ServicesApi, VolumesApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
 import { MountDTO, MountType } from '../../core/models';
+import { collectAll } from '../../core/paging';
 import { ServiceDetailStore } from '../service/service-detail.store';
 
 interface MountRow {
@@ -80,9 +81,9 @@ export class ServiceTabMounts implements OnInit {
 
   ngOnInit(): void {
     this.reload();
-    this.volumesApi.list(1, 200).subscribe({
-      next: (res) =>
-        this.volumeOptions.set(res.items.map((v) => ({ label: v.name, value: v.name }))),
+    collectAll((page, size) => this.volumesApi.list(page, size)).subscribe({
+      next: (volumes) =>
+        this.volumeOptions.set(volumes.map((v) => ({ label: v.name, value: v.name }))),
     });
   }
 
@@ -119,9 +120,22 @@ export class ServiceTabMounts implements OnInit {
     this.rows.update((rs) => rs.filter((_, i) => i !== index));
   }
 
+  /**
+   * Replaces the edited row rather than writing through it.
+   *
+   * This is why the template binds [ngModel] + (ngModelChange) instead of the
+   * shorter [(ngModel)]="row.target": mutating an object the rows signal holds
+   * leaves the signal's own value identical, so `valid` never re-runs. A row
+   * added by addRow starts invalid, and filling it in would then leave Save
+   * disabled for good.
+   */
+  patchRow(index: number, change: Partial<MountRow>): void {
+    this.rows.update((rs) => rs.map((r, i) => (i === index ? { ...r, ...change } : r)));
+  }
+
   /** tmpfs has no source; clear it when switching to tmpfs. */
-  onTypeChange(row: MountRow): void {
-    if (row.type === 'tmpfs') row.source = '';
+  onTypeChange(index: number, type: MountType): void {
+    this.patchRow(index, type === 'tmpfs' ? { type, source: '' } : { type });
   }
 
   save(): void {

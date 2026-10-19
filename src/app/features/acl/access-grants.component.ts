@@ -7,11 +7,13 @@ import { TagModule } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { forkJoin } from 'rxjs';
 
 import { AclApi, UsersApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
+import { firstErrorMessage, settleAll } from '../../core/bulk';
+import { confirmDestructive } from '../../core/confirm';
 import { AclResourceType, GrantResponse, Verb } from '../../core/models';
+import { collectAll } from '../../core/paging';
 
 /**
  * "Habilitations" panel: lists and manages the ACL grants on a cluster or hive
@@ -283,8 +285,8 @@ export class AccessGrantsComponent {
   }
 
   private loadUsers(): void {
-    this.usersApi.list(1, 200).subscribe({
-      next: (res) => this.users.set(res.items.map((u) => ({ id: u.id, email: u.email }))),
+    collectAll((page, size) => this.usersApi.list(page, size)).subscribe({
+      next: (users) => this.users.set(users.map((u) => ({ id: u.id, email: u.email }))),
     });
   }
 
@@ -316,46 +318,21 @@ export class AccessGrantsComponent {
   }
 
   revoke(g: GrantResponse): void {
-    if (!confirm(`Révoquer l'accès de ${this.userLabel(g.subject_id)} ?`)) return;
-    this.acl.revoke(g.id).subscribe({
-      next: () => {
-        this.toast.add({ severity: 'success', summary: 'Habilitation', detail: 'Droit révoqué' });
-        this.load();
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Révoquer l’accès',
+        message: `Révoquer l'accès de ${this.userLabel(g.subject_id)} ?`,
+        acceptLabel: 'Révoquer',
       },
-      error: (err) =>
-        this.toast.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: err?.error?.message ?? 'Révocation impossible',
-        }),
-    });
-  }
-
-  clearSelection(): void {
-    this.selected.set([]);
-  }
-
-  /** Revoke every selected grant after one confirmation. */
-  bulkRevoke(): void {
-    const items = this.selected();
-    if (!items.length) return;
-    this.confirmer.confirm({
-      header: 'Révoquer la sélection',
-      message: `Révoquer ${items.length} habilitation(s) ? Action irréversible.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Révoquer',
-      rejectLabel: 'Annuler',
-      acceptButtonProps: { severity: 'danger' },
-      rejectButtonProps: { severity: 'secondary', text: true },
-      accept: () => {
-        forkJoin(items.map((x) => this.acl.revoke(x.id))).subscribe({
+      () => {
+        this.acl.revoke(g.id).subscribe({
           next: () => {
             this.toast.add({
               severity: 'success',
-              summary: 'Révoqués',
-              detail: `${items.length} habilitation(s) révoquée(s)`,
+              summary: 'Habilitation',
+              detail: 'Droit révoqué',
             });
-            this.clearSelection();
             this.load();
           },
           error: (err) =>
@@ -366,7 +343,44 @@ export class AccessGrantsComponent {
             }),
         });
       },
-    });
+    );
+  }
+
+  clearSelection(): void {
+    this.selected.set([]);
+  }
+
+  /** Revoke every selected grant after one confirmation. */
+  bulkRevoke(): void {
+    const items = this.selected();
+    if (!items.length) return;
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Révoquer la sélection',
+        message: `Révoquer ${items.length} habilitation(s) ? Action irréversible.`,
+        acceptLabel: 'Révoquer',
+      },
+      () =>
+        settleAll(items, (x) => this.acl.revoke(x.id)).subscribe((res) => {
+          // Refresh whatever the outcome: a partial failure still changed rows.
+          this.clearSelection();
+          this.load();
+          if (res.failed.length) {
+            this.toast.add({
+              severity: 'error',
+              summary: 'Révocation partielle',
+              detail: `${res.succeeded.length}/${items.length} révoqué(s) — ${firstErrorMessage(res.failed, 'Révocation impossible')}`,
+            });
+            return;
+          }
+          this.toast.add({
+            severity: 'success',
+            summary: 'Révoqués',
+            detail: `${items.length} habilitation(s) révoquée(s)`,
+          });
+        }),
+    );
   }
 
   label(): string {

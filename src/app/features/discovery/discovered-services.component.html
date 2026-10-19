@@ -108,56 +108,58 @@
           </td>
           <td class="muted mono">{{ s.swarm_service_id.slice(0, 12) }}</td>
           <td class="muted">{{ s.created_at | date: 'short' }}</td>
-          <td class="flex gap-2 justify-content-end">
-            @if (s.class === 'managed' && s.service_id) {
-              <p-button
-                icon="pi pi-arrow-up-right"
-                severity="secondary"
-                [text]="true"
-                size="small"
-                pTooltip="Ouvrir le service"
-                [routerLink]="['/services', s.service_id]"
-              />
-              @if (canRelease(s)) {
+          <td>
+            <div class="flex gap-2 justify-content-end">
+              @if (s.class === 'managed' && s.service_id) {
                 <p-button
-                  icon="pi pi-link"
-                  severity="warn"
-                  [text]="true"
-                  size="small"
-                  pTooltip="Libérer (ne plus gérer)"
-                  (onClick)="release(s)"
-                />
-              }
-            }
-            @if (s.class !== 'managed') {
-              <!-- Not managed by Hivemind: no service page, so supervise here. -->
-              <p-button
-                icon="pi pi-align-left"
-                severity="secondary"
-                [text]="true"
-                size="small"
-                pTooltip="Voir les logs"
-                (onClick)="openLogs(s)"
-              />
-              @if (canRestart()) {
-                <p-button
-                  icon="pi pi-refresh"
+                  icon="pi pi-arrow-up-right"
                   severity="secondary"
                   [text]="true"
                   size="small"
-                  pTooltip="Redémarrer (re-pull de l'image, définition inchangée)"
-                  (onClick)="restart(s)"
+                  pTooltip="Ouvrir le service"
+                  [routerLink]="['/services', s.service_id]"
+                />
+                @if (canRelease(s)) {
+                  <p-button
+                    icon="pi pi-link"
+                    severity="warn"
+                    [text]="true"
+                    size="small"
+                    pTooltip="Libérer (ne plus gérer)"
+                    (onClick)="release(s)"
+                  />
+                }
+              }
+              @if (s.class !== 'managed') {
+                <!-- Not managed by Hivemind: no service page, so supervise here. -->
+                <p-button
+                  icon="pi pi-align-left"
+                  severity="secondary"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Voir les logs"
+                  (onClick)="openLogs(s)"
+                />
+                @if (canRestart()) {
+                  <p-button
+                    icon="pi pi-refresh"
+                    severity="secondary"
+                    [text]="true"
+                    size="small"
+                    pTooltip="Redémarrer (re-pull de l'image, définition inchangée)"
+                    (onClick)="restart(s)"
+                  />
+                }
+              }
+              @if (s.class === 'foreign' && canAdopt()) {
+                <p-button
+                  label="Adopter"
+                  icon="pi pi-download"
+                  size="small"
+                  (onClick)="openAdopt(s)"
                 />
               }
-            }
-            @if (s.class === 'foreign' && canAdopt()) {
-              <p-button
-                label="Adopter"
-                icon="pi pi-download"
-                size="small"
-                (onClick)="openAdopt(s)"
-              />
-            }
+            </div>
           </td>
         </tr>
       </ng-template>

@@ -10,12 +10,14 @@ import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { forkJoin } from 'rxjs';
 
 import { DiscoveryApi, HivesApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
 import { ClusterContextService } from '../../core/cluster-context.service';
+import { firstErrorMessage, settleAll } from '../../core/bulk';
+import { confirmDestructive } from '../../core/confirm';
 import { DiscoveredService, DiscoveredServiceClass } from '../../core/models';
+import { collectAll } from '../../core/paging';
 import { LogViewer } from '../service/log-viewer.component';
 
 interface HiveOption {
@@ -205,11 +207,11 @@ export class DiscoveredServices {
   }
 
   private loadHives(): void {
-    this.hivesApi.list(1, 100).subscribe({
-      next: (res) => {
+    collectAll((page, size) => this.hivesApi.list(page, size)).subscribe({
+      next: (hives) => {
         this.hives.set([
           { label: 'Aucune ruche', value: null },
-          ...res.items.map((h) => ({ label: h.name, value: h.id })),
+          ...hives.map((h) => ({ label: h.name, value: h.id })),
         ]);
       },
       error: () => this.hives.set([{ label: 'Aucune ruche', value: null }]),
@@ -254,25 +256,29 @@ export class DiscoveredServices {
   }
 
   release(s: DiscoveredService): void {
-    if (
-      !confirm(
-        `Libérer "${s.name}" ? Le service continue de tourner mais ne sera plus géré par Hivemind.`,
-      )
-    )
-      return;
-    this.api.release(s.swarm_service_id).subscribe({
-      next: () => {
-        this.toast.add({ severity: 'success', summary: 'Libéré', detail: `${s.name} libéré` });
-        this.load();
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Libérer le service',
+        message: `Libérer "${s.name}" ? Le service continue de tourner mais ne sera plus géré par Hivemind.`,
+        acceptLabel: 'Libérer',
       },
-      error: (err) => {
-        this.toast.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: err?.error?.message ?? 'Libération impossible',
+      () => {
+        this.api.release(s.swarm_service_id).subscribe({
+          next: () => {
+            this.toast.add({ severity: 'success', summary: 'Libéré', detail: `${s.name} libéré` });
+            this.load();
+          },
+          error: (err) => {
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Libération impossible',
+            });
+          },
         });
       },
-    });
+    );
   }
 
   /** Release every managed service in the selection the user may release; the
@@ -287,34 +293,34 @@ export class DiscoveredServices {
       });
       return;
     }
-    this.confirmer.confirm({
-      header: 'Libérer la sélection',
-      message: `Libérer ${items.length} service(s) ? Ils continuent de tourner mais ne seront plus gérés par Hivemind.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Libérer',
-      rejectLabel: 'Annuler',
-      acceptButtonProps: { severity: 'warn' },
-      rejectButtonProps: { severity: 'secondary', text: true },
-      accept: () => {
-        forkJoin(items.map((x) => this.api.release(x.swarm_service_id))).subscribe({
-          next: () => {
-            this.toast.add({
-              severity: 'success',
-              summary: 'Libérés',
-              detail: `${items.length} service(s) libéré(s)`,
-            });
-            this.clearSelection();
-            this.load();
-          },
-          error: (err) =>
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Libérer la sélection',
+        message: `Libérer ${items.length} service(s) ? Ils continuent de tourner mais ne seront plus gérés par Hivemind.`,
+        acceptLabel: 'Libérer',
+        acceptSeverity: 'warn',
+      },
+      () =>
+        settleAll(items, (x) => this.api.release(x.swarm_service_id)).subscribe((res) => {
+          // Refresh whatever the outcome: a partial failure still changed rows.
+          this.clearSelection();
+          this.load();
+          if (res.failed.length) {
             this.toast.add({
               severity: 'error',
-              summary: 'Erreur',
-              detail: err?.error?.message ?? 'Libération impossible',
-            }),
-        });
-      },
-    });
+              summary: 'Libération partielle',
+              detail: `${res.succeeded.length}/${items.length} libéré(s) — ${firstErrorMessage(res.failed, 'Libération impossible')}`,
+            });
+            return;
+          }
+          this.toast.add({
+            severity: 'success',
+            summary: 'Libérés',
+            detail: `${items.length} service(s) libéré(s)`,
+          });
+        }),
+    );
   }
 
   classLabel(c: DiscoveredServiceClass): string {

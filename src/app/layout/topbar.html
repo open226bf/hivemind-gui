@@ -1,7 +1,9 @@
 <div class="brand flex align-items-center gap-2">
   <img src="brand/hivemind-mark.svg" alt="" class="logo" width="22" height="22" />
   <span class="name">Hivemind</span>
-  <span class="env">dev</span>
+  @if (clusterName(); as cluster) {
+    <span class="env" title="Cluster actif">{{ cluster }}</span>
+  }
 </div>
 <div class="flex-1"></div>
 <div class="user flex align-items-center gap-2">

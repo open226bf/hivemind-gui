@@ -6,8 +6,13 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 
 /**
  * Portainer-style confirmation dialog shown before forcing a redeploy of an
- * already-deployed service. Lets the operator opt in to re-pulling the image
- * (Swarm's QueryRegistry) so a moved tag like `:latest` is re-resolved.
+ * already-deployed service. Lets the operator choose whether to re-pull the
+ * image (Swarm's QueryRegistry) so a moved tag like `:latest` is re-resolved.
+ *
+ * Re-pull is on by default, and again each time the dialog opens — it is not
+ * remembered from the previous redeploy. Forcing a redeploy is mostly done to
+ * pick up a moved tag, and without a re-pull Swarm keeps the digest it already
+ * resolved, so the tasks would be recreated on the very same image.
  */
 @Component({
   selector: 'hm-redeploy-confirm',
@@ -88,13 +93,13 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 export class RedeployConfirm {
   readonly visible = signal(false);
   readonly serviceName = signal('');
-  repull = false;
+  repull = true;
 
   readonly confirmed = output<{ repull: boolean }>();
 
   open(name: string): void {
     this.serviceName.set(name);
-    this.repull = false;
+    this.repull = true;
     this.visible.set(true);
   }
 

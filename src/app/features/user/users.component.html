@@ -106,24 +106,26 @@
             }
           </td>
           <td class="muted">{{ u.created_at | date: 'short' }}</td>
-          <td class="flex gap-2 justify-content-end">
-            <p-button
-              icon="pi pi-pencil"
-              severity="secondary"
-              [text]="true"
-              size="small"
-              pTooltip="Modifier"
-              (onClick)="openEdit(u)"
-            />
-            <p-button
-              icon="pi pi-trash"
-              severity="danger"
-              [text]="true"
-              size="small"
-              pTooltip="Supprimer"
-              [disabled]="u.id === currentUserId()"
-              (onClick)="remove(u)"
-            />
+          <td>
+            <div class="flex gap-2 justify-content-end">
+              <p-button
+                icon="pi pi-pencil"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                pTooltip="Modifier"
+                (onClick)="openEdit(u)"
+              />
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [text]="true"
+                size="small"
+                pTooltip="Supprimer"
+                [disabled]="u.id === currentUserId()"
+                (onClick)="remove(u)"
+              />
+            </div>
           </td>
         </tr>
       </ng-template>

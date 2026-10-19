@@ -12,8 +12,10 @@ import { map, switchMap } from 'rxjs/operators';
 import { SelectModule } from 'primeng/select';
 
 import { ConfigsApi, NetworksApi, SecretsApi, ServicesApi } from '../../core/api';
+import { collectAll } from '../../core/paging';
 import {
   DEFAULT_UPDATE_CONFIG,
+  FileMount,
   SecretResponse,
   ConfigResponse,
   ServiceResponse,
@@ -75,20 +77,20 @@ export class ServiceFormComponent {
   constructor() {
     // Catalog lists and the create call are scoped to the active cluster by the
     // X-Hivemind-Cluster header (clusterInterceptor) — no per-form picker.
-    this.networkApi.list(1, 200).subscribe({
-      next: (res) =>
-        this.networkOptions.set(res.items.map((n) => ({ label: n.name, value: n.id }))),
+    collectAll((page, size) => this.networkApi.list(page, size)).subscribe({
+      next: (networks) =>
+        this.networkOptions.set(networks.map((n) => ({ label: n.name, value: n.id }))),
     });
-    this.secretsApi.list(1, 200).subscribe({
-      next: (res) => {
-        this.allSecrets = res.items;
-        this.secretOptions.set(this.toPathOptions(res.items));
+    collectAll((page, size) => this.secretsApi.list(page, size)).subscribe({
+      next: (secrets) => {
+        this.allSecrets = secrets;
+        this.secretOptions.set(this.toPathOptions(secrets));
       },
     });
-    this.configsApi.list(1, 200).subscribe({
-      next: (res) => {
-        this.allConfigs = res.items;
-        this.configOptions.set(this.toPathOptions(res.items));
+    collectAll((page, size) => this.configsApi.list(page, size)).subscribe({
+      next: (configs) => {
+        this.allConfigs = configs;
+        this.configOptions.set(this.toPathOptions(configs));
       },
     });
 
@@ -216,13 +218,13 @@ export class ServiceFormComponent {
       ...this.diffSync(
         this.editingSecretIds,
         this.form.secretIds,
-        (sid) => this.svcApi.attachSecret(serviceId, sid, this.targetPath(this.allSecrets, sid)),
+        (sid) => this.svcApi.attachSecret(serviceId, sid, this.defaultMount(this.allSecrets, sid)),
         (sid) => this.svcApi.detachSecret(serviceId, sid),
       ),
       ...this.diffSync(
         this.editingConfigIds,
         this.form.configIds,
-        (cid) => this.svcApi.attachConfig(serviceId, cid, this.targetPath(this.allConfigs, cid)),
+        (cid) => this.svcApi.attachConfig(serviceId, cid, this.defaultMount(this.allConfigs, cid)),
         (cid) => this.svcApi.detachConfig(serviceId, cid),
       ),
     ];
@@ -242,8 +244,17 @@ export class ServiceFormComponent {
     ];
   }
 
-  private targetPath(items: { id: string; target_path: string }[], id: string): string {
-    return items.find((i) => i.id === id)?.target_path ?? '';
+  /**
+   * The mount a freshly-attached secret or config starts from: the catalog's own
+   * path, the orchestrator's owner and the default permission bits.
+   *
+   * Owner and mode are deliberately left out rather than guessed here — they are
+   * per-service settings, edited afterwards in the service's Secrets & configs
+   * tab, and this form only ever attaches ids it did not have before (see
+   * diffSync), so reopening it never resets a mount someone tuned there.
+   */
+  private defaultMount(items: { id: string; target_path: string }[], id: string): FileMount {
+    return { target_path: items.find((i) => i.id === id)?.target_path ?? '' };
   }
 
   private onSuccess(isCreate: boolean, deployed: boolean): void {

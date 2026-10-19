@@ -5,11 +5,13 @@ import { TagModule } from 'primeng/tag';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { forkJoin } from 'rxjs';
 
 import { TemplatesApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
+import { firstErrorMessage, settleAll } from '../../core/bulk';
+import { confirmDestructive } from '../../core/confirm';
 import { TemplateResponse } from '../../core/models';
+import { collectAll } from '../../core/paging';
 import { TemplateFormComponent } from './template-form.component';
 import { TemplateInstantiateComponent } from './template-instantiate.component';
 
@@ -53,11 +55,11 @@ export class Templates {
   load(): void {
     this.loading.set(true);
     this.selected.set([]); // drop stale selection (rows are about to be replaced)
-    // Client-side paginate/sort/filter over a generous page; the table handles
-    // the rest without extra round-trips.
-    this.api.list(1, 1000).subscribe({
-      next: (res) => {
-        this.templates.set(res.items);
+    // The whole catalog is pulled page by page, then the table paginates,
+    // sorts and filters client-side without extra round-trips.
+    collectAll((page, size) => this.api.list(page, size)).subscribe({
+      next: (items) => {
+        this.templates.set(items);
         this.loading.set(false);
       },
       error: () => {
@@ -84,20 +86,32 @@ export class Templates {
   }
 
   remove(t: TemplateResponse): void {
-    if (!confirm(`Supprimer le template "${t.name}" ?`)) return;
-    this.api.remove(t.id).subscribe({
-      next: () => {
-        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${t.name} supprimé` });
-        this.load();
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Supprimer le template',
+        message: `Supprimer le template "${t.name}" ?`,
       },
-      error: (err) => {
-        this.toast.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: err?.error?.message ?? 'Suppression impossible',
+      () => {
+        this.api.remove(t.id).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimé',
+              detail: `${t.name} supprimé`,
+            });
+            this.load();
+          },
+          error: (err) => {
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible',
+            });
+          },
         });
       },
-    });
+    );
   }
 
   // ─── Bulk actions ─────────────────────────────────────────────────────────────
@@ -109,33 +123,31 @@ export class Templates {
   bulkDelete(): void {
     const items = this.selected();
     if (!items.length) return;
-    this.confirmer.confirm({
-      header: 'Supprimer la sélection',
-      message: `Supprimer ${items.length} élément(s) ? Action irréversible.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Supprimer',
-      rejectLabel: 'Annuler',
-      acceptButtonProps: { severity: 'danger' },
-      rejectButtonProps: { severity: 'secondary', text: true },
-      accept: () => {
-        forkJoin(items.map((x) => this.api.remove(x.id))).subscribe({
-          next: () => {
-            this.toast.add({
-              severity: 'success',
-              summary: 'Supprimés',
-              detail: `${items.length} supprimé(s)`,
-            });
-            this.clearSelection();
-            this.load();
-          },
-          error: (err) =>
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Supprimer la sélection',
+        message: `Supprimer ${items.length} élément(s) ? Action irréversible.`,
+      },
+      () =>
+        settleAll(items, (x) => this.api.remove(x.id)).subscribe((res) => {
+          // Refresh whatever the outcome: a partial failure still changed rows.
+          this.clearSelection();
+          this.load();
+          if (res.failed.length) {
             this.toast.add({
               severity: 'error',
-              summary: 'Erreur',
-              detail: err?.error?.message ?? 'Suppression impossible',
-            }),
-        });
-      },
-    });
+              summary: 'Suppression partielle',
+              detail: `${res.succeeded.length}/${items.length} supprimé(s) — ${firstErrorMessage(res.failed, 'Suppression impossible')}`,
+            });
+            return;
+          }
+          this.toast.add({
+            severity: 'success',
+            summary: 'Supprimés',
+            detail: `${items.length} supprimé(s)`,
+          });
+        }),
+    );
   }
 }

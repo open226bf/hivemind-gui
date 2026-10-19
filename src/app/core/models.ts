@@ -132,8 +132,18 @@ export interface ServiceResponse {
   updated_at: string;
 }
 
+/**
+ * A service as listed: the service plus the ports it publishes, joined by the
+ * server so a table need not ask once per row. Only list responses carry
+ * `ports` — every other endpoint returns a plain ServiceResponse, where a
+ * missing list would not mean "no port published".
+ */
+export interface ServiceListItem extends ServiceResponse {
+  ports: PortDTO[];
+}
+
 export interface ServiceListResponse {
-  items: ServiceResponse[];
+  items: ServiceListItem[];
   total: number;
   page: number;
   size: number;
@@ -674,16 +684,31 @@ export interface UpdateClusterRequest {
 
 // ─── Service attachments ─────────────────────────────────────────────────────
 
-export interface ServiceSecretResponse {
-  secret_id: string;
-  name: string;
+/**
+ * How a secret or config is exposed inside a service's containers: where the
+ * file lands, who owns it and what its permission bits are.
+ *
+ * `uid` and `gid` are strings so that empty stays distinct from "0": empty
+ * leaves the choice to the orchestrator (which uses root), while "0" is root
+ * asked for deliberately. `mode` holds permission bits as a number — decimal on
+ * the wire, octal on screen (see core/filemode) — and 0 means "not chosen", the
+ * server then applying its own default.
+ */
+export interface FileMount {
   target_path: string;
+  uid?: string;
+  gid?: string;
+  mode?: number;
 }
 
-export interface ServiceConfigResponse {
+export interface ServiceSecretResponse extends FileMount {
+  secret_id: string;
+  name: string;
+}
+
+export interface ServiceConfigResponse extends FileMount {
   config_id: string;
   name: string;
-  target_path: string;
 }
 
 // ─── Configs ─────────────────────────────────────────────────────────────────

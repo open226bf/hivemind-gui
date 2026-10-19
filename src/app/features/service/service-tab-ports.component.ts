@@ -104,6 +104,19 @@ export class ServiceTabPorts implements OnInit {
     this.rows.update((rs) => rs.filter((_, i) => i !== index));
   }
 
+  /**
+   * Replaces the edited row rather than writing through it.
+   *
+   * This is why the template binds [ngModel] + (ngModelChange) instead of the
+   * shorter [(ngModel)]="row.target_port": mutating an object the rows signal
+   * holds leaves the signal's own value identical, so `valid` never re-runs. A
+   * row added by addRow starts invalid, and filling it in would then leave Save
+   * disabled for good.
+   */
+  patchRow(index: number, change: Partial<PortRow>): void {
+    this.rows.update((rs) => rs.map((r, i) => (i === index ? { ...r, ...change } : r)));
+  }
+
   save(): void {
     if (!this.valid()) return;
     this.saving.set(true);

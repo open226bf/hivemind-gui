@@ -9,11 +9,13 @@ import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 import { TabsModule } from 'primeng/tabs';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { forkJoin } from 'rxjs';
 
 import { VolumesApi } from '../../core/api';
 import { ClusterContextService } from '../../core/cluster-context.service';
 import { AuthService } from '../../core/auth.service';
+import { firstErrorMessage, settleAll } from '../../core/bulk';
+import { confirmDestructive } from '../../core/confirm';
+import { collectAll } from '../../core/paging';
 import { SwarmVolumeInfo, VolumeResponse } from '../../core/models';
 import { VolumeFormComponent } from './volume-form.component';
 
@@ -70,9 +72,9 @@ export class Volumes {
   load(): void {
     this.loading.set(true);
     this.selected.set([]); // drop stale selection (rows are about to be replaced)
-    this.api.list(1, 1000).subscribe({
-      next: (res) => {
-        this.volumes.set(res.items);
+    collectAll((page, size) => this.api.list(page, size)).subscribe({
+      next: (items) => {
+        this.volumes.set(items);
         this.loading.set(false);
       },
       error: () => {
@@ -109,20 +111,28 @@ export class Volumes {
   }
 
   remove(v: VolumeResponse): void {
-    if (!confirm(`Supprimer le volume "${v.name}" ?`)) return;
-    this.api.remove(v.id).subscribe({
-      next: () => {
-        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${v.name} supprimé` });
-        this.load();
-      },
-      error: (err) => {
-        this.toast.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: err?.error?.message ?? 'Suppression impossible (volume monté ?)',
-        });
-      },
-    });
+    confirmDestructive(
+      this.confirmer,
+      { header: 'Supprimer le volume', message: `Supprimer le volume "${v.name}" ?` },
+      () =>
+        this.api.remove(v.id).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimé',
+              detail: `${v.name} supprimé`,
+            });
+            this.onSaved();
+          },
+          error: (err) => {
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible (volume monté ?)',
+            });
+          },
+        }),
+    );
   }
 
   // ─── Bulk actions (registered catalog) ────────────────────────────────────────
@@ -134,33 +144,34 @@ export class Volumes {
   bulkDelete(): void {
     const items = this.selected();
     if (!items.length) return;
-    this.confirmer.confirm({
-      header: 'Supprimer la sélection',
-      message: `Supprimer ${items.length} volume(s) ? Action irréversible.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Supprimer',
-      rejectLabel: 'Annuler',
-      acceptButtonProps: { severity: 'danger' },
-      rejectButtonProps: { severity: 'secondary', text: true },
-      accept: () => {
-        forkJoin(items.map((x) => this.api.remove(x.id))).subscribe({
-          next: () => {
-            this.toast.add({
-              severity: 'success',
-              summary: 'Supprimés',
-              detail: `${items.length} supprimé(s)`,
-            });
-            this.clearSelection();
-            this.load();
-          },
-          error: (err) =>
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Supprimer la sélection',
+        message: `Supprimer ${items.length} volume(s) ? Action irréversible.`,
+      },
+      () =>
+        settleAll(items, (x) => this.api.remove(x.id)).subscribe((res) => {
+          // Refresh whatever the outcome: a partial failure still removed rows.
+          this.clearSelection();
+          this.onSaved();
+          if (res.failed.length) {
             this.toast.add({
               severity: 'error',
-              summary: 'Erreur',
-              detail: err?.error?.message ?? 'Suppression impossible',
-            }),
-        });
-      },
-    });
+              summary: 'Suppression partielle',
+              detail: `${res.succeeded.length}/${items.length} supprimé(s) — ${firstErrorMessage(
+                res.failed,
+                'suppression impossible',
+              )}`,
+            });
+            return;
+          }
+          this.toast.add({
+            severity: 'success',
+            summary: 'Supprimés',
+            detail: `${items.length} supprimé(s)`,
+          });
+        }),
+    );
   }
 }

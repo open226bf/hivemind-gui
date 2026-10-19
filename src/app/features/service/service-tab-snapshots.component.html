@@ -38,28 +38,30 @@
           <span class="chip">{{ s.summary.mount_count }} montage</span>
         </td>
         <td class="muted">{{ s.created_at | date: 'short' }}</td>
-        <td class="flex gap-2 align-items-center justify-content-end">
-          @if (canManage()) {
-            <p-button
-              label="Restaurer"
-              icon="pi pi-history"
-              severity="warn"
-              size="small"
-              (onClick)="rollback(s)"
-              [loading]="rollingBack() === s.id"
-              [disabled]="store.deploying() || rollingBack() === s.id"
-            />
-            <p-button
-              icon="pi pi-trash"
-              severity="danger"
-              [text]="true"
-              size="small"
-              pTooltip="Supprimer"
-              (onClick)="remove(s)"
-            />
-          } @else {
-            <span class="muted">Lecture seule</span>
-          }
+        <td>
+          <div class="flex gap-2 align-items-center justify-content-end">
+            @if (canManage()) {
+              <p-button
+                label="Restaurer"
+                icon="pi pi-history"
+                severity="warn"
+                size="small"
+                (onClick)="rollback(s)"
+                [loading]="rollingBack() === s.id"
+                [disabled]="store.deploying() || rollingBack() === s.id"
+              />
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [text]="true"
+                size="small"
+                pTooltip="Supprimer"
+                (onClick)="remove(s)"
+              />
+            } @else {
+              <span class="muted">Lecture seule</span>
+            }
+          </div>
         </td>
       </tr>
     </ng-template>

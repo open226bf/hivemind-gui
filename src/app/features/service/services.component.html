@@ -98,7 +98,7 @@
             <th style="width: 3rem"><p-tableHeaderCheckbox /></th>
           }
           <th pSortableColumn="name">Nom <p-sortIcon field="name" /></th>
-          <th pSortableColumn="full_image">Image <p-sortIcon field="full_image" /></th>
+          <th>Ports</th>
           <th pSortableColumn="replicas">Replicas <p-sortIcon field="replicas" /></th>
           <th pSortableColumn="status">Statut <p-sortIcon field="status" /></th>
           <th pSortableColumn="updated_at">Mis à jour <p-sortIcon field="updated_at" /></th>
@@ -111,13 +111,29 @@
             <td><p-tableCheckbox [value]="svc" /></td>
           }
           <td>
-            <a [routerLink]="['/services', svc.id]" class="svc-name">{{ svc.name }}</a>
+            <a [routerLink]="['/services', svc.id]" class="svc-name" [title]="svc.full_image">{{
+              svc.name
+            }}</a>
             @if (svc.description) {
               <div class="muted">{{ svc.description }}</div>
             }
           </td>
           <td>
-            <code>{{ svc.full_image }}</code>
+            @let ports = portSummary(svc);
+            @if (ports.shown.length) {
+              <div class="ports">
+                @for (p of ports.shown; track $index) {
+                  <code class="port" [title]="p.title">{{ p.label }}</code>
+                }
+                @if (ports.hidden.length) {
+                  <code class="port more" [title]="ports.hiddenTitle"
+                    >+{{ ports.hidden.length }}</code
+                  >
+                }
+              </div>
+            } @else {
+              <span class="muted">—</span>
+            }
           </td>
           <td>
             @if (live(svc.id); as ls) {
@@ -143,48 +159,50 @@
             }
           </td>
           <td class="muted">{{ svc.updated_at | date: 'short' }}</td>
-          <td class="flex gap-2 justify-content-end">
-            @if (canWriteService(svc)) {
-              <p-button
-                icon="pi pi-pencil"
-                severity="secondary"
-                [text]="true"
-                size="small"
-                pTooltip="Modifier"
-                (onClick)="openEdit(svc)"
-                [disabled]="isDeploying(svc.id)"
-              />
-              <p-button
-                [label]="svc.status === 'deployed' ? 'Redéployer' : 'Déployer'"
-                [severity]="svc.status === 'deployed' ? 'contrast' : 'success'"
-                icon="pi pi-cloud-upload"
-                size="small"
-                (onClick)="deploy(svc)"
-                [disabled]="isDeploying(svc.id)"
-                [loading]="isDeploying(svc.id)"
-              />
-              <p-button
-                icon="pi pi-stop-circle"
-                severity="warn"
-                [text]="true"
-                size="small"
-                pTooltip="Retirer de Swarm"
-                (onClick)="undeploy(svc)"
-                [disabled]="
-                  isDeploying(svc.id) || svc.status === 'removed' || svc.status === 'draft'
-                "
-              />
-              <p-button
-                icon="pi pi-trash"
-                severity="danger"
-                [text]="true"
-                size="small"
-                pTooltip="Supprimer la définition"
-                (onClick)="remove(svc)"
-              />
-            } @else {
-              <span class="muted ro-hint">Lecture seule</span>
-            }
+          <td>
+            <div class="flex gap-2 justify-content-end">
+              @if (canWriteService(svc)) {
+                <p-button
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Modifier"
+                  (onClick)="openEdit(svc)"
+                  [disabled]="isDeploying(svc.id)"
+                />
+                <p-button
+                  [label]="svc.status === 'deployed' ? 'Redéployer' : 'Déployer'"
+                  [severity]="svc.status === 'deployed' ? 'contrast' : 'success'"
+                  icon="pi pi-cloud-upload"
+                  size="small"
+                  (onClick)="deploy(svc)"
+                  [disabled]="isDeploying(svc.id)"
+                  [loading]="isDeploying(svc.id)"
+                />
+                <p-button
+                  icon="pi pi-stop-circle"
+                  severity="warn"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Retirer de Swarm"
+                  (onClick)="undeploy(svc)"
+                  [disabled]="
+                    isDeploying(svc.id) || svc.status === 'removed' || svc.status === 'draft'
+                  "
+                />
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Supprimer la définition"
+                  (onClick)="remove(svc)"
+                />
+              } @else {
+                <span class="muted ro-hint">Lecture seule</span>
+              }
+            </div>
           </td>
         </tr>
       </ng-template>

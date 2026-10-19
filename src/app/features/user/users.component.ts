@@ -8,11 +8,13 @@ import { TooltipModule } from 'primeng/tooltip';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { forkJoin } from 'rxjs';
 
 import { UsersApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
+import { firstErrorMessage, settleAll } from '../../core/bulk';
+import { confirmDestructive } from '../../core/confirm';
 import { Role, UserResponse } from '../../core/models';
+import { collectAll } from '../../core/paging';
 import { UserFormComponent } from './user-form.component';
 
 @Component({
@@ -60,11 +62,11 @@ export class Users {
   load(): void {
     this.loading.set(true);
     this.selected.set([]); // drop stale selection (rows are about to be replaced)
-    // Client-side paginate/sort/filter over a generous page; the table handles
-    // the rest without extra round-trips.
-    this.api.list(1, 1000).subscribe({
-      next: (res) => {
-        this.users.set(res.items);
+    // The whole catalog is pulled page by page, then the table paginates,
+    // sorts and filters client-side without extra round-trips.
+    collectAll((page, size) => this.api.list(page, size)).subscribe({
+      next: (items) => {
+        this.users.set(items);
         this.loading.set(false);
       },
       error: () => {
@@ -88,20 +90,32 @@ export class Users {
 
   remove(u: UserResponse): void {
     if (u.id === this.currentUserId()) return;
-    if (!confirm(`Supprimer l'utilisateur "${u.email}" ?`)) return;
-    this.api.remove(u.id).subscribe({
-      next: () => {
-        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: `${u.email} supprimé` });
-        this.load();
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Supprimer l’utilisateur',
+        message: `Supprimer l'utilisateur "${u.email}" ?`,
       },
-      error: (err) => {
-        this.toast.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: err?.error?.message ?? 'Suppression impossible',
+      () => {
+        this.api.remove(u.id).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimé',
+              detail: `${u.email} supprimé`,
+            });
+            this.load();
+          },
+          error: (err) => {
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible',
+            });
+          },
         });
       },
-    });
+    );
   }
 
   // ─── Bulk actions ─────────────────────────────────────────────────────────────
@@ -115,34 +129,32 @@ export class Users {
   bulkDelete(): void {
     const items = this.selected().filter((u) => u.id !== this.currentUserId());
     if (!items.length) return;
-    this.confirmer.confirm({
-      header: 'Supprimer la sélection',
-      message: `Supprimer ${items.length} utilisateur(s) ? Action irréversible.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Supprimer',
-      rejectLabel: 'Annuler',
-      acceptButtonProps: { severity: 'danger' },
-      rejectButtonProps: { severity: 'secondary', text: true },
-      accept: () => {
-        forkJoin(items.map((u) => this.api.remove(u.id))).subscribe({
-          next: () => {
-            this.toast.add({
-              severity: 'success',
-              summary: 'Supprimés',
-              detail: `${items.length} supprimé(s)`,
-            });
-            this.clearSelection();
-            this.load();
-          },
-          error: (err) =>
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Supprimer la sélection',
+        message: `Supprimer ${items.length} utilisateur(s) ? Action irréversible.`,
+      },
+      () =>
+        settleAll(items, (u) => this.api.remove(u.id)).subscribe((res) => {
+          // Refresh whatever the outcome: a partial failure still changed rows.
+          this.clearSelection();
+          this.load();
+          if (res.failed.length) {
             this.toast.add({
               severity: 'error',
-              summary: 'Erreur',
-              detail: err?.error?.message ?? 'Suppression impossible',
-            }),
-        });
-      },
-    });
+              summary: 'Suppression partielle',
+              detail: `${res.succeeded.length}/${items.length} supprimé(s) — ${firstErrorMessage(res.failed, 'Suppression impossible')}`,
+            });
+            return;
+          }
+          this.toast.add({
+            severity: 'success',
+            summary: 'Supprimés',
+            detail: `${items.length} supprimé(s)`,
+          });
+        }),
+    );
   }
 
   roleSeverity(role: Role): 'danger' | 'info' | 'secondary' {

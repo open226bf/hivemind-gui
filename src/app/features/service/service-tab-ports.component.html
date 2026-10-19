@@ -78,7 +78,8 @@
         <div class="row flex gap-2 align-items-center">
           <p-inputnumber
             class="pub"
-            [(ngModel)]="row.published_port"
+            [ngModel]="row.published_port"
+            (ngModelChange)="patchRow($index, { published_port: $event })"
             [useGrouping]="false"
             [min]="0"
             [max]="65535"
@@ -87,7 +88,8 @@
           <span class="arrow">→</span>
           <p-inputnumber
             class="tgt"
-            [(ngModel)]="row.target_port"
+            [ngModel]="row.target_port"
+            (ngModelChange)="patchRow($index, { target_port: $event })"
             [useGrouping]="false"
             [min]="1"
             [max]="65535"
@@ -96,7 +98,8 @@
           <p-select
             class="proto"
             [options]="protocolOptions"
-            [(ngModel)]="row.protocol"
+            [ngModel]="row.protocol"
+            (ngModelChange)="patchRow($index, { protocol: $event })"
             optionLabel="label"
             optionValue="value"
             appendTo="body"
@@ -104,7 +107,8 @@
           <p-select
             class="mode"
             [options]="modeOptions"
-            [(ngModel)]="row.mode"
+            [ngModel]="row.mode"
+            (ngModelChange)="patchRow($index, { mode: $event })"
             optionLabel="label"
             optionValue="value"
             appendTo="body"

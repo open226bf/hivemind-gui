@@ -1,12 +1,14 @@
 import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { HivesApi, ServicesApi } from '../../core/api';
 import { AuthService } from '../../core/auth.service';
 import { ClusterContextService } from '../../core/cluster-context.service';
+import { confirmDestructive } from '../../core/confirm';
 import { HiveResponse } from '../../core/models';
+import { collectAll } from '../../core/paging';
 import { HiveFormComponent } from './hive-form.component';
 
 @Component({
@@ -21,6 +23,7 @@ export class Hives {
   private readonly toast = inject(MessageService);
   private readonly router = inject(Router);
   private readonly ctx = inject(ClusterContextService);
+  private readonly confirmer = inject(ConfirmationService);
   private readonly auth = inject(AuthService);
 
   /** Whether the user may create a hive on the active cluster (write on it). */
@@ -53,9 +56,9 @@ export class Hives {
 
   load(): void {
     this.loading.set(true);
-    this.api.list().subscribe({
-      next: (res) => {
-        this.hives.set(res.items);
+    collectAll((page, size) => this.api.list(page, size)).subscribe({
+      next: (hives) => {
+        this.hives.set(hives);
         this.loading.set(false);
       },
       error: () => {
@@ -89,23 +92,31 @@ export class Hives {
   }
 
   remove(h: HiveResponse): void {
-    if (!confirm(`Supprimer la ruche "${h.name}" ?`)) return;
-    this.api.remove(h.id).subscribe({
-      next: () => {
-        this.toast.add({
-          severity: 'success',
-          summary: 'Supprimée',
-          detail: `${h.name} supprimée`,
-        });
-        this.load();
+    confirmDestructive(
+      this.confirmer,
+      {
+        header: 'Supprimer la ruche',
+        message: `Supprimer la ruche "${h.name}" ?`,
       },
-      error: (err) => {
-        this.toast.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: err?.error?.message ?? 'Suppression impossible (ruche non vide ?)',
+      () => {
+        this.api.remove(h.id).subscribe({
+          next: () => {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Supprimée',
+              detail: `${h.name} supprimée`,
+            });
+            this.load();
+          },
+          error: (err) => {
+            this.toast.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err?.error?.message ?? 'Suppression impossible (ruche non vide ?)',
+            });
+          },
         });
       },
-    });
+    );
   }
 }
