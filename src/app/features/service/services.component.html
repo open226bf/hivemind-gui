@@ -159,48 +159,50 @@
             }
           </td>
           <td class="muted">{{ svc.updated_at | date: 'short' }}</td>
-          <td class="flex gap-2 justify-content-end">
-            @if (canWriteService(svc)) {
-              <p-button
-                icon="pi pi-pencil"
-                severity="secondary"
-                [text]="true"
-                size="small"
-                pTooltip="Modifier"
-                (onClick)="openEdit(svc)"
-                [disabled]="isDeploying(svc.id)"
-              />
-              <p-button
-                [label]="svc.status === 'deployed' ? 'Redéployer' : 'Déployer'"
-                [severity]="svc.status === 'deployed' ? 'contrast' : 'success'"
-                icon="pi pi-cloud-upload"
-                size="small"
-                (onClick)="deploy(svc)"
-                [disabled]="isDeploying(svc.id)"
-                [loading]="isDeploying(svc.id)"
-              />
-              <p-button
-                icon="pi pi-stop-circle"
-                severity="warn"
-                [text]="true"
-                size="small"
-                pTooltip="Retirer de Swarm"
-                (onClick)="undeploy(svc)"
-                [disabled]="
-                  isDeploying(svc.id) || svc.status === 'removed' || svc.status === 'draft'
-                "
-              />
-              <p-button
-                icon="pi pi-trash"
-                severity="danger"
-                [text]="true"
-                size="small"
-                pTooltip="Supprimer la définition"
-                (onClick)="remove(svc)"
-              />
-            } @else {
-              <span class="muted ro-hint">Lecture seule</span>
-            }
+          <td>
+            <div class="flex gap-2 justify-content-end">
+              @if (canWriteService(svc)) {
+                <p-button
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Modifier"
+                  (onClick)="openEdit(svc)"
+                  [disabled]="isDeploying(svc.id)"
+                />
+                <p-button
+                  [label]="svc.status === 'deployed' ? 'Redéployer' : 'Déployer'"
+                  [severity]="svc.status === 'deployed' ? 'contrast' : 'success'"
+                  icon="pi pi-cloud-upload"
+                  size="small"
+                  (onClick)="deploy(svc)"
+                  [disabled]="isDeploying(svc.id)"
+                  [loading]="isDeploying(svc.id)"
+                />
+                <p-button
+                  icon="pi pi-stop-circle"
+                  severity="warn"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Retirer de Swarm"
+                  (onClick)="undeploy(svc)"
+                  [disabled]="
+                    isDeploying(svc.id) || svc.status === 'removed' || svc.status === 'draft'
+                  "
+                />
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Supprimer la définition"
+                  (onClick)="remove(svc)"
+                />
+              } @else {
+                <span class="muted ro-hint">Lecture seule</span>
+              }
+            </div>
           </td>
         </tr>
       </ng-template>

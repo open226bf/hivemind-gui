@@ -95,33 +95,35 @@
           <td><p-tag [value]="'v' + c.current_version" severity="info" /></td>
           <td class="muted">{{ c.created_at | date: 'short' }}</td>
           <td class="muted">{{ c.updated_at | date: 'short' }}</td>
-          <td class="flex gap-2 justify-content-end">
-            <p-button
-              icon="pi pi-history"
-              severity="secondary"
-              [text]="true"
-              size="small"
-              pTooltip="Versions"
-              (onClick)="openVersions(c)"
-            />
-            @if (canManage()) {
+          <td>
+            <div class="flex gap-2 justify-content-end">
               <p-button
-                icon="pi pi-plus-circle"
+                icon="pi pi-history"
                 severity="secondary"
                 [text]="true"
                 size="small"
-                pTooltip="Nouvelle version"
-                (onClick)="openAddVersion(c)"
+                pTooltip="Versions"
+                (onClick)="openVersions(c)"
               />
-              <p-button
-                icon="pi pi-trash"
-                severity="danger"
-                [text]="true"
-                size="small"
-                pTooltip="Supprimer"
-                (onClick)="remove(c)"
-              />
-            }
+              @if (canManage()) {
+                <p-button
+                  icon="pi pi-plus-circle"
+                  severity="secondary"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Nouvelle version"
+                  (onClick)="openAddVersion(c)"
+                />
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [text]="true"
+                  size="small"
+                  pTooltip="Supprimer"
+                  (onClick)="remove(c)"
+                />
+              }
+            </div>
           </td>
         </tr>
       </ng-template>
